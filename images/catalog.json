@@ -1,0 +1,2366 @@
+[
+  {
+    "title": "40 Steps to Master System Design",
+    "filename": "40 Steps to Master System Design.png",
+    "categories": [
+      "architecture"
+    ],
+    "original": "originals/40-steps-to-master-system-design-png-d1f6781d.png",
+    "thumbnail": "thumbs/40-steps-to-master-system-design-png-d1f6781d.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "40-Steps-to-Master-System-Design-Recreated",
+    "filename": "40-Steps-to-Master-System-Design-Recreated.png",
+    "categories": [
+      "architecture"
+    ],
+    "original": "originals/40-steps-to-master-system-design-recreated-png-c1cc32f5.png",
+    "thumbnail": "thumbs/40-steps-to-master-system-design-recreated-png-c1cc32f5.webp",
+    "width": 2048,
+    "height": 3072
+  },
+  {
+    "title": "90-Day Python AI Engineer Roadmap",
+    "filename": "90-Day Python AI Engineer Roadmap.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/90-day-python-ai-engineer-roadmap-png-343bdec5.png",
+    "thumbnail": "thumbs/90-day-python-ai-engineer-roadmap-png-343bdec5.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Agentic DevOps: Intelligent Automation",
+    "filename": "Agentic DevOps: Intelligent Automation.png",
+    "categories": [
+      "ai",
+      "devops"
+    ],
+    "original": "originals/agentic-devops-intelligent-automation-png-a3dd55ca.png",
+    "thumbnail": "thumbs/agentic-devops-intelligent-automation-png-a3dd55ca.webp",
+    "width": 1054,
+    "height": 1492
+  },
+  {
+    "title": "AI landscape: ML, GenAI, RAG and agents",
+    "filename": "AI landscape: ML, GenAI, RAG and agents.png",
+    "categories": [
+      "ai"
+    ],
+    "original": "originals/ai-landscape-ml-genai-rag-and-agents-png-85a0cd2f.png",
+    "thumbnail": "thumbs/ai-landscape-ml-genai-rag-and-agents-png-85a0cd2f.webp",
+    "width": 1117,
+    "height": 1408
+  },
+  {
+    "title": "AI Powered Cloud Platform LinkedIn Cover Final",
+    "filename": "AI_Powered_Cloud_Platform_LinkedIn_Cover_Final.png",
+    "categories": [
+      "ai",
+      "branding"
+    ],
+    "original": "originals/ai-powered-cloud-platform-linkedin-cover-final-png-fe09ce29.png",
+    "thumbnail": "thumbs/ai-powered-cloud-platform-linkedin-cover-final-png-fe09ce29.webp",
+    "width": 1584,
+    "height": 396
+  },
+  {
+    "title": "ALB and NLB routing decisions",
+    "filename": "ALB and NLB routing decisions.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/alb-and-nlb-routing-decisions-png-76b06584.png",
+    "thumbnail": "thumbs/alb-and-nlb-routing-decisions-png-76b06584.webp",
+    "width": 1023,
+    "height": 1537
+  },
+  {
+    "title": "ALB and NLB routing guide",
+    "filename": "ALB and NLB routing guide.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/alb-and-nlb-routing-guide-png-a37531c4.png",
+    "thumbnail": "thumbs/alb-and-nlb-routing-guide-png-a37531c4.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Amazon EC2 architecture guide",
+    "filename": "Amazon EC2 architecture guide.png",
+    "categories": [
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/amazon-ec2-architecture-guide-png-2b2af3c7.png",
+    "thumbnail": "thumbs/amazon-ec2-architecture-guide-png-2b2af3c7.webp",
+    "width": 1054,
+    "height": 1492
+  },
+  {
+    "title": "Amazon EC2 Auto Scaling Control Loop",
+    "filename": "Amazon EC2 Auto Scaling Control Loop.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/amazon-ec2-auto-scaling-control-loop-png-3194fc80.png",
+    "thumbnail": "thumbs/amazon-ec2-auto-scaling-control-loop-png-3194fc80.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Amazon EC2 senior engineer playbook",
+    "filename": "Amazon EC2 senior engineer playbook.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/amazon-ec2-senior-engineer-playbook-png-d589bc65.png",
+    "thumbnail": "thumbs/amazon-ec2-senior-engineer-playbook-png-d589bc65.webp",
+    "width": 1122,
+    "height": 1402
+  },
+  {
+    "title": "Amazon EKS Production Resilience Infographic",
+    "filename": "Amazon EKS Production Resilience Infographic.png",
+    "categories": [
+      "kubernetes",
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/amazon-eks-production-resilience-infographic-png-31f9ffba.png",
+    "thumbnail": "thumbs/amazon-eks-production-resilience-infographic-png-31f9ffba.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "Amazon RDS & Aurora: Resilient Enterprise Databases",
+    "filename": "Amazon RDS & Aurora: Resilient Enterprise Databases.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/amazon-rds-aurora-resilient-enterprise-databases-png-a74bda5b.png",
+    "thumbnail": "thumbs/amazon-rds-aurora-resilient-enterprise-databases-png-a74bda5b.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "Amazon S3 architecture and resilience",
+    "filename": "Amazon S3 architecture and resilience.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/amazon-s3-architecture-and-resilience-png-6d543d2c.png",
+    "thumbnail": "thumbs/amazon-s3-architecture-and-resilience-png-6d543d2c.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Amazon S3 Secure Storage Infographic",
+    "filename": "Amazon S3 Secure Storage Infographic.png",
+    "categories": [
+      "ai",
+      "aws"
+    ],
+    "original": "originals/amazon-s3-secure-storage-infographic-png-975d912b.png",
+    "thumbnail": "thumbs/amazon-s3-secure-storage-infographic-png-975d912b.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "Auto Scaling Failures Troubleshooting Guide",
+    "filename": "Auto Scaling Failures Troubleshooting Guide.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr"
+    ],
+    "original": "originals/auto-scaling-failures-troubleshooting-guide-png-4adc88ba.png",
+    "thumbnail": "thumbs/auto-scaling-failures-troubleshooting-guide-png-4adc88ba.webp",
+    "width": 1054,
+    "height": 1492
+  },
+  {
+    "title": "Auto Scaling Failures",
+    "filename": "Auto Scaling Failures.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr"
+    ],
+    "original": "originals/auto-scaling-failures-png-6d5dee9c.png",
+    "thumbnail": "thumbs/auto-scaling-failures-png-6d5dee9c.webp",
+    "width": 1100,
+    "height": 1429
+  },
+  {
+    "title": "AWS Active-Active vs Active-Passive Architecture",
+    "filename": "AWS Active-Active vs Active-Passive Architecture.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/aws-active-active-vs-active-passive-architecture-png-f63c577c.png",
+    "thumbnail": "thumbs/aws-active-active-vs-active-passive-architecture-png-f63c577c.webp",
+    "width": 1312,
+    "height": 1199
+  },
+  {
+    "title": "AWS ALB vs. NLB: Traffic by design",
+    "filename": "AWS ALB vs. NLB: Traffic by design.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-alb-vs-nlb-traffic-by-design-png-c14c7ce1.png",
+    "thumbnail": "thumbs/aws-alb-vs-nlb-traffic-by-design-png-c14c7ce1.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS API Gateway: REST, HTTP, or WebSocket?",
+    "filename": "AWS API Gateway: REST, HTTP, or WebSocket?.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-api-gateway-rest-http-or-websocket-png-c6af2222.png",
+    "thumbnail": "thumbs/aws-api-gateway-rest-http-or-websocket-png-c6af2222.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Application Load Balancer Guide",
+    "filename": "AWS Application Load Balancer Guide.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-application-load-balancer-guide-png-08d6eaf1.png",
+    "thumbnail": "thumbs/aws-application-load-balancer-guide-png-08d6eaf1.webp",
+    "width": 1024,
+    "height": 1535
+  },
+  {
+    "title": "AWS Auto Scaling Troubleshooting Guide",
+    "filename": "AWS Auto Scaling Troubleshooting Guide.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-auto-scaling-troubleshooting-guide-png-547f9c95.png",
+    "thumbnail": "thumbs/aws-auto-scaling-troubleshooting-guide-png-547f9c95.webp",
+    "width": 1100,
+    "height": 1430
+  },
+  {
+    "title": "AWS Availability and Disaster Recovery Guide",
+    "filename": "AWS Availability and Disaster Recovery Guide.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr",
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-availability-and-disaster-recovery-guide-png-a09ce12c.png",
+    "thumbnail": "thumbs/aws-availability-and-disaster-recovery-guide-png-a09ce12c.webp",
+    "width": 1227,
+    "height": 1282
+  },
+  {
+    "title": "AWS Availability Zones: Building Resilience",
+    "filename": "AWS Availability Zones: Building Resilience.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/aws-availability-zones-building-resilience-png-92f8ffaf.png",
+    "thumbnail": "thumbs/aws-availability-zones-building-resilience-png-92f8ffaf.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "AWS Cheat Sheet: Senior Practices",
+    "filename": "AWS Cheat Sheet: Senior Practices.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-cheat-sheet-senior-practices-png-d7b6a81c.png",
+    "thumbnail": "thumbs/aws-cheat-sheet-senior-practices-png-d7b6a81c.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Cloud Architecture: Master Series",
+    "filename": "AWS Cloud Architecture: Master Series.png",
+    "categories": [
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/aws-cloud-architecture-master-series-png-029d19e7.png",
+    "thumbnail": "thumbs/aws-cloud-architecture-master-series-png-029d19e7.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Cloud Cheat Sheet Poster",
+    "filename": "AWS Cloud Cheat Sheet Poster.png",
+    "categories": [
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-cloud-cheat-sheet-poster-png-6a6e7071.png",
+    "thumbnail": "thumbs/aws-cloud-cheat-sheet-poster-png-6a6e7071.webp",
+    "width": 1013,
+    "height": 1552
+  },
+  {
+    "title": "AWS cloud foundations cheat sheet",
+    "filename": "AWS cloud foundations cheat sheet.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-cloud-foundations-cheat-sheet-png-66dc6974.png",
+    "thumbnail": "thumbs/aws-cloud-foundations-cheat-sheet-png-66dc6974.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Cloud Operations #16 infographic",
+    "filename": "AWS Cloud Operations #16 infographic.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-cloud-operations-16-infographic-png-a3a6e60d.png",
+    "thumbnail": "thumbs/aws-cloud-operations-16-infographic-png-a3a6e60d.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS CloudTrail audit and governance blueprint",
+    "filename": "AWS CloudTrail audit and governance blueprint.png",
+    "categories": [
+      "ai",
+      "aws"
+    ],
+    "original": "originals/aws-cloudtrail-audit-and-governance-blueprint-png-3f9e970e.png",
+    "thumbnail": "thumbs/aws-cloudtrail-audit-and-governance-blueprint-png-3f9e970e.webp",
+    "width": 864,
+    "height": 1821
+  },
+  {
+    "title": "AWS Core Architecture Patterns",
+    "filename": "AWS Core Architecture Patterns.png",
+    "categories": [
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/aws-core-architecture-patterns-png-556f7cc8.png",
+    "thumbnail": "thumbs/aws-core-architecture-patterns-png-556f7cc8.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS database failure fundamentals(1)",
+    "filename": "AWS database failure fundamentals(1).png",
+    "categories": [
+      "ai",
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/aws-database-failure-fundamentals-1-png-b8b1b149.png",
+    "thumbnail": "thumbs/aws-database-failure-fundamentals-1-png-b8b1b149.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS database failure fundamentals",
+    "filename": "AWS database failure fundamentals.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/aws-database-failure-fundamentals-png-d3fbae4b.png",
+    "thumbnail": "thumbs/aws-database-failure-fundamentals-png-d3fbae4b.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS DevOps, Migration, and Observability",
+    "filename": "AWS DevOps, Migration, and Observability.png",
+    "categories": [
+      "devops",
+      "aws"
+    ],
+    "original": "originals/aws-devops-migration-and-observability-png-d8341ae2.png",
+    "thumbnail": "thumbs/aws-devops-migration-and-observability-png-d8341ae2.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Disaster Recovery Architecture Guide",
+    "filename": "AWS Disaster Recovery Architecture Guide.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "architecture",
+      "branding"
+    ],
+    "original": "originals/aws-disaster-recovery-architecture-guide-png-6f77bfec.png",
+    "thumbnail": "thumbs/aws-disaster-recovery-architecture-guide-png-6f77bfec.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS Disaster Recovery Strategies Infographic",
+    "filename": "AWS Disaster Recovery Strategies Infographic.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-disaster-recovery-strategies-infographic-png-338e5280.png",
+    "thumbnail": "thumbs/aws-disaster-recovery-strategies-infographic-png-338e5280.webp",
+    "width": 1312,
+    "height": 1199
+  },
+  {
+    "title": "AWS EBS: gp3 vs io2 vs st1",
+    "filename": "AWS EBS: gp3 vs io2 vs st1.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-ebs-gp3-vs-io2-vs-st1-png-7d8a5363.png",
+    "thumbnail": "thumbs/aws-ebs-gp3-vs-io2-vs-st1-png-7d8a5363.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS EKS Three-Tier Architecture Overview",
+    "filename": "AWS EKS Three-Tier Architecture Overview.png",
+    "categories": [
+      "kubernetes",
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/aws-eks-three-tier-architecture-overview-png-9697d0ba.png",
+    "thumbnail": "thumbs/aws-eks-three-tier-architecture-overview-png-9697d0ba.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS Global Infrastructure Podcast Timeline",
+    "filename": "AWS Global Infrastructure Podcast Timeline.png",
+    "categories": [
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-global-infrastructure-podcast-timeline-png-8f7532b8.png",
+    "thumbnail": "thumbs/aws-global-infrastructure-podcast-timeline-png-8f7532b8.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS Global Infrastructure: Lesson 01",
+    "filename": "AWS Global Infrastructure: Lesson 01.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-global-infrastructure-lesson-01-png-8e581e35.png",
+    "thumbnail": "thumbs/aws-global-infrastructure-lesson-01-png-8e581e35.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS Global Infrastructure: Regions and Resilience",
+    "filename": "AWS Global Infrastructure: Regions and Resilience.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/aws-global-infrastructure-regions-and-resilience-png-c1b1843b.png",
+    "thumbnail": "thumbs/aws-global-infrastructure-regions-and-resilience-png-c1b1843b.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS High Availability & Disaster Recovery Infographic",
+    "filename": "AWS High Availability & Disaster Recovery Infographic.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr",
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-high-availability-disaster-recovery-infographic-png-9b3033e2.png",
+    "thumbnail": "thumbs/aws-high-availability-disaster-recovery-infographic-png-9b3033e2.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS KMS and Secrets Manager Cheat Sheet",
+    "filename": "AWS KMS and Secrets Manager Cheat Sheet.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-kms-and-secrets-manager-cheat-sheet-png-80e17668.png",
+    "thumbnail": "thumbs/aws-kms-and-secrets-manager-cheat-sheet-png-80e17668.webp",
+    "width": 1054,
+    "height": 1492
+  },
+  {
+    "title": "AWS KMS and Secrets Manager",
+    "filename": "AWS KMS and Secrets Manager.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-kms-and-secrets-manager-png-692895c0.png",
+    "thumbnail": "thumbs/aws-kms-and-secrets-manager-png-692895c0.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Messaging: SQS, SNS, and EventBridge",
+    "filename": "AWS Messaging: SQS, SNS, and EventBridge.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-messaging-sqs-sns-and-eventbridge-png-422cd4b6.png",
+    "thumbnail": "thumbs/aws-messaging-sqs-sns-and-eventbridge-png-422cd4b6.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Multi-AZ Resilience Guide",
+    "filename": "AWS Multi-AZ Resilience Guide.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/aws-multi-az-resilience-guide-png-e1d49f10.png",
+    "thumbnail": "thumbs/aws-multi-az-resilience-guide-png-e1d49f10.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "AWS Multi-AZ Resilience Podcast Cover",
+    "filename": "AWS Multi-AZ Resilience Podcast Cover.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-multi-az-resilience-podcast-cover-png-0522cecf.png",
+    "thumbnail": "thumbs/aws-multi-az-resilience-podcast-cover-png-0522cecf.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "AWS Multi-AZ Resilience Storyboard(1)",
+    "filename": "AWS Multi-AZ Resilience Storyboard(1).png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-multi-az-resilience-storyboard-1-png-f68dc5ba.png",
+    "thumbnail": "thumbs/aws-multi-az-resilience-storyboard-1-png-f68dc5ba.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "AWS Multi-AZ Resilience Storyboard",
+    "filename": "AWS Multi-AZ Resilience Storyboard.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-multi-az-resilience-storyboard-png-e2b173f3.png",
+    "thumbnail": "thumbs/aws-multi-az-resilience-storyboard-png-e2b173f3.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "AWS Multi-AZ Resilience Training Series",
+    "filename": "AWS Multi-AZ Resilience Training Series.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/aws-multi-az-resilience-training-series-png-3946ad75.png",
+    "thumbnail": "thumbs/aws-multi-az-resilience-training-series-png-3946ad75.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "AWS Multi-AZ vs Multi-Region Guide",
+    "filename": "AWS Multi-AZ vs Multi-Region Guide.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/aws-multi-az-vs-multi-region-guide-png-dfd8b67a.png",
+    "thumbnail": "thumbs/aws-multi-az-vs-multi-region-guide-png-dfd8b67a.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS Multi-Region EKS Architecture",
+    "filename": "AWS Multi-Region EKS Architecture.png",
+    "categories": [
+      "kubernetes",
+      "aws-ha-dr",
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/aws-multi-region-eks-architecture-png-6926f2a5.png",
+    "thumbnail": "thumbs/aws-multi-region-eks-architecture-png-6926f2a5.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS Multi-Region Failover Architecture",
+    "filename": "AWS Multi-Region Failover Architecture.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr",
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/aws-multi-region-failover-architecture-png-6a4d54d3.png",
+    "thumbnail": "thumbs/aws-multi-region-failover-architecture-png-6a4d54d3.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS network security architecture",
+    "filename": "AWS network security architecture.png",
+    "categories": [
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/aws-network-security-architecture-png-6a295323.png",
+    "thumbnail": "thumbs/aws-network-security-architecture-png-6a295323.webp",
+    "width": 1122,
+    "height": 1402
+  },
+  {
+    "title": "AWS network security: VPC defense in depth",
+    "filename": "AWS network security: VPC defense in depth.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-network-security-vpc-defense-in-depth-png-e2902a71.png",
+    "thumbnail": "thumbs/aws-network-security-vpc-defense-in-depth-png-e2902a71.webp",
+    "width": 1122,
+    "height": 1402
+  },
+  {
+    "title": "AWS Podcast Global Infrastructure Storyboard",
+    "filename": "AWS Podcast Global Infrastructure Storyboard.png",
+    "categories": [
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-podcast-global-infrastructure-storyboard-png-046a2f68.png",
+    "thumbnail": "thumbs/aws-podcast-global-infrastructure-storyboard-png-046a2f68.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "AWS Resilience Podcast: Multi-AZ Mastery",
+    "filename": "AWS Resilience Podcast: Multi-AZ Mastery.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-resilience-podcast-multi-az-mastery-png-5b255e25.png",
+    "thumbnail": "thumbs/aws-resilience-podcast-multi-az-mastery-png-5b255e25.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "AWS RTO vs RPO Recovery Guide",
+    "filename": "AWS RTO vs RPO Recovery Guide.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-rto-vs-rpo-recovery-guide-png-7b4efffe.png",
+    "thumbnail": "thumbs/aws-rto-vs-rpo-recovery-guide-png-7b4efffe.webp",
+    "width": 1227,
+    "height": 1282
+  },
+  {
+    "title": "AWS Security, Operations & Resilience",
+    "filename": "AWS Security, Operations & Resilience.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/aws-security-operations-resilience-png-04839786.png",
+    "thumbnail": "thumbs/aws-security-operations-resilience-png-04839786.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Senior Engineer Podcast Cover",
+    "filename": "AWS Senior Engineer Podcast Cover.png",
+    "categories": [
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-senior-engineer-podcast-cover-png-db01a107.png",
+    "thumbnail": "thumbs/aws-senior-engineer-podcast-cover-png-db01a107.webp",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "title": "AWS Senior Engineer Podcast",
+    "filename": "AWS Senior Engineer Podcast.png",
+    "categories": [
+      "aws",
+      "branding"
+    ],
+    "original": "originals/aws-senior-engineer-podcast-png-30014fc2.png",
+    "thumbnail": "thumbs/aws-senior-engineer-podcast-png-30014fc2.webp",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "title": "AWS Senior Engineer Study Notes Grid",
+    "filename": "AWS Senior Engineer Study Notes Grid.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-senior-engineer-study-notes-grid-png-624694fb.png",
+    "thumbnail": "thumbs/aws-senior-engineer-study-notes-grid-png-624694fb.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Senior Engineer Study Notes Preview",
+    "filename": "AWS Senior Engineer Study Notes Preview.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-senior-engineer-study-notes-preview-png-e280dacc.png",
+    "thumbnail": "thumbs/aws-senior-engineer-study-notes-preview-png-e280dacc.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Senior Engineer Study Notes(1)",
+    "filename": "AWS Senior Engineer Study Notes(1).png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-senior-engineer-study-notes-1-png-28c58931.png",
+    "thumbnail": "thumbs/aws-senior-engineer-study-notes-1-png-28c58931.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Senior Engineer Study Notes",
+    "filename": "AWS Senior Engineer Study Notes.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-senior-engineer-study-notes-png-6f333e3c.png",
+    "thumbnail": "thumbs/aws-senior-engineer-study-notes-png-6f333e3c.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS Systems Manager Operations Guide",
+    "filename": "AWS Systems Manager Operations Guide.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-systems-manager-operations-guide-png-82538292.png",
+    "thumbnail": "thumbs/aws-systems-manager-operations-guide-png-82538292.webp",
+    "width": 1055,
+    "height": 1491
+  },
+  {
+    "title": "AWS three-tier architecture blueprint",
+    "filename": "AWS three-tier architecture blueprint.png",
+    "categories": [
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/aws-three-tier-architecture-blueprint-png-4717610f.png",
+    "thumbnail": "thumbs/aws-three-tier-architecture-blueprint-png-4717610f.webp",
+    "width": 1054,
+    "height": 1492
+  },
+  {
+    "title": "AWS VPC egress, security and hybrid connectivity",
+    "filename": "AWS VPC egress, security and hybrid connectivity.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-vpc-egress-security-and-hybrid-connectivity-png-62156f3e.png",
+    "thumbnail": "thumbs/aws-vpc-egress-security-and-hybrid-connectivity-png-62156f3e.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS VPC foundations and connectivity",
+    "filename": "AWS VPC foundations and connectivity.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-vpc-foundations-and-connectivity-png-6d6145fc.png",
+    "thumbnail": "thumbs/aws-vpc-foundations-and-connectivity-png-6d6145fc.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS VPC network foundations",
+    "filename": "AWS VPC network foundations.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/aws-vpc-network-foundations-png-a18be59f.png",
+    "thumbnail": "thumbs/aws-vpc-network-foundations-png-a18be59f.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "AWS-Comparison-01-Security-Groups-vs-NACLs-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-01-Security-Groups-vs-NACLs-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-01-security-groups-vs-nacls-venkat-tech-lab-png-704c963b.png",
+    "thumbnail": "thumbs/aws-comparison-01-security-groups-vs-nacls-venkat-tech-lab-png-704c963b.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-02-S3-vs-EBS-vs-EFS-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-02-S3-vs-EBS-vs-EFS-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-02-s3-vs-ebs-vs-efs-venkat-tech-lab-png-76021fe5.png",
+    "thumbnail": "thumbs/aws-comparison-02-s3-vs-ebs-vs-efs-venkat-tech-lab-png-76021fe5.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-03-S3-Storage-Classes-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-03-S3-Storage-Classes-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "ai",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-03-s3-storage-classes-venkat-tech-lab-png-e619fc41.png",
+    "thumbnail": "thumbs/aws-comparison-03-s3-storage-classes-venkat-tech-lab-png-e619fc41.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-04-EC2-Pricing-Options-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-04-EC2-Pricing-Options-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-04-ec2-pricing-options-venkat-tech-lab-png-4b34ba66.png",
+    "thumbnail": "thumbs/aws-comparison-04-ec2-pricing-options-venkat-tech-lab-png-4b34ba66.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-05-RDS-vs-DynamoDB-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-05-RDS-vs-DynamoDB-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-05-rds-vs-dynamodb-venkat-tech-lab-png-14af3aab.png",
+    "thumbnail": "thumbs/aws-comparison-05-rds-vs-dynamodb-venkat-tech-lab-png-14af3aab.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-06-CloudWatch-vs-CloudTrail-vs-X-Ray-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-06-CloudWatch-vs-CloudTrail-vs-X-Ray-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "ai",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-06-cloudwatch-vs-cloudtrail-vs-x-ray-venkat-tech-lab-png-348bfe0f.png",
+    "thumbnail": "thumbs/aws-comparison-06-cloudwatch-vs-cloudtrail-vs-x-ray-venkat-tech-lab-png-348bfe0f.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-07-IAM-Users-vs-Groups-vs-Roles-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-07-IAM-Users-vs-Groups-vs-Roles-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-07-iam-users-vs-groups-vs-roles-venkat-tech-lab-png-3d9b67f8.png",
+    "thumbnail": "thumbs/aws-comparison-07-iam-users-vs-groups-vs-roles-venkat-tech-lab-png-3d9b67f8.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-08-EC2-vs-Lambda-vs-Fargate-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-08-EC2-vs-Lambda-vs-Fargate-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-08-ec2-vs-lambda-vs-fargate-venkat-tech-lab-png-48d42aa0.png",
+    "thumbnail": "thumbs/aws-comparison-08-ec2-vs-lambda-vs-fargate-venkat-tech-lab-png-48d42aa0.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-09-ALB-vs-NLB-vs-GWLB-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-09-ALB-vs-NLB-vs-GWLB-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-09-alb-vs-nlb-vs-gwlb-venkat-tech-lab-png-0ad9c6e6.png",
+    "thumbnail": "thumbs/aws-comparison-09-alb-vs-nlb-vs-gwlb-venkat-tech-lab-png-0ad9c6e6.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-10-SQS-vs-SNS-vs-EventBridge-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-10-SQS-vs-SNS-vs-EventBridge-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-10-sqs-vs-sns-vs-eventbridge-venkat-tech-lab-png-c38dab59.png",
+    "thumbnail": "thumbs/aws-comparison-10-sqs-vs-sns-vs-eventbridge-venkat-tech-lab-png-c38dab59.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-11-RDS-vs-Aurora-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-11-RDS-vs-Aurora-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-11-rds-vs-aurora-venkat-tech-lab-png-8158faa5.png",
+    "thumbnail": "thumbs/aws-comparison-11-rds-vs-aurora-venkat-tech-lab-png-8158faa5.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-12-EBS-gp3-vs-io2-vs-st1-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-12-EBS-gp3-vs-io2-vs-st1-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-12-ebs-gp3-vs-io2-vs-st1-venkat-tech-lab-png-bb624519.png",
+    "thumbnail": "thumbs/aws-comparison-12-ebs-gp3-vs-io2-vs-st1-venkat-tech-lab-png-bb624519.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-13-Secrets-Manager-vs-Parameter-Store-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-13-Secrets-Manager-vs-Parameter-Store-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-13-secrets-manager-vs-parameter-store-venkat-tech-lab-png-8033fa08.png",
+    "thumbnail": "thumbs/aws-comparison-13-secrets-manager-vs-parameter-store-venkat-tech-lab-png-8033fa08.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-14-NAT-Gateway-vs-VPC-Endpoints-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-14-NAT-Gateway-vs-VPC-Endpoints-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-14-nat-gateway-vs-vpc-endpoints-venkat-tech-lab-png-be823695.png",
+    "thumbnail": "thumbs/aws-comparison-14-nat-gateway-vs-vpc-endpoints-venkat-tech-lab-png-be823695.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-15-Route-53-Routing-Policies-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-15-Route-53-Routing-Policies-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-15-route-53-routing-policies-venkat-tech-lab-png-70bc97fd.png",
+    "thumbnail": "thumbs/aws-comparison-15-route-53-routing-policies-venkat-tech-lab-png-70bc97fd.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-16-ElastiCache-Redis-vs-Memcached-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-16-ElastiCache-Redis-vs-Memcached-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-16-elasticache-redis-vs-memcached-venkat-tech-lab-png-b2a7b283.png",
+    "thumbnail": "thumbs/aws-comparison-16-elasticache-redis-vs-memcached-venkat-tech-lab-png-b2a7b283.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-17-API-Gateway-REST-vs-HTTP-vs-WebSocket-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-17-API-Gateway-REST-vs-HTTP-vs-WebSocket-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-17-api-gateway-rest-vs-http-vs-websocket-venkat-tech-lab-png-f39cbe56.png",
+    "thumbnail": "thumbs/aws-comparison-17-api-gateway-rest-vs-http-vs-websocket-venkat-tech-lab-png-f39cbe56.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-18-ECS-vs-EKS-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-18-ECS-vs-EKS-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "kubernetes",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-18-ecs-vs-eks-venkat-tech-lab-png-ddf767a8.png",
+    "thumbnail": "thumbs/aws-comparison-18-ecs-vs-eks-venkat-tech-lab-png-ddf767a8.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-19-CloudFormation-vs-CDK-vs-Terraform-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-19-CloudFormation-vs-CDK-vs-Terraform-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "terraform",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-19-cloudformation-vs-cdk-vs-terraform-venkat-tech-lab-png-68f65d56.png",
+    "thumbnail": "thumbs/aws-comparison-19-cloudformation-vs-cdk-vs-terraform-venkat-tech-lab-png-68f65d56.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-20-CodePipeline-vs-GitHub-Actions-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-20-CodePipeline-vs-GitHub-Actions-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "devops",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-20-codepipeline-vs-github-actions-venkat-tech-lab-png-214f37b7.png",
+    "thumbnail": "thumbs/aws-comparison-20-codepipeline-vs-github-actions-venkat-tech-lab-png-214f37b7.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-21-Lambda-vs-Step-Functions-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-21-Lambda-vs-Step-Functions-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-21-lambda-vs-step-functions-venkat-tech-lab-png-94827005.png",
+    "thumbnail": "thumbs/aws-comparison-21-lambda-vs-step-functions-venkat-tech-lab-png-94827005.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-22-Redshift-vs-Athena-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-22-Redshift-vs-Athena-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-22-redshift-vs-athena-venkat-tech-lab-png-84ce4ea5.png",
+    "thumbnail": "thumbs/aws-comparison-22-redshift-vs-athena-venkat-tech-lab-png-84ce4ea5.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-23-CloudFront-vs-Global-Accelerator-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-23-CloudFront-vs-Global-Accelerator-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-23-cloudfront-vs-global-accelerator-venkat-tech-lab-png-919b1d82.png",
+    "thumbnail": "thumbs/aws-comparison-23-cloudfront-vs-global-accelerator-venkat-tech-lab-png-919b1d82.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-24-WAF-vs-Shield-vs-Network-Firewall-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-24-WAF-vs-Shield-vs-Network-Firewall-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-24-waf-vs-shield-vs-network-firewall-venkat-tech-lab-png-0d412185.png",
+    "thumbnail": "thumbs/aws-comparison-24-waf-vs-shield-vs-network-firewall-venkat-tech-lab-png-0d412185.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-25-Graviton-vs-x86-Instances-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-25-Graviton-vs-x86-Instances-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-25-graviton-vs-x86-instances-venkat-tech-lab-png-ff849f37.png",
+    "thumbnail": "thumbs/aws-comparison-25-graviton-vs-x86-instances-venkat-tech-lab-png-ff849f37.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-26-Systems-Manager-vs-AWS-Config-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-26-Systems-Manager-vs-AWS-Config-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-26-systems-manager-vs-aws-config-venkat-tech-lab-png-e1895038.png",
+    "thumbnail": "thumbs/aws-comparison-26-systems-manager-vs-aws-config-venkat-tech-lab-png-e1895038.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-27-VPC-Peering-vs-Transit-Gateway-vs-PrivateLink-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-27-VPC-Peering-vs-Transit-Gateway-vs-PrivateLink-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-27-vpc-peering-vs-transit-gateway-vs-privatelink-venkat-tech-lab-png-47c39e09.png",
+    "thumbnail": "thumbs/aws-comparison-27-vpc-peering-vs-transit-gateway-vs-privatelink-venkat-tech-lab-png-47c39e09.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-28-Direct-Connect-vs-Site-to-Site-VPN-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-28-Direct-Connect-vs-Site-to-Site-VPN-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-28-direct-connect-vs-site-to-site-vpn-venkat-tech-lab-png-4a765114.png",
+    "thumbnail": "thumbs/aws-comparison-28-direct-connect-vs-site-to-site-vpn-venkat-tech-lab-png-4a765114.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-29-Aurora-Provisioned-vs-Serverless-v2-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-29-Aurora-Provisioned-vs-Serverless-v2-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-29-aurora-provisioned-vs-serverless-v2-venkat-tech-lab-png-20ab87ae.png",
+    "thumbnail": "thumbs/aws-comparison-29-aurora-provisioned-vs-serverless-v2-venkat-tech-lab-png-20ab87ae.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-30-DynamoDB-vs-Aurora-at-Scale-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-30-DynamoDB-vs-Aurora-at-Scale-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-30-dynamodb-vs-aurora-at-scale-venkat-tech-lab-png-b346daf3.png",
+    "thumbnail": "thumbs/aws-comparison-30-dynamodb-vs-aurora-at-scale-venkat-tech-lab-png-b346daf3.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-31-Kinesis-vs-MSK-vs-SQS-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-31-Kinesis-vs-MSK-vs-SQS-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-31-kinesis-vs-msk-vs-sqs-venkat-tech-lab-png-5e3b3c3d.png",
+    "thumbnail": "thumbs/aws-comparison-31-kinesis-vs-msk-vs-sqs-venkat-tech-lab-png-5e3b3c3d.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-32-EKS-on-EC2-vs-EKS-on-Fargate-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-32-EKS-on-EC2-vs-EKS-on-Fargate-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "kubernetes",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-32-eks-on-ec2-vs-eks-on-fargate-venkat-tech-lab-png-6291ac9f.png",
+    "thumbnail": "thumbs/aws-comparison-32-eks-on-ec2-vs-eks-on-fargate-venkat-tech-lab-png-6291ac9f.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-33-IRSA-vs-EKS-Pod-Identity-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-33-IRSA-vs-EKS-Pod-Identity-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "kubernetes",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-33-irsa-vs-eks-pod-identity-venkat-tech-lab-png-2b446ca6.png",
+    "thumbnail": "thumbs/aws-comparison-33-irsa-vs-eks-pod-identity-venkat-tech-lab-png-2b446ca6.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-34-KMS-vs-CloudHSM-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-34-KMS-vs-CloudHSM-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-34-kms-vs-cloudhsm-venkat-tech-lab-png-536ecf30.png",
+    "thumbnail": "thumbs/aws-comparison-34-kms-vs-cloudhsm-venkat-tech-lab-png-536ecf30.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-35-ElastiCache-vs-MemoryDB-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-35-ElastiCache-vs-MemoryDB-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-35-elasticache-vs-memorydb-venkat-tech-lab-png-02ee9e9f.png",
+    "thumbnail": "thumbs/aws-comparison-35-elasticache-vs-memorydb-venkat-tech-lab-png-02ee9e9f.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-36-FSx-Windows-vs-Lustre-vs-NetApp-ONTAP-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-36-FSx-Windows-vs-Lustre-vs-NetApp-ONTAP-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-36-fsx-windows-vs-lustre-vs-netapp-ontap-venkat-tech-lab-png-faf63684.png",
+    "thumbnail": "thumbs/aws-comparison-36-fsx-windows-vs-lustre-vs-netapp-ontap-venkat-tech-lab-png-faf63684.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-37-CloudWatch-vs-Dynatrace-vs-Datadog-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-37-CloudWatch-vs-Dynatrace-vs-Datadog-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-37-cloudwatch-vs-dynatrace-vs-datadog-venkat-tech-lab-png-afa00124.png",
+    "thumbnail": "thumbs/aws-comparison-37-cloudwatch-vs-dynatrace-vs-datadog-venkat-tech-lab-png-afa00124.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-38-Bedrock-vs-SageMaker-AI-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-38-Bedrock-vs-SageMaker-AI-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "ai",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-38-bedrock-vs-sagemaker-ai-venkat-tech-lab-png-7287301a.png",
+    "thumbnail": "thumbs/aws-comparison-38-bedrock-vs-sagemaker-ai-venkat-tech-lab-png-7287301a.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-39-Bedrock-Knowledge-Bases-vs-OpenSearch-Vector-Search-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-39-Bedrock-Knowledge-Bases-vs-OpenSearch-Vector-Search-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "ai",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-39-bedrock-knowledge-bases-vs-opensearch-vector-search-venkat-tech-lab-png-3e8ff9f1.png",
+    "thumbnail": "thumbs/aws-comparison-39-bedrock-knowledge-bases-vs-opensearch-vector-search-venkat-tech-lab-png-3e8ff9f1.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-Comparison-40-Bedrock-Agents-vs-Claude-Agent-SDK-Venkat-Tech-Lab",
+    "filename": "AWS-Comparison-40-Bedrock-Agents-vs-Claude-Agent-SDK-Venkat-Tech-Lab.png",
+    "categories": [
+      "aws-decisions",
+      "ai",
+      "aws"
+    ],
+    "original": "originals/aws-comparison-40-bedrock-agents-vs-claude-agent-sdk-venkat-tech-lab-png-aeb88f01.png",
+    "thumbnail": "thumbs/aws-comparison-40-bedrock-agents-vs-claude-agent-sdk-venkat-tech-lab-png-aeb88f01.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-DevOps-Services-01-of-04",
+    "filename": "AWS-DevOps-Services-01-of-04.png",
+    "categories": [
+      "devops",
+      "aws"
+    ],
+    "original": "originals/aws-devops-services-01-of-04-png-73690ec3.png",
+    "thumbnail": "thumbs/aws-devops-services-01-of-04-png-73690ec3.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-DevOps-Services-02-of-04",
+    "filename": "AWS-DevOps-Services-02-of-04.png",
+    "categories": [
+      "devops",
+      "aws"
+    ],
+    "original": "originals/aws-devops-services-02-of-04-png-bfb5858a.png",
+    "thumbnail": "thumbs/aws-devops-services-02-of-04-png-bfb5858a.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-DevOps-Services-03-of-04",
+    "filename": "AWS-DevOps-Services-03-of-04.png",
+    "categories": [
+      "devops",
+      "aws"
+    ],
+    "original": "originals/aws-devops-services-03-of-04-png-2c28c8c4.png",
+    "thumbnail": "thumbs/aws-devops-services-03-of-04-png-2c28c8c4.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS-DevOps-Services-04-of-04",
+    "filename": "AWS-DevOps-Services-04-of-04.png",
+    "categories": [
+      "devops",
+      "aws"
+    ],
+    "original": "originals/aws-devops-services-04-of-04-png-23bec5c0.png",
+    "thumbnail": "thumbs/aws-devops-services-04-of-04-png-23bec5c0.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "AWS Solutions Architect Associate",
+    "filename": "AWS_Solutions_Architect_Associate.png",
+    "categories": [
+      "certifications",
+      "aws"
+    ],
+    "original": "originals/aws-solutions-architect-associate-png-db2ca6df.png",
+    "thumbnail": "thumbs/aws-solutions-architect-associate-png-db2ca6df.webp",
+    "width": 600,
+    "height": 600
+  },
+  {
+    "title": "AWS Solutions Architect Professional",
+    "filename": "AWS_Solutions_Architect_Professional.png",
+    "categories": [
+      "certifications",
+      "aws"
+    ],
+    "original": "originals/aws-solutions-architect-professional-png-0ec86a83.png",
+    "thumbnail": "thumbs/aws-solutions-architect-professional-png-0ec86a83.webp",
+    "width": 600,
+    "height": 600
+  },
+  {
+    "title": "CKA Certified Kubernetes Administrator",
+    "filename": "CKA_Certified_Kubernetes_Administrator.png",
+    "categories": [
+      "certifications",
+      "kubernetes"
+    ],
+    "original": "originals/cka-certified-kubernetes-administrator-png-1f3b4ded.png",
+    "thumbnail": "thumbs/cka-certified-kubernetes-administrator-png-1f3b4ded.webp",
+    "width": 600,
+    "height": 600
+  },
+  {
+    "title": "Claude Architect Foundations Podcast Poster",
+    "filename": "Claude Architect Foundations Podcast Poster.png",
+    "categories": [
+      "ai",
+      "branding"
+    ],
+    "original": "originals/claude-architect-foundations-podcast-poster-png-fd028b83.png",
+    "thumbnail": "thumbs/claude-architect-foundations-podcast-poster-png-fd028b83.webp",
+    "width": 941,
+    "height": 1672
+  },
+  {
+    "title": "Claude Certified Architect Podcast Poster",
+    "filename": "Claude Certified Architect Podcast Poster.png",
+    "categories": [
+      "certifications",
+      "ai",
+      "branding"
+    ],
+    "original": "originals/claude-certified-architect-podcast-poster-png-a7071994.png",
+    "thumbnail": "thumbs/claude-certified-architect-podcast-poster-png-a7071994.webp",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "title": "Claude Certified Architect Foundations",
+    "filename": "Claude_Certified_Architect_Foundations.png",
+    "categories": [
+      "certifications",
+      "ai"
+    ],
+    "original": "originals/claude-certified-architect-foundations-png-bd60b9af.png",
+    "thumbnail": "thumbs/claude-certified-architect-foundations-png-bd60b9af.webp",
+    "width": 604,
+    "height": 604
+  },
+  {
+    "title": "Cloud engineering certification banner",
+    "filename": "Cloud engineering certification banner.png",
+    "categories": [
+      "certifications",
+      "branding"
+    ],
+    "original": "originals/cloud-engineering-certification-banner-png-fe447463.png",
+    "thumbnail": "thumbs/cloud-engineering-certification-banner-png-fe447463.webp",
+    "width": 1560,
+    "height": 1008
+  },
+  {
+    "title": "Cloud Engineering Leader Resume Infographic",
+    "filename": "Cloud Engineering Leader Resume Infographic.png",
+    "categories": [
+      "architecture"
+    ],
+    "original": "originals/cloud-engineering-leader-resume-infographic-png-0929196a.png",
+    "thumbnail": "thumbs/cloud-engineering-leader-resume-infographic-png-0929196a.webp",
+    "width": 1055,
+    "height": 1491
+  },
+  {
+    "title": "CloudFront: Secure Global Delivery at the Edge",
+    "filename": "CloudFront: Secure Global Delivery at the Edge.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/cloudfront-secure-global-delivery-at-the-edge-png-964104c5.png",
+    "thumbnail": "thumbs/cloudfront-secure-global-delivery-at-the-edge-png-964104c5.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Colorful Git Commands Cheat Sheet",
+    "filename": "Colorful Git Commands Cheat Sheet.png",
+    "categories": [
+      "devops"
+    ],
+    "original": "originals/colorful-git-commands-cheat-sheet-png-a8c929aa.png",
+    "thumbnail": "thumbs/colorful-git-commands-cheat-sheet-png-a8c929aa.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Corrected AWS Systems Manager checklist",
+    "filename": "Corrected AWS Systems Manager checklist.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/corrected-aws-systems-manager-checklist-png-c79490af.png",
+    "thumbnail": "thumbs/corrected-aws-systems-manager-checklist-png-c79490af.webp",
+    "width": 1054,
+    "height": 1492
+  },
+  {
+    "title": "Dark cloud network executive backdrop",
+    "filename": "Dark cloud network executive backdrop.png",
+    "categories": [
+      "branding"
+    ],
+    "original": "originals/dark-cloud-network-executive-backdrop-png-953bde12.png",
+    "thumbnail": "thumbs/dark-cloud-network-executive-backdrop-png-953bde12.webp",
+    "width": 1881,
+    "height": 836
+  },
+  {
+    "title": "EC2: Scalable, Secure AWS Compute",
+    "filename": "EC2: Scalable, Secure AWS Compute.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/ec2-scalable-secure-aws-compute-png-dd7f5b9f.png",
+    "thumbnail": "thumbs/ec2-scalable-secure-aws-compute-png-dd7f5b9f.webp",
+    "width": 1024,
+    "height": 1535
+  },
+  {
+    "title": "EKS Multi-AZ High Availability Architecture",
+    "filename": "EKS Multi-AZ High Availability Architecture.png",
+    "categories": [
+      "kubernetes",
+      "ai",
+      "aws-ha-dr",
+      "architecture"
+    ],
+    "original": "originals/eks-multi-az-high-availability-architecture-png-4809fb69.png",
+    "thumbnail": "thumbs/eks-multi-az-high-availability-architecture-png-4809fb69.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "EKS AWS Failover DR",
+    "filename": "EKS_AWS_Failover_DR.png",
+    "categories": [
+      "kubernetes",
+      "ai",
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/eks-aws-failover-dr-png-90751f39.png",
+    "thumbnail": "thumbs/eks-aws-failover-dr-png-90751f39.webp",
+    "width": 3600,
+    "height": 3160
+  },
+  {
+    "title": "EKS AWS Single Region",
+    "filename": "EKS_AWS_Single_Region.png",
+    "categories": [
+      "kubernetes",
+      "aws"
+    ],
+    "original": "originals/eks-aws-single-region-png-56b64f3d.png",
+    "thumbnail": "thumbs/eks-aws-single-region-png-56b64f3d.webp",
+    "width": 3600,
+    "height": 3160
+  },
+  {
+    "title": "EKS Failover and DR",
+    "filename": "EKS_Failover_and_DR.png",
+    "categories": [
+      "kubernetes",
+      "ai",
+      "aws-ha-dr"
+    ],
+    "original": "originals/eks-failover-and-dr-png-fb592548.png",
+    "thumbnail": "thumbs/eks-failover-and-dr-png-fb592548.webp",
+    "width": 2450,
+    "height": 2800
+  },
+  {
+    "title": "EKS Single Region Architecture",
+    "filename": "EKS_Single_Region_Architecture.png",
+    "categories": [
+      "kubernetes",
+      "architecture"
+    ],
+    "original": "originals/eks-single-region-architecture-png-186086ee.png",
+    "thumbnail": "thumbs/eks-single-region-architecture-png-186086ee.webp",
+    "width": 2450,
+    "height": 2800
+  },
+  {
+    "title": "Executive AI Cloud Architecture Background",
+    "filename": "Executive AI Cloud Architecture Background.png",
+    "categories": [
+      "ai",
+      "architecture",
+      "branding"
+    ],
+    "original": "originals/executive-ai-cloud-architecture-background-png-59282eb8.png",
+    "thumbnail": "thumbs/executive-ai-cloud-architecture-background-png-59282eb8.webp",
+    "width": 1774,
+    "height": 887
+  },
+  {
+    "title": "Executive cloud engineering leadership banner",
+    "filename": "Executive cloud engineering leadership banner.png",
+    "categories": [
+      "branding"
+    ],
+    "original": "originals/executive-cloud-engineering-leadership-banner-png-26a4885a.png",
+    "thumbnail": "thumbs/executive-cloud-engineering-leadership-banner-png-26a4885a.webp",
+    "width": 1774,
+    "height": 887
+  },
+  {
+    "title": "KMS and Secrets Manager playbook",
+    "filename": "KMS and Secrets Manager playbook.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/kms-and-secrets-manager-playbook-png-64409d04.png",
+    "thumbnail": "thumbs/kms-and-secrets-manager-playbook-png-64409d04.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Kubernetes & Terraform Command Cheat Sheet",
+    "filename": "Kubernetes & Terraform Command Cheat Sheet.png",
+    "categories": [
+      "kubernetes",
+      "terraform"
+    ],
+    "original": "originals/kubernetes-terraform-command-cheat-sheet-png-2e0bdf0e.png",
+    "thumbnail": "thumbs/kubernetes-terraform-command-cheat-sheet-png-2e0bdf0e.webp",
+    "width": 1055,
+    "height": 1491
+  },
+  {
+    "title": "Kubernetes overview: architecture and operations",
+    "filename": "Kubernetes overview: architecture and operations.png",
+    "categories": [
+      "kubernetes",
+      "architecture"
+    ],
+    "original": "originals/kubernetes-overview-architecture-and-operations-png-986fcd94.png",
+    "thumbnail": "thumbs/kubernetes-overview-architecture-and-operations-png-986fcd94.webp",
+    "width": 1055,
+    "height": 1491
+  },
+  {
+    "title": "Kubernetes overview: corrected kubectl commands",
+    "filename": "Kubernetes overview: corrected kubectl commands.png",
+    "categories": [
+      "kubernetes"
+    ],
+    "original": "originals/kubernetes-overview-corrected-kubectl-commands-png-c76be80a.png",
+    "thumbnail": "thumbs/kubernetes-overview-corrected-kubectl-commands-png-c76be80a.webp",
+    "width": 1055,
+    "height": 1491
+  },
+  {
+    "title": "Kubernetes Production Architecture Blueprint",
+    "filename": "Kubernetes Production Architecture Blueprint.png",
+    "categories": [
+      "kubernetes",
+      "architecture"
+    ],
+    "original": "originals/kubernetes-production-architecture-blueprint-png-431651ea.png",
+    "thumbnail": "thumbs/kubernetes-production-architecture-blueprint-png-431651ea.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Kustomize: Kubernetes Configuration Playbook",
+    "filename": "Kustomize: Kubernetes Configuration Playbook.png",
+    "categories": [
+      "kubernetes"
+    ],
+    "original": "originals/kustomize-kubernetes-configuration-playbook-png-455e22e4.png",
+    "thumbnail": "thumbs/kustomize-kubernetes-configuration-playbook-png-455e22e4.webp",
+    "width": 1055,
+    "height": 1491
+  },
+  {
+    "title": "learning-curve",
+    "filename": "learning-curve.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/learning-curve-png-8da31b78.png",
+    "thumbnail": "thumbs/learning-curve-png-8da31b78.webp",
+    "width": 576,
+    "height": 455
+  },
+  {
+    "title": "Linux-Training-01-Basics-and-Filesystem",
+    "filename": "Linux-Training-01-Basics-and-Filesystem.png",
+    "categories": [
+      "ai",
+      "devops"
+    ],
+    "original": "originals/linux-training-01-basics-and-filesystem-png-cc9127a5.png",
+    "thumbnail": "thumbs/linux-training-01-basics-and-filesystem-png-cc9127a5.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "Linux-Training-02-Permissions-Users-and-Processes",
+    "filename": "Linux-Training-02-Permissions-Users-and-Processes.png",
+    "categories": [
+      "ai",
+      "devops"
+    ],
+    "original": "originals/linux-training-02-permissions-users-and-processes-png-e80c4e44.png",
+    "thumbnail": "thumbs/linux-training-02-permissions-users-and-processes-png-e80c4e44.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "Linux-Training-03-Packages-Networking-and-Remote-Access",
+    "filename": "Linux-Training-03-Packages-Networking-and-Remote-Access.png",
+    "categories": [
+      "ai",
+      "devops"
+    ],
+    "original": "originals/linux-training-03-packages-networking-and-remote-access-png-1fa4adfd.png",
+    "thumbnail": "thumbs/linux-training-03-packages-networking-and-remote-access-png-1fa4adfd.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "Linux-Training-04-Storage-Automation-and-Troubleshooting",
+    "filename": "Linux-Training-04-Storage-Automation-and-Troubleshooting.png",
+    "categories": [
+      "ai",
+      "devops"
+    ],
+    "original": "originals/linux-training-04-storage-automation-and-troubleshooting-png-ed0f4e62.png",
+    "thumbnail": "thumbs/linux-training-04-storage-automation-and-troubleshooting-png-ed0f4e62.webp",
+    "width": 2480,
+    "height": 3508
+  },
+  {
+    "title": "Midnight Cloud Platform Backdrop",
+    "filename": "Midnight Cloud Platform Backdrop.png",
+    "categories": [
+      "branding"
+    ],
+    "original": "originals/midnight-cloud-platform-backdrop-png-57a38d6b.png",
+    "thumbnail": "thumbs/midnight-cloud-platform-backdrop-png-57a38d6b.webp",
+    "width": 1774,
+    "height": 887
+  },
+  {
+    "title": "Multi-AZ AWS Architecture Blueprint",
+    "filename": "Multi-AZ AWS Architecture Blueprint.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/multi-az-aws-architecture-blueprint-png-5f8c4851.png",
+    "thumbnail": "thumbs/multi-az-aws-architecture-blueprint-png-5f8c4851.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "Multi-AZ Resilience Architecture Infographic",
+    "filename": "Multi-AZ Resilience Architecture Infographic.png",
+    "categories": [
+      "aws-ha-dr",
+      "architecture"
+    ],
+    "original": "originals/multi-az-resilience-architecture-infographic-png-ad609a43.png",
+    "thumbnail": "thumbs/multi-az-resilience-architecture-infographic-png-ad609a43.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "Multi-AZ Resilience: Beyond Checkboxes",
+    "filename": "Multi-AZ Resilience: Beyond Checkboxes.png",
+    "categories": [
+      "aws-ha-dr"
+    ],
+    "original": "originals/multi-az-resilience-beyond-checkboxes-png-76fb03a1.png",
+    "thumbnail": "thumbs/multi-az-resilience-beyond-checkboxes-png-76fb03a1.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "Multi-AZ Resilience: Design for Failure",
+    "filename": "Multi-AZ Resilience: Design for Failure.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr"
+    ],
+    "original": "originals/multi-az-resilience-design-for-failure-png-5fbc89e4.png",
+    "thumbnail": "thumbs/multi-az-resilience-design-for-failure-png-5fbc89e4.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "Multi-AZ Resilience: Shared Dependencies Matter",
+    "filename": "Multi-AZ Resilience: Shared Dependencies Matter.png",
+    "categories": [
+      "aws-ha-dr"
+    ],
+    "original": "originals/multi-az-resilience-shared-dependencies-matter-png-99b8e889.png",
+    "thumbnail": "thumbs/multi-az-resilience-shared-dependencies-matter-png-99b8e889.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "Multi-Region Resilience: AWS Lesson 06",
+    "filename": "Multi-Region Resilience: AWS Lesson 06.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/multi-region-resilience-aws-lesson-06-png-3131b4a9.png",
+    "thumbnail": "thumbs/multi-region-resilience-aws-lesson-06-png-3131b4a9.webp",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "title": "NAT Gateway vs VPC Endpoints",
+    "filename": "NAT Gateway vs VPC Endpoints.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/nat-gateway-vs-vpc-endpoints-png-b4b2ca6f.png",
+    "thumbnail": "thumbs/nat-gateway-vs-vpc-endpoints-png-b4b2ca6f.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Organized Python AI Engineer eBook Drive Banner",
+    "filename": "Organized Python AI Engineer eBook Drive Banner.png",
+    "categories": [
+      "python-ai",
+      "branding"
+    ],
+    "original": "originals/organized-python-ai-engineer-ebook-drive-banner-png-9d9b7e69.png",
+    "thumbnail": "thumbs/organized-python-ai-engineer-ebook-drive-banner-png-9d9b7e69.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "Python AI Engineering Guide Cover",
+    "filename": "Python AI Engineering Guide Cover.png",
+    "categories": [
+      "python-ai",
+      "branding"
+    ],
+    "original": "originals/python-ai-engineering-guide-cover-png-38e54e80.png",
+    "thumbnail": "thumbs/python-ai-engineering-guide-cover-png-38e54e80.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers Cover",
+    "filename": "Python for AI Engineers Cover.png",
+    "categories": [
+      "python-ai",
+      "branding"
+    ],
+    "original": "originals/python-for-ai-engineers-cover-png-1f45bebf.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-cover-png-1f45bebf.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers Drive Folder",
+    "filename": "Python for AI Engineers Drive Folder.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-drive-folder-png-ed3b6d42.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-drive-folder-png-ed3b6d42.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "Python for AI Engineers eBook Cover",
+    "filename": "Python for AI Engineers eBook Cover.png",
+    "categories": [
+      "python-ai",
+      "branding"
+    ],
+    "original": "originals/python-for-ai-engineers-ebook-cover-png-a16ad719.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-ebook-cover-png-a16ad719.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers Guide(1)",
+    "filename": "Python for AI Engineers Guide(1).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-guide-1-png-c6197e8d.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-guide-1-png-c6197e8d.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers Guide",
+    "filename": "Python for AI Engineers Guide.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-guide-png-ff42fde8.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-guide-png-ff42fde8.webp",
+    "width": 1086,
+    "height": 1448
+  },
+  {
+    "title": "Python for AI Engineers Roadmap",
+    "filename": "Python for AI Engineers Roadmap.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-roadmap-png-026330ef.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-roadmap-png-026330ef.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers",
+    "filename": "Python for AI Engineers.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-png-5d2d5e09.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-png-5d2d5e09.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Guide(1)",
+    "filename": "Python for AI Engineers: 90-Day Guide(1).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-guide-1-png-f192f5f6.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-guide-1-png-f192f5f6.webp",
+    "width": 1086,
+    "height": 1448
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Guide(2)",
+    "filename": "Python for AI Engineers: 90-Day Guide(2).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-guide-2-png-b72caabe.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-guide-2-png-b72caabe.webp",
+    "width": 1086,
+    "height": 1448
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Guide(3)",
+    "filename": "Python for AI Engineers: 90-Day Guide(3).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-guide-3-png-646f5759.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-guide-3-png-646f5759.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Guide(4)",
+    "filename": "Python for AI Engineers: 90-Day Guide(4).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-guide-4-png-754d0422.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-guide-4-png-754d0422.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Guide(5)",
+    "filename": "Python for AI Engineers: 90-Day Guide(5).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-guide-5-png-b0b14e0a.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-guide-5-png-b0b14e0a.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Guide(6)",
+    "filename": "Python for AI Engineers: 90-Day Guide(6).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-guide-6-png-5716c3e4.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-guide-6-png-5716c3e4.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Guide",
+    "filename": "Python for AI Engineers: 90-Day Guide.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-guide-png-f9858c8b.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-guide-png-f9858c8b.webp",
+    "width": 1086,
+    "height": 1448
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Roadmap(1)",
+    "filename": "Python for AI Engineers: 90-Day Roadmap(1).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-roadmap-1-png-ae1afbbe.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-roadmap-1-png-ae1afbbe.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Roadmap(2)",
+    "filename": "Python for AI Engineers: 90-Day Roadmap(2).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-roadmap-2-png-e6c2d5b7.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-roadmap-2-png-e6c2d5b7.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Roadmap(3)",
+    "filename": "Python for AI Engineers: 90-Day Roadmap(3).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-roadmap-3-png-fc999ba4.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-roadmap-3-png-fc999ba4.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: 90-Day Roadmap",
+    "filename": "Python for AI Engineers: 90-Day Roadmap.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-90-day-roadmap-png-9704414a.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-90-day-roadmap-png-9704414a.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: From Code to Impact(1)",
+    "filename": "Python for AI Engineers: From Code to Impact(1).png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-from-code-to-impact-1-png-3b9fade0.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-from-code-to-impact-1-png-3b9fade0.webp",
+    "width": 992,
+    "height": 1586
+  },
+  {
+    "title": "Python for AI Engineers: From Code to Impact",
+    "filename": "Python for AI Engineers: From Code to Impact.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-from-code-to-impact-png-8e2f4afb.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-from-code-to-impact-png-8e2f4afb.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: From Code to Production",
+    "filename": "Python for AI Engineers: From Code to Production.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-from-code-to-production-png-565bf3b0.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-from-code-to-production-png-565bf3b0.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: Neon Intelligence",
+    "filename": "Python for AI Engineers: Neon Intelligence.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-neon-intelligence-png-c675793b.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-neon-intelligence-png-c675793b.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers: Production AI Guide",
+    "filename": "Python for AI Engineers: Production AI Guide.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-production-ai-guide-png-b99b0535.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-production-ai-guide-png-b99b0535.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python to Production AI Roadmap",
+    "filename": "Python to Production AI Roadmap.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-to-production-ai-roadmap-png-7e7ae159.png",
+    "thumbnail": "thumbs/python-to-production-ai-roadmap-png-7e7ae159.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Python for AI Engineers Learning Plan Updated",
+    "filename": "Python_for_AI_Engineers_Learning_Plan_Updated.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/python-for-ai-engineers-learning-plan-updated-png-6d23c8b4.png",
+    "thumbnail": "thumbs/python-for-ai-engineers-learning-plan-updated-png-6d23c8b4.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Refined AI cloud architecture",
+    "filename": "Refined AI cloud architecture.png",
+    "categories": [
+      "ai",
+      "architecture"
+    ],
+    "original": "originals/refined-ai-cloud-architecture-png-30c1d7aa.png",
+    "thumbnail": "thumbs/refined-ai-cloud-architecture-png-30c1d7aa.webp",
+    "width": 1774,
+    "height": 887
+  },
+  {
+    "title": "roc-curve",
+    "filename": "roc-curve.png",
+    "categories": [
+      "python-ai"
+    ],
+    "original": "originals/roc-curve-png-eecf3b81.png",
+    "thumbnail": "thumbs/roc-curve-png-eecf3b81.webp",
+    "width": 627,
+    "height": 634
+  },
+  {
+    "title": "Route 53 Health Checks and DNS Failover Guide",
+    "filename": "Route 53 Health Checks and DNS Failover Guide.png",
+    "categories": [
+      "ai",
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/route-53-health-checks-and-dns-failover-guide-png-a54cc101.png",
+    "thumbnail": "thumbs/route-53-health-checks-and-dns-failover-guide-png-a54cc101.webp",
+    "width": 1226,
+    "height": 1283
+  },
+  {
+    "title": "Route 53 routing policies compared",
+    "filename": "Route 53 routing policies compared.png",
+    "categories": [
+      "aws-ha-dr",
+      "aws"
+    ],
+    "original": "originals/route-53-routing-policies-compared-png-12aa497b.png",
+    "thumbnail": "thumbs/route-53-routing-policies-compared-png-12aa497b.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Security groups: EC2, ALB, and RDS",
+    "filename": "Security groups: EC2, ALB, and RDS.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/security-groups-ec2-alb-and-rds-png-67336108.png",
+    "thumbnail": "thumbs/security-groups-ec2-alb-and-rds-png-67336108.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Senior EC2 design decisions guide",
+    "filename": "Senior EC2 design decisions guide.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/senior-ec2-design-decisions-guide-png-5317cfe3.png",
+    "thumbnail": "thumbs/senior-ec2-design-decisions-guide-png-5317cfe3.webp",
+    "width": 1023,
+    "height": 1537
+  },
+  {
+    "title": "Single-Region AWS EKS Three-Tier Architecture",
+    "filename": "Single-Region AWS EKS Three-Tier Architecture.png",
+    "categories": [
+      "kubernetes",
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/single-region-aws-eks-three-tier-architecture-png-86f1fef8.png",
+    "thumbnail": "thumbs/single-region-aws-eks-three-tier-architecture-png-86f1fef8.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "Systems Manager: Secure Fleet Operations",
+    "filename": "Systems Manager: Secure Fleet Operations.png",
+    "categories": [
+      "aws"
+    ],
+    "original": "originals/systems-manager-secure-fleet-operations-png-5b443e57.png",
+    "thumbnail": "thumbs/systems-manager-secure-fleet-operations-png-5b443e57.webp",
+    "width": 1054,
+    "height": 1492
+  },
+  {
+    "title": "Terraform Modules Cheat Sheet Infographic",
+    "filename": "Terraform Modules Cheat Sheet Infographic.png",
+    "categories": [
+      "terraform"
+    ],
+    "original": "originals/terraform-modules-cheat-sheet-infographic-png-b15231ae.png",
+    "thumbnail": "thumbs/terraform-modules-cheat-sheet-infographic-png-b15231ae.webp",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "title": "The Modern AI Agent Stack Infographic",
+    "filename": "The Modern AI Agent Stack Infographic.png",
+    "categories": [
+      "ai"
+    ],
+    "original": "originals/the-modern-ai-agent-stack-infographic-png-c06a306c.png",
+    "thumbnail": "thumbs/the-modern-ai-agent-stack-infographic-png-c06a306c.webp",
+    "width": 1122,
+    "height": 1402
+  },
+  {
+    "title": "The wonders of AI",
+    "filename": "The wonders of AI.png",
+    "categories": [
+      "ai"
+    ],
+    "original": "originals/the-wonders-of-ai-png-b019f26e.png",
+    "thumbnail": "thumbs/the-wonders-of-ai-png-b019f26e.webp",
+    "width": 941,
+    "height": 1672
+  },
+  {
+    "title": "Top 5 AI certifications infographic",
+    "filename": "Top 5 AI certifications infographic.png",
+    "categories": [
+      "certifications",
+      "ai"
+    ],
+    "original": "originals/top-5-ai-certifications-infographic-png-327594ee.png",
+    "thumbnail": "thumbs/top-5-ai-certifications-infographic-png-327594ee.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Venkat’s AWS Cloud Architecture Master Series",
+    "filename": "Venkat’s AWS Cloud Architecture Master Series.png",
+    "categories": [
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/venkat-s-aws-cloud-architecture-master-series-png-d92f23bd.png",
+    "thumbnail": "thumbs/venkat-s-aws-cloud-architecture-master-series-png-d92f23bd.webp",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "title": "Venkat’s Tech Lab Badge",
+    "filename": "Venkat’s Tech Lab Badge.png",
+    "categories": [
+      "branding"
+    ],
+    "original": "originals/venkat-s-tech-lab-badge-png-cf524c09.png",
+    "thumbnail": "thumbs/venkat-s-tech-lab-badge-png-cf524c09.webp",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "title": "Venkat’s Tech Lab Cloud Badge",
+    "filename": "Venkat’s Tech Lab Cloud Badge.png",
+    "categories": [
+      "branding"
+    ],
+    "original": "originals/venkat-s-tech-lab-cloud-badge-png-8d19f72a.png",
+    "thumbnail": "thumbs/venkat-s-tech-lab-cloud-badge-png-8d19f72a.webp",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "title": "Venkat’s Tech Lab Cloud Innovation Badge",
+    "filename": "Venkat’s Tech Lab Cloud Innovation Badge.png",
+    "categories": [
+      "branding"
+    ],
+    "original": "originals/venkat-s-tech-lab-cloud-innovation-badge-png-de872e06.png",
+    "thumbnail": "thumbs/venkat-s-tech-lab-cloud-innovation-badge-png-de872e06.webp",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "title": "Venkat’s Tech Lab Logo",
+    "filename": "Venkat’s Tech Lab Logo.png",
+    "categories": [
+      "branding"
+    ],
+    "original": "originals/venkat-s-tech-lab-logo-png-62e75212.png",
+    "thumbnail": "thumbs/venkat-s-tech-lab-logo-png-62e75212.webp",
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "title": "Venkat’s Tech Lab: AWS Cloud Architecture",
+    "filename": "Venkat’s Tech Lab: AWS Cloud Architecture.png",
+    "categories": [
+      "aws",
+      "architecture"
+    ],
+    "original": "originals/venkat-s-tech-lab-aws-cloud-architecture-png-55451152.png",
+    "thumbnail": "thumbs/venkat-s-tech-lab-aws-cloud-architecture-png-55451152.webp",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "title": "Venkat’s Tech Lab: Cloud Futures",
+    "filename": "Venkat’s Tech Lab: Cloud Futures.png",
+    "categories": [
+      "architecture"
+    ],
+    "original": "originals/venkat-s-tech-lab-cloud-futures-png-e3ad09b4.png",
+    "thumbnail": "thumbs/venkat-s-tech-lab-cloud-futures-png-e3ad09b4.webp",
+    "width": 1983,
+    "height": 793
+  },
+  {
+    "title": "Venkat’s Tech Lab: Cloud to Future",
+    "filename": "Venkat’s Tech Lab: Cloud to Future.png",
+    "categories": [
+      "architecture"
+    ],
+    "original": "originals/venkat-s-tech-lab-cloud-to-future-png-59cb0a47.png",
+    "thumbnail": "thumbs/venkat-s-tech-lab-cloud-to-future-png-59cb0a47.webp",
+    "width": 1983,
+    "height": 793
+  }
+]
