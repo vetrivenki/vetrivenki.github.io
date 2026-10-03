@@ -87,7 +87,7 @@ const COVERS = {
    append an object to this array (copy an existing one).
    Fields:
      title, description (1-2 lines), pages (number),
-     tag (small label), cover (COVERS.key or "" for placeholder),
+     tag (small label), level (e.g. Beginner / Senior / Reference), cover (COVERS.key or "" for placeholder),
      showNameOverlay (true if the cover image lacks the full name),
      links: [{label, url, primary}]
    ===================================================================== */
@@ -97,6 +97,7 @@ const LIBRARY = [
     description: "Plain-English study notes for every SAA-C03 exam topic, cloud basics and a glossary, plus 137 practice questions with answers and explanations.",
     pages: 162,
     tag: "AWS · SAA-C03",
+    level: "Beginner",
     cover: COVERS.aws,
     showNameOverlay: false,
     links: [
@@ -108,6 +109,7 @@ const LIBRARY = [
     description: "All 21 sections / 136 lectures rewritten as beginner-friendly study notes, with exam tips, a glossary and a coverage checklist.",
     pages: 201,
     tag: "Claude · CCAR-F",
+    level: "Beginner",
     cover: COVERS.ccar,
     showNameOverlay: false,
     links: [
@@ -120,6 +122,7 @@ const LIBRARY = [
     description: "All 311 lectures rewritten in plain English across 18 chapters, with learning objectives, self-check questions, lab and mock-exam answers, and a glossary.",
     pages: 157,
     tag: "Kubernetes · CKA",
+    level: "Beginner",
     cover: COVERS.ebook,
     showNameOverlay: false,
     links: [
@@ -132,6 +135,7 @@ const LIBRARY = [
     description: "40 one-page visual comparisons of common AWS design choices (Security Groups vs NACLs, RDS vs DynamoDB, Kinesis vs MSK vs SQS, EKS on EC2 vs Fargate and more), each with a quick comparison table, common mistakes and a decision flow.",
     pages: 40,
     tag: "AWS · Architecture",
+    level: "Senior",
     cover: COVERS.awsdec,
     showNameOverlay: true,
     links: [
@@ -143,6 +147,7 @@ const LIBRARY = [
     description: "The purpose and main use case of 79 AWS services, grouped into 12 categories from Networking and Compute to Machine Learning and IoT, with retired or renamed services flagged (as of 2026).",
     pages: 13,
     tag: "AWS · Services",
+    level: "Reference",
     cover: COVERS.awssvc,
     showNameOverlay: false,
     links: [
@@ -154,6 +159,7 @@ const LIBRARY = [
     description: "20 one-page visual deep dives on core AWS services (EC2, VPC, ALB/NLB, Auto Scaling, S3, IAM, Lambda, EKS & ECS, CloudWatch, KMS, Transit Gateway and more), covering production architecture, reliability patterns and senior-engineer checklists.",
     pages: 20,
     tag: "AWS · Operations",
+    level: "Senior",
     cover: COVERS.awsops,
     showNameOverlay: true,
     links: [
@@ -184,7 +190,7 @@ const LIBRARY = [
     return `<article class="card">
       <${coverTag} class="cover">${coverInner}${overlay}${item.pages?`<span class="badge">${item.pages} pages</span>`:""}</${coverEnd}>
       <div class="body">
-        <div class="meta">${item.tag?`<span class="hl">${esc(item.tag)}</span>`:""}${item.pages?`<span>${item.pages} pages</span>`:""}<span>Beginner</span></div>
+        <div class="meta">${item.tag?`<span class="hl">${esc(item.tag)}</span>`:""}${item.pages?`<span>${item.pages} pages</span>`:""}${item.level?`<span>${esc(item.level)}</span>`:""}</div>
         <h3>${esc(item.title)}</h3>
         <p>${esc(item.description)}</p>
         <div class="btns">${btns}</div>
