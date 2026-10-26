@@ -197,6 +197,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
+    <div class="note">Version 2026-10-26 · key file setup.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -908,11 +909,14 @@ function updateKeyInfo(){
 $('ksPick').onclick = pickKeyFile;
 $('ksPaste').onclick = ()=>{ $('ksPasteRow').hidden=false; $('ksPasteInput').focus(); };
 $('ksPasteSave').onclick = ()=>{ const v=$('ksPasteInput').value; if(!useKeyText(v,'pasted text')) return; store.set('keyFile',''); updateKeyInfo(); };
-$('ksSkip').onclick = ()=>{ $('keySetup').hidden = true; };
+$('ksSkip').onclick = ()=>{ $('keySetup').hidden = true; store.set('keySetupSkipped','1'); };
 $('keyChange').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
 (async ()=>{
   updateKeyInfo();
-  if(S.key) return;
+  // Ask when there is no key, or when a key was typed earlier but never mapped to a key file.
+  const mapped = store.get('keyFile','') !== '';
+  if(S.key && (mapped || store.get('keySetupSkipped','')==='1')) return;
+  if(S.key) keyMsg('A key is already saved in this browser. Choose your key file to map it, or skip to keep the saved key.');
   const h = await idb.get('keyHandle');
   if(h){ $('ksReload').hidden=false; $('ksReload').textContent='Reload key from '+h.name; $('ksReload').onclick=reloadMappedKey; }
   $('keySetup').hidden = false;
