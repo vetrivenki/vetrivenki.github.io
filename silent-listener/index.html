@@ -111,6 +111,16 @@ mark{background:var(--mark);color:var(--markInk);padding:0 .15em;border-radius:3
 .sumBody ul{margin:0;padding-left:1.2em}.sumBody .meta{color:var(--muted);margin:0}
 .banner{margin:8px 14px 0;padding:8px 10px;border-radius:6px;background:var(--mark);color:var(--markInk);font-size:14px}
 .head em{font-style:normal;color:var(--accent)}
+.livebox{margin:8px 10px 0;padding:8px 12px;border:2px solid var(--accent);border-radius:10px;background:var(--bg)}
+.livebox.idle{border-color:var(--line)}
+.livebox .lhead{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.livebox.idle .lhead{color:var(--muted)}
+.livebox .ldot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.livebox.busy .ldot{background:var(--accent);animation:pulse 1s infinite}
+.livebox .lq{font-size:calc(var(--aFont)*.72);color:var(--muted);margin-top:4px}
+.livebox .la{font-size:var(--aFont);line-height:1.4;font-weight:500;margin-top:2px}
+.livebox.idle .la{opacity:.6}
+@media (prefers-reduced-motion:reduce){.livebox.busy .ldot{animation:none}}
 .qa.live .a{color:var(--muted)}
 .caret{animation:blink 1s steps(1) infinite;color:var(--accent)}@keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.caret{animation:none}}
@@ -187,6 +197,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
           <option value="claude-sonnet-5-5">Deeper but slower (Sonnet)</option>
         </select></label>
       <label style="flex-direction:row;align-items:center;gap:8px"><input id="showDetails" type="checkbox"> Expand keyword details by default</label>
+      <label style="flex-direction:row;align-items:center;gap:8px"><input id="liveToggle" type="checkbox"> Live answer while the question is being asked</label>
       <label class="wide">Technologies — only questions in these areas get answered (comma separated)
         <textarea id="tech" rows="2"></textarea></label>
       <label class="wide">Job description (optional) — answers are tailored to this role
@@ -204,7 +215,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26c · streaming answers.</div>
+    <div class="note">Version 2026-10-26d · live answer box.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -259,6 +270,10 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
   <section class="pane" id="bottom">
     <div class="head"><span>Questions · short answers <em id="thinking" hidden>· analyzing…</em></span><span><span id="cvState"></span><span id="qCount">0 questions</span></span></div>
     <div class="banner" id="banner" hidden></div>
+    <div class="livebox idle" id="liveBox" aria-live="polite">
+      <div class="lhead"><span class="ldot"></span>Live answer</div>
+      <div id="liveBody"></div>
+    </div>
     <div class="scroll" id="answers"></div>
     <form class="ask" id="askForm">
       <input id="askInput" placeholder="Type a question to test…" autocomplete="off">
@@ -284,7 +299,7 @@ document.documentElement.dataset.device = isMobile ? 'mobile' : 'desktop';
 /* ---------- settings ---------- */
 const S = {
   tFont: +store.get('tFont'+DEV, isMobile?15:20), aFont: +store.get('aFont'+DEV, isMobile?18:22), split: +store.get('split'+DEV, isMobile?35:55),
-  lang: store.get('lang', 'en-US'), key: store.get('key', ''), tech: store.get('tech', 'AWS, Amazon EKS, Kubernetes, Docker, Terraform, CI/CD, DevOps, SRE, observability, AI engineering, LLMs, RAG, AI agents, MLOps, Python'), jd: store.get('jd', ''), resume: store.get('resume', ''), model: (store.get('modelFastMigrated','')==='1' ? store.get('model', 'claude-haiku-5-5') : (store.set('modelFastMigrated','1'), 'claude-haiku-5-5')), showDetails: store.get('showDetails','1')==='1'
+  lang: store.get('lang', 'en-US'), key: store.get('key', ''), tech: store.get('tech', 'AWS, Amazon EKS, Kubernetes, Docker, Terraform, CI/CD, DevOps, SRE, observability, AI engineering, LLMs, RAG, AI agents, MLOps, Python'), jd: store.get('jd', ''), resume: store.get('resume', ''), model: (store.get('modelFastMigrated','')==='1' ? store.get('model', 'claude-haiku-5-5') : (store.set('modelFastMigrated','1'), 'claude-haiku-5-5')), showDetails: store.get('showDetails','1')==='1', liveAnswer: store.get('liveAnswer','1')==='1'
 };
 function applySettings(){
   root.setProperty('--tFont', S.tFont+'px'); root.setProperty('--aFont', S.aFont+'px');
@@ -292,7 +307,7 @@ function applySettings(){
   $('tFont').value=S.tFont; $('aFont').value=S.aFont; $('split').value=S.split;
   $('tVal').textContent=S.tFont+'px'; $('aVal').textContent=S.aFont+'px'; $('sVal').textContent=S.split+'%';
   $('lang').value=S.lang; $('key').value=S.key; $('tech').value=S.tech; $('jd').value=S.jd; $('resume').value=S.resume; $('model').value=S.model;
-  for(const k in S) store.set(['tFont','aFont','split'].includes(k) ? k+DEV : k, k==='showDetails' ? (S[k]?'1':'0') : S[k]);
+  for(const k in S) if(k!=='liveAnswer') store.set(['tFont','aFont','split'].includes(k) ? k+DEV : k, k==='showDetails' ? (S[k]?'1':'0') : S[k]);
   $('showDetails').checked = S.showDetails;
   const w = S.resume ? S.resume.split(/\s+/).length : 0;
   $('cvState').textContent = w ? 'Resume ✓ ('+w+' words) · ' : 'No resume · ';
@@ -378,6 +393,7 @@ function addFinal(text){
   text = stripRepeat(text);
   if(!text){ if(current) current.querySelector('.interim').textContent=''; return; }
   remember(text);
+  liveInterim=''; scheduleLive();
   const now=Date.now();
   if(!current || now-lastFinalAt > GAP_MS) newTurn();
   lastFinalAt=now;
@@ -388,6 +404,7 @@ function addFinal(text){
   queueSpeech(text, current);
 }
 function setInterim(text){
+  liveInterim = text; if(text) scheduleLive();
   if(!current || Date.now()-lastFinalAt > GAP_MS){ if(!text) return; newTurn(); lastFinalAt=Date.now(); }
   current.querySelector('.interim').textContent = text;
   scrollEnd(transcriptEl);
@@ -466,7 +483,7 @@ Reply with JSON only: {"items":[{"question":"","answer":"","keywords":[""],"deta
 // Streams the reply so answers appear word by word; the long system prompt (resume + JD) is cached
 // by the API, which makes every later question faster.
 async function callClaude(system, user, opts={}){
-  const body = { model:S.model, max_tokens:opts.maxTokens||1200, stream:true,
+  const body = { model:opts.model||S.model, max_tokens:opts.maxTokens||1200, stream:true,
     system:[{type:'text', text:system, cache_control:{type:'ephemeral'}}],
     messages:[{role:'user',content:user}] };
   let res;
@@ -662,7 +679,7 @@ function stop(){
   $('toggle').textContent='Start interview'; $('toggle').className='btn primary';
 }
 $('resumeBtn').onclick = ()=>{ if(!listening) return; hideResume(); quickEnds=0; gen++; try{ rec && rec.abort(); }catch(e){} try{ startRec(); }catch(err){ showResume(); } };
-$('clear').onclick = ()=>{ recentWords=''; transcriptEl.innerHTML=''; answersEl.innerHTML=''; turns=0; qCount=0; answered.length=0; buffer=''; current=null; hideBanner();
+$('clear').onclick = ()=>{ recentWords=''; if(typeof resetLive==='function') resetLive(); transcriptEl.innerHTML=''; answersEl.innerHTML=''; turns=0; qCount=0; answered.length=0; buffer=''; current=null; hideBanner();
   $('turnCount').textContent='0 turns'; $('qCount').textContent='0 questions'; showEmpty(); };
 
 /* ---------- microphone test (required once per page load before an interview) ---------- */
@@ -1067,6 +1084,60 @@ $('folderChange').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
   if(S.key) keyMsg('A key is already saved in this browser. Choose your interview folder so the key and resume load from it.');
   $('keySetup').hidden = false;
 })();
+
+/* ---------- live answer: answer while the question is still being asked ---------- */
+// Every ~0.5 s of new speech, the words heard so far go to the fast model, which guesses the full
+// question and answers in one line. Shown in the Live answer box; the full card still follows below.
+let liveInterim='', liveBusy=false, liveDirty=false, liveLastText='', liveTimer=null;
+function liveSource(){ return (buffer+' '+liveInterim).trim(); }
+function scheduleLive(){
+  if(!S.liveAnswer || !S.key || !listening) return;
+  clearTimeout(liveTimer); liveTimer=setTimeout(runLive, 450);
+}
+function livePrompt(){
+  return `You help a candidate during a live job interview. The interviewer is STILL SPEAKING: you get partial speech-to-text that may stop mid-sentence and contain misheard words.
+Guess the full question being asked and answer it right away so the candidate can start speaking.
+Scope: technical questions about ${S.tech || 'AWS, EKS, DevOps, AI engineering'}, or questions about the candidate (experience, projects, "tell me about yourself").${S.resume ? `
+For questions about the candidate, answer in first person using only this resume:
+<<<
+${S.resume}
+>>>` : ''}${S.jd ? `
+Role / job description:
+<<<
+${S.jd.slice(0,4000)}
+>>>` : ''}
+Reply in exactly two lines, nothing else:
+Q: <the likely full question, max 12 words>
+A: <direct, specific answer, max 25 words; wrap the 2-3 most important terms in **double asterisks**>
+If the speech is not a question yet or is out of scope, reply exactly: NONE`;
+}
+function renderLive(t, done){
+  const box=$('liveBox'), body=$('liveBody');
+  if(/^\s*NONE/i.test(t)){ if(done) box.classList.add('idle'); return; }
+  const q=(t.match(/Q:\s*([^\n]*)/)||[])[1]||'', a=(t.match(/A:\s*([\s\S]*)/)||[])[1]||'';
+  if(!q && !a) return;
+  box.classList.remove('idle');
+  const html = esc(a.trim()).replace(/\*\*(.+?)\*\*/g,'<mark>$1</mark>').replace(/\*\*/g,'');
+  body.innerHTML = `<div class="lq">${esc(q.trim())}</div><div class="la">${html}${done?'':'<span class="caret">▍</span>'}</div>`;
+}
+async function runLive(){
+  const text = liveSource();
+  if(text.split(/\s+/).filter(Boolean).length < 4 || text===liveLastText) return;
+  if(liveBusy){ liveDirty=true; return; }
+  liveBusy=true; liveLastText=text; $('liveBox').classList.add('busy');
+  try{
+    const ctx = [...transcriptEl.querySelectorAll('.final')].slice(-3).map(e=>e.textContent).join('\n').slice(-600);
+    const out = await callClaude(livePrompt(), `Recent conversation:\n${ctx}\n\nSpeech so far (still talking):\n${text}`,
+                                 {model:'claude-haiku-5-5', maxTokens:150, onText:t=>renderLive(t,false)});
+    renderLive(out, true);
+  }catch(e){ /* live box stays quiet on errors; the main answer shows them */ }
+  liveBusy=false; $('liveBox').classList.remove('busy');
+  if(liveDirty){ liveDirty=false; runLive(); }
+}
+function resetLive(){ liveInterim=''; liveLastText=''; $('liveBody').innerHTML='<div class="lq">Answers appear here while the question is still being asked.</div>'; $('liveBox').classList.add('idle'); }
+$('liveToggle').addEventListener('change', e=>{ S.liveAnswer=e.target.checked; store.set('liveAnswer', S.liveAnswer?'1':'0'); $('liveBox').hidden=!S.liveAnswer; });
+$('liveToggle').checked = S.liveAnswer; $('liveBox').hidden = !S.liveAnswer;
+resetLive();
 
 if(location.protocol==='file:' && store.get('hideFileBanner','')!=='1'){ $('fileBanner').hidden=false; $('fileBanner').title='Tap to hide'; $('fileBanner').style.cursor='pointer'; $('fileBanner').onclick=()=>{ $('fileBanner').hidden=true; store.set('hideFileBanner','1'); }; $('fileBanner').textContent += ' (Tap to hide.)'; }
 
