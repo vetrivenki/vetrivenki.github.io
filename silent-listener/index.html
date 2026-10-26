@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Silent Listener</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: full-height app — toolbar, transcript pane, drag divider, answers pane */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#15202b; --muted:#5f6d7a; --line:#d9e0e6;
+  --accent:#0b6e8a; --mark:#ffe58a; --markInk:#3a2c00; --live:#d33a2c;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --tFont:20px; --aFont:22px; --split:55;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1419; --panel:#151d24; --ink:#e7edf2; --muted:#8b9aa7; --line:#25313b;
+  --accent:#4cc3e0; --mark:#5a4a12; --markInk:#ffe9a6; --live:#ff6b5e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1419; --panel:#151d24; --ink:#e7edf2; --muted:#8b9aa7; --line:#25313b;
+  --accent:#4cc3e0; --mark:#5a4a12; --markInk:#ffe9a6; --live:#ff6b5e; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{height:100dvh}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top,0) max(8px,env(safe-area-inset-right,0)) env(safe-area-inset-bottom,0) max(8px,env(safe-area-inset-left,0))}
+button,select,input{font:inherit;color:inherit}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:500}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.stop{background:var(--live);border-color:var(--live);color:#fff}
+.status{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+.on .dot{background:var(--live);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.on .dot{animation:none}}
+.spacer{flex:1}
+details.settings{width:100%}
+details.settings summary{cursor:pointer;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px;padding:10px 0}
+.grid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.grid input[type=range]{width:100%}
+.grid .wide{grid-column:1/-1}
+.resumeRow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:13px}
+.qa .kd{margin-top:8px;font-size:calc(var(--aFont)*.72)}
+.qa .kd summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.qa .kd dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:6px 0 0}
+.qa .kd dt{font-weight:600;color:var(--accent)}.qa .kd dd{margin:0;min-width:0}
+@media (max-width:520px){.qa .kd dl{grid-template-columns:1fr}.qa .kd dd{margin-bottom:6px}}
+.qa .cv{margin-top:8px;padding:6px 10px;border-left:3px solid var(--accent);background:var(--bg);border-radius:0 6px 6px 0;font-size:calc(var(--aFont)*.75)}
+.qa .cv b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:500}
+.qa .cv ul{margin:2px 0 0;padding-left:1.1em}
+.grid textarea{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:6px 8px;font:inherit;font-size:14px;resize:vertical;width:100%}
+.grid .sub{font-weight:600;color:var(--ink);margin-top:6px;font-size:13px}
+.grid input[type=text],.grid input[type=password],.grid select{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:6px 8px}
+.app{flex:1;min-height:0;display:flex;flex-direction:column}
+.pane{background:var(--panel);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-height:60px;overflow:hidden}
+#top{flex:var(--split) 1 0}
+#bottom{flex:calc(100 - var(--split)) 1 0}
+.head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.scroll{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+.divider{height:14px;cursor:row-resize;display:flex;align-items:center;justify-content:center;touch-action:none}
+.divider span{width:48px;height:4px;border-radius:2px;background:var(--line)}
+.turn{font-size:var(--tFont);line-height:1.45}
+.turn time{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:2px}
+.turn .interim{color:var(--muted)}
+.turn.q{border-left:3px solid var(--accent);padding-left:10px}
+.qa{font-size:var(--aFont);line-height:1.4;border-bottom:1px solid var(--line);padding-bottom:12px}
+.qa:last-child{border-bottom:0}
+.qa .q{font-weight:600}
+.qa .a{margin-top:4px}
+.qa .a.pending{color:var(--muted);font-style:italic}
+mark{background:var(--mark);color:var(--markInk);padding:0 .15em;border-radius:3px;font-weight:600}
+.empty{color:var(--muted);font-size:14px}
+.ask{display:flex;gap:8px;padding:8px 14px;border-top:1px solid var(--line)}
+.ask input{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:6px 10px}
+.note{font-size:12px;color:var(--muted);padding:4px 0}
+.test{display:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;gap:10px;flex-direction:column}
+.test.open{display:flex}
+.checks{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:14px}
+.ok{color:#1f8a4c;font-weight:600}.bad{color:var(--live);font-weight:600}.wait{color:var(--muted);font-weight:600}
+.meter{height:14px;border-radius:7px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1f8a4c,#e0b100 70%,var(--live));transition:width .08s}
+.heard{font-size:18px;min-height:1.4em;padding:8px 10px;background:var(--bg);border-radius:6px}
+.testmsg{font-size:14px}
+.test strong{font-size:16px}
+.sumBody{max-height:45vh;overflow-y:auto;font-size:15px;line-height:1.45}
+.sumBody h4{margin:10px 0 2px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+.sumBody ul{margin:0;padding-left:1.2em}.sumBody .meta{color:var(--muted);margin:0}
+.banner{margin:8px 14px 0;padding:8px 10px;border-radius:6px;background:var(--mark);color:var(--markInk);font-size:14px}
+.head em{font-style:normal;color:var(--accent)}
+.qa .fu{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips span{font-family:var(--mono);font-size:calc(var(--aFont)*.6);padding:2px 8px;border-radius:999px;border:1px solid var(--accent);color:var(--accent)}
+details.settings .sOpen{display:none}
+details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{display:none}
+.app.only-answers #top,.app.only-answers .divider,.app.only-transcript #bottom,.app.only-transcript .divider{display:none}
+.app.only-answers #bottom,.app.only-transcript #top{flex:1 1 0}
+
+/* ---------- phone layout ---------- */
+@media (max-width:640px), (pointer:coarse) and (max-width:950px){
+  .bar{gap:6px;padding:6px 0}
+  #toggle{order:-2;flex:1 1 100%;min-height:52px;font-size:18px;border-radius:12px}
+  #status{order:-1;flex:1 1 100%;justify-content:center}
+  .spacer{display:none}
+  .bar>.btn{flex:1 1 0;min-height:44px;padding:6px 4px;font-size:14px}
+  #clear{display:none}
+  details.settings{flex:1 1 100%}
+  details.settings summary{display:block;text-align:center;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);font-size:15px;color:var(--ink)}
+  details.settings[open]{position:fixed;inset:0;z-index:30;background:var(--bg);overflow-y:auto;
+    padding:calc(env(safe-area-inset-top,0px) + 10px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(16px,env(safe-area-inset-left,0px))}
+  details.settings[open] summary{position:sticky;top:0;z-index:1;background:var(--accent);color:#fff;border-color:var(--accent)}
+  .grid{grid-template-columns:1fr}
+  input,select,textarea{font-size:16px !important}   /* stops iPhone zooming on focus */
+  .head{padding:6px 10px;font-size:10px}
+  .scroll{padding:10px;gap:10px}
+  .ask{padding:6px 10px}
+  .ask input{min-height:44px}
+  .divider{height:22px}
+  .divider span{width:64px;height:5px}
+  .test.open{position:fixed;inset:0;z-index:40;margin:0;border-radius:0;overflow-y:auto;
+    padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(16px,env(safe-area-inset-left,0px))}
+  .test .checks{font-size:16px;gap:8px 12px}
+  .test .meter{height:20px}
+  .test .btn{min-height:48px;flex:1 1 0;font-size:16px}
+  .sumBody{max-height:none}
+  .sumBody{max-height:50dvh}
+  .qa .kd dl{grid-template-columns:1fr}.qa .kd dd{margin-bottom:6px}
+}
+</style>
+</head>
+<body>
+<div class="bar">
+  <button id="toggle" class="btn primary">Start interview</button>
+  <div id="status" class="status"><span class="dot"></span><span id="statusText">Idle</span></div>
+  <div class="spacer"></div>
+  <button id="fontDown" class="btn" aria-label="Smaller text">A−</button>
+  <button id="fontUp" class="btn" aria-label="Larger text">A+</button>
+  <button id="clear" class="btn">Clear</button>
+  <button id="testBtn" class="btn">Test mic</button>
+  <button id="viewBtn" class="btn" aria-label="Change view">View: Split</button>
+  <details class="settings" id="settings">
+    <summary><span class="sClosed">Settings</span><span class="sOpen">Done</span></summary>
+    <div class="grid">
+      <label>Transcript font <span id="tVal"></span><input id="tFont" type="range" min="12" max="48"></label>
+      <label>Answer font <span id="aVal"></span><input id="aFont" type="range" min="12" max="56"></label>
+      <label>Split (top %) <span id="sVal"></span><input id="split" type="range" min="20" max="80"></label>
+      <label>Language
+        <select id="lang">
+          <option value="en-US">English (US)</option><option value="en-IN">English (India)</option>
+          <option value="en-GB">English (UK)</option><option value="ta-IN">Tamil</option>
+          <option value="hi-IN">Hindi</option>
+        </select></label>
+      <label>Claude API key (stored only in this browser)<input id="key" type="password" placeholder="sk-ant-…" autocomplete="off"></label>
+
+      <label>Answer quality
+        <select id="model">
+          <option value="claude-sonnet-5-5">Best answers (Sonnet)</option>
+          <option value="claude-haiku-5-5">Fastest (Haiku)</option>
+        </select></label>
+      <label style="flex-direction:row;align-items:center;gap:8px"><input id="showDetails" type="checkbox"> Expand keyword details by default</label>
+      <label class="wide">Technologies — only questions in these areas get answered (comma separated)
+        <textarea id="tech" rows="2"></textarea></label>
+      <label class="wide">Job description (optional) — answers are tailored to this role
+        <textarea id="jd" rows="5" placeholder="Paste the job description here…"></textarea></label>
+      <label class="wide">Your resume (optional) — experience questions are answered from it, and matching resume facts are shown with answers
+        <textarea id="resume" rows="5" placeholder="Paste your resume text, or load the PDF below…"></textarea></label>
+      <div class="wide resumeRow"><input id="resumeFile" type="file" accept=".pdf,.txt,.md"><span id="resumeMsg" class="note"></span></div>
+      <div class="wide sub">Interview details (used in the summary and file name)</div>
+      <label>Company<input id="dCompany" type="text"></label>
+      <label>Role<input id="dRole" type="text"></label>
+      <label>Interviewer(s)<input id="dWho" type="text"></label>
+      <label>Round<input id="dRound" type="text" placeholder="e.g. Technical round 1"></label>
+      <label>Date / time<input id="dWhen" type="text"></label>
+      <label class="wide">Interview email (paste the invite from Gmail)
+        <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
+      <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
+    </div>
+    <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
+  </details>
+</div>
+
+<section class="test" id="testPanel" aria-live="polite">
+  <strong id="testTitle">Microphone test</strong>
+  <div class="checks">
+    <span id="cSpeech" class="wait">…</span><span>Speech-to-text supported in this browser</span>
+    <span id="cSecure" class="wait">…</span><span>Opened as a real page (not the Claude app preview)</span>
+    <span id="cMic" class="wait">…</span><span>Microphone permission</span>
+    <span id="cLevel" class="wait">…</span><span>Sound reaching the microphone</span>
+    <span id="cRec" class="wait">…</span><span>Speech recognized</span>
+  </div>
+  <div class="meter" aria-label="Microphone level"><i id="level"></i></div>
+  <div class="heard" id="heard">Say: "How does Kubernetes autoscaling work?"</div>
+  <div class="testmsg" id="testMsg"></div>
+  <div class="resumeRow"><button id="testGo" class="btn primary" type="button" hidden>Start interview</button><button id="testStop" class="btn" type="button">Close</button></div>
+</section>
+
+<section class="test" id="sumPanel" aria-live="polite">
+  <strong>Interview summary</strong>
+  <div id="sumBody" class="sumBody"></div>
+  <div class="resumeRow"><button id="sumSave" class="btn" type="button">Save HTML + TXT again</button><button id="sumClose" class="btn" type="button">Close</button></div>
+</section>
+
+<main class="app" id="app">
+  <section class="pane" id="top">
+    <div class="head"><span>Live conversation</span><span id="turnCount">0 turns</span></div>
+    <div class="banner" id="fileBanner" hidden>Opened as a local file, so the browser asks for the microphone again every time recognition restarts. Open it from a web (https) link to allow the mic once.</div>
+    <div class="scroll" id="transcript"></div>
+  </section>
+  <div class="divider" id="divider" role="separator" aria-label="Resize panels"><span></span></div>
+  <section class="pane" id="bottom">
+    <div class="head"><span>Questions · short answers <em id="thinking" hidden>· analyzing…</em></span><span><span id="cvState"></span><span id="qCount">0 questions</span></span></div>
+    <div class="banner" id="banner" hidden></div>
+    <div class="scroll" id="answers"></div>
+    <form class="ask" id="askForm">
+      <input id="askInput" placeholder="Type a question to test…" autocomplete="off">
+      <button class="btn" type="submit">Ask</button>
+    </form>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem('sl_'+k); return v===null ? d : v; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('sl_'+k, v); }catch(e){} }
+};
+const root = document.documentElement.style;
+
+/* ---------- device: phone/tablet-in-hand vs desktop ---------- */
+const MOBILE_Q = '(max-width:640px), (pointer:coarse) and (max-width:950px)';
+const isMobile = matchMedia(MOBILE_Q).matches;
+const DEV = isMobile ? '_m' : '';           // phones keep their own font/split/view settings
+document.documentElement.dataset.device = isMobile ? 'mobile' : 'desktop';
+
+/* ---------- settings ---------- */
+const S = {
+  tFont: +store.get('tFont'+DEV, isMobile?15:20), aFont: +store.get('aFont'+DEV, isMobile?18:22), split: +store.get('split'+DEV, isMobile?35:55),
+  lang: store.get('lang', 'en-US'), key: store.get('key', ''), tech: store.get('tech', 'AWS, Amazon EKS, Kubernetes, Docker, Terraform, CI/CD, DevOps, SRE, observability, AI engineering, LLMs, RAG, AI agents, MLOps, Python'), jd: store.get('jd', ''), resume: store.get('resume', ''), model: store.get('model', 'claude-sonnet-5-5'), showDetails: store.get('showDetails','1')==='1'
+};
+function applySettings(){
+  root.setProperty('--tFont', S.tFont+'px'); root.setProperty('--aFont', S.aFont+'px');
+  root.setProperty('--split', S.split);
+  $('tFont').value=S.tFont; $('aFont').value=S.aFont; $('split').value=S.split;
+  $('tVal').textContent=S.tFont+'px'; $('aVal').textContent=S.aFont+'px'; $('sVal').textContent=S.split+'%';
+  $('lang').value=S.lang; $('key').value=S.key; $('tech').value=S.tech; $('jd').value=S.jd; $('resume').value=S.resume; $('model').value=S.model;
+  for(const k in S) store.set(['tFont','aFont','split'].includes(k) ? k+DEV : k, k==='showDetails' ? (S[k]?'1':'0') : S[k]);
+  $('showDetails').checked = S.showDetails;
+  const w = S.resume ? S.resume.split(/\s+/).length : 0;
+  $('cvState').textContent = w ? 'Resume ✓ ('+w+' words) · ' : 'No resume · ';
+}
+['tFont','aFont','split'].forEach(id => $(id).addEventListener('input', e => { S[id]=+e.target.value; applySettings(); }));
+$('showDetails').addEventListener('change', e=>{ S.showDetails=e.target.checked; applySettings(); });
+['tech','jd','resume'].forEach(id => $(id).addEventListener('change', e => { S[id]=e.target.value.trim().slice(0,12000); applySettings(); }));
+// Load resume from PDF (pdf.js loaded only when needed) or text file
+function loadScript(src){ return new Promise((ok,bad)=>{ const t=document.createElement('script'); t.src=src; t.onload=ok; t.onerror=()=>bad(new Error('Could not load the PDF reader. Check your internet connection.')); document.head.appendChild(t); }); }
+$('resumeFile').addEventListener('change', async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  $('resumeMsg').textContent='Reading '+f.name+'…';
+  try{
+    let text='';
+    if(/\.pdf$/i.test(f.name)){
+      if(!window.pdfjsLib){
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+        pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+      const pdf = await pdfjsLib.getDocument({data: await f.arrayBuffer()}).promise;
+      for(let i=1;i<=pdf.numPages;i++){
+        const c = await (await pdf.getPage(i)).getTextContent();
+        text += c.items.map(it=>it.str + (it.hasEOL?'\n':' ')).join('') + '\n';
+      }
+    } else text = await f.text();
+    text = text.replace(/[ \t]+/g,' ').replace(/\n\s*\n+/g,'\n').trim();
+    S.resume = text.slice(0,12000); applySettings();
+    $('resumeMsg').textContent = 'Loaded '+f.name+' ('+text.split(/\s+/).length+' words). Saved in this browser only.';
+  }catch(err){ $('resumeMsg').textContent = err.message || 'Could not read that file.'; }
+});
+['lang','model'].forEach(id => $(id).addEventListener('change', e => { S[id]=e.target.value; applySettings(); if(id==='lang' && listening){ rec.stop(); } }));
+$('key').addEventListener('change', e => { S.key=e.target.value.trim(); applySettings(); });
+$('fontUp').onclick = () => { S.tFont=Math.min(48,S.tFont+2); S.aFont=Math.min(56,S.aFont+2); applySettings(); };
+$('fontDown').onclick = () => { S.tFont=Math.max(12,S.tFont-2); S.aFont=Math.max(12,S.aFont-2); applySettings(); };
+if(!S.key) $('settings').open = true;
+applySettings();
+
+/* ---------- drag divider ---------- */
+(function(){
+  const d=$('divider'), app=$('app'); let drag=false;
+  d.addEventListener('pointerdown', e=>{ drag=true; d.setPointerCapture(e.pointerId); });
+  d.addEventListener('pointermove', e=>{ if(!drag) return;
+    const r=app.getBoundingClientRect(); S.split=Math.round(Math.min(80,Math.max(20,(e.clientY-r.top)/r.height*100))); applySettings(); });
+  d.addEventListener('pointerup', ()=> drag=false);
+})();
+
+/* ---------- helpers ---------- */
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<mark>$1</mark>');
+const clock = () => new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+function scrollEnd(el){ el.scrollTop = el.scrollHeight; }
+
+/* ---------- transcript ---------- */
+const transcriptEl=$('transcript'), answersEl=$('answers');
+let turns=0, current=null, lastFinalAt=0;
+const GAP_MS = 1800; // silence longer than this starts a new turn
+function newTurn(){
+  current=document.createElement('div'); current.className='turn';
+  current.innerHTML = `<time>${clock()}</time><span class="final"></span> <span class="interim"></span>`;
+  transcriptEl.appendChild(current); turns++; $('turnCount').textContent = turns+(turns===1?' turn':' turns');
+}
+function addFinal(text){
+  const now=Date.now();
+  if(!current || now-lastFinalAt > GAP_MS) newTurn();
+  lastFinalAt=now;
+  const f=current.querySelector('.final');
+  f.textContent = (f.textContent+' '+text).trim();
+  current.querySelector('.interim').textContent='';
+  scrollEnd(transcriptEl);
+  queueSpeech(text, current);
+}
+function setInterim(text){
+  if(!current || Date.now()-lastFinalAt > GAP_MS){ if(!text) return; newTurn(); lastFinalAt=Date.now(); }
+  current.querySelector('.interim').textContent = text;
+  scrollEnd(transcriptEl);
+}
+function finishTurn(){ flushSpeech(); }
+
+/* ---------- Claude: find questions in the speech and answer them ---------- */
+// Speech is buffered and sent after a 1.5 s pause (or every ~50 words while talking).
+// Claude decides what is a question, so unpunctuated speech still works.
+let buffer='', bufferTurns=new Set(), flushTimer=null, busy=false, again=false;
+const answered=[]; let qCount=0;
+function queueSpeech(text, turnEl){
+  buffer = (buffer+' '+text).trim(); bufferTurns.add(turnEl);
+  clearTimeout(flushTimer);
+  if(buffer.split(/\s+/).length > 50) flushSpeech();
+  else flushTimer = setTimeout(flushSpeech, 1500);
+}
+async function flushSpeech(){
+  clearTimeout(flushTimer);
+  if(!buffer) return;
+  if(busy){ again=true; return; }
+  const text=buffer, els=[...bufferTurns]; buffer=''; bufferTurns=new Set();
+  if(text.split(/\s+/).length < (answered.length ? 1 : 3)) return;
+  if(!S.key){ showBanner('Add your Claude API key in Settings to get answers.'); return; }
+  busy=true; setThinking(true);
+  try{
+    const items = await analyze(text);
+    if(items.length) els.forEach(el=>el.classList.add('q'));
+    items.forEach(addCard);
+    hideBanner();
+  }catch(err){ showBanner(err.message); }
+  busy=false; setThinking(false);
+  if(again){ again=false; flushSpeech(); }
+}
+function setThinking(on){ $('thinking').hidden = !on; }
+
+const recentContext = () => [...transcriptEl.querySelectorAll('.final')].slice(-8).map(e=>e.textContent).join('\n').slice(-2000);
+function systemPrompt(){
+  return `You silently help a person during a live spoken conversation. You receive speech-to-text, which often has no punctuation and has misheard words; infer what was really said.
+
+Task: find every question in NEW SPEECH that someone wants answered. Count direct questions and requests such as "explain…", "tell me about…", "walk me through…", "what's the difference between…". Skip small talk ("how are you"), rhetorical questions, and questions already in PREVIOUS Q&A.
+
+Scope. The person is a candidate in a job interview for an AWS / EKS / DevOps / AI engineer role. Answer ONLY these two kinds of question:
+1. Technical questions about: ${S.tech || 'AWS, EKS, DevOps, AI engineering'}.
+2. Interview questions about the candidate themself: "tell me about yourself", "introduce yourself", "walk me through your resume", your experience, projects, strengths, achievements, challenges, why this role. These are ALWAYS in scope.
+Leave out everything else (salary, notice period, HR logistics, small talk, unrelated topics): do not include it in items at all. Interpret terms in this technical context ("eks" = Amazon EKS, "pod" = Kubernetes pod, "rag" = retrieval-augmented generation).${S.jd ? `
+
+Job description for the role (tailor answers to what it asks for; mention the tools it names when they fit):
+"""
+${S.jd}
+"""` : ''}${S.resume ? `
+
+RESUME of the person you are helping (they are the candidate; questions are asked TO them):
+"""
+${S.resume}
+"""
+Resume rules:
+- Questions about their own experience, background, projects, achievements or numbers ("tell me about yourself", "how many clusters have you managed", "what did you do at JPMorgan", "have you used Karpenter") are in scope. Answer in first person ("I…") using ONLY facts from the resume; up to 3 sentences (50 words) for "tell me about yourself".
+- For any answered question, put 1 to 3 short, specific resume facts the person could mention (company, numbers, tools, projects) in "resume". Use [] when nothing in the resume is relevant.
+- Never invent experience, numbers or employers that are not in the resume.` : `
+
+No resume was provided. For questions about the candidate themself, answer: "Add your resume in Settings for a personal answer." followed by a one-line structure tip (e.g. current role → key platforms → impact → why this role).`}
+
+Follow-ups: people often ask incomplete follow-ups such as "managed service?", "and on Azure?", "what about cost", "why?", "example?". When NEW SPEECH is an incomplete phrase, join it with the most recent question in PREVIOUS Q&A to make a full question. Example: after "What is EKS?", the speech "managed service?" becomes "Is EKS a managed service?". Mark these with "followUp": true and "followUpOf": the number of that earlier question.
+
+For each question give:
+- "question": the corrected question, max 14 words.
+- "answer": what a senior expert would say, specific and accurate, max 2 short sentences (35 words). Lead with the direct answer. Use concrete names, numbers, commands or services, not generic advice.
+- "keywords": 3 to 5 important terms copied exactly as they appear in your answer.
+- "details": one entry per keyword, {"term": keyword, "detail": what it is and how it applies here, max 22 words, concrete (settings, numbers, commands, AWS service names)}.
+- "resume": supporting facts from the resume, as described above ([] if no resume).
+- "followUp" and "followUpOf": only for follow-ups, as described above.
+
+Reply with JSON only: {"items":[{"question":"","answer":"","keywords":[""],"details":[{"term":"","detail":""}],"resume":[],"followUp":false,"followUpOf":0}]}. If there is no question, reply {"items":[]}.`;
+}
+async function callClaude(system, user){
+  let res;
+  try{
+    res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'content-type':'application/json','x-api-key':S.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({ model:S.model, max_tokens:1600, system, messages:[{role:'user',content:user}] })
+    });
+  }catch(e){ throw new Error('Could not reach Claude. Check your internet connection.'); }
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok){
+    const msg = data?.error?.message || ('HTTP '+res.status);
+    if(res.status===401) throw new Error('API key rejected: '+msg);
+    if(res.status===429) throw new Error('Rate limited. Answers resume in a moment.');
+    if(res.status===400 && /credit/i.test(msg)) throw new Error('No API credits left. Add credits in the Claude Console billing page.');
+    throw new Error('Claude error: '+msg);
+  }
+  return (data.content||[]).map(c=>c.text||'').join('').trim();
+}
+function parseItems(t){
+  const m=t.match(/\{[\s\S]*\}/); if(!m) return [];
+  try{ const j=JSON.parse(m[0]); return Array.isArray(j.items)?j.items.filter(i=>i&&i.question&&i.answer):[]; }catch(e){ return []; }
+}
+function previousQA(){
+  return answered.slice(-8).map(x=>`Q${x.n}. ${x.question}\nA: ${x.answer}`).join('\n') || '(none)';
+}
+function buildUser(text){
+  return `EARLIER CONVERSATION:\n${recentContext()}\n\nPREVIOUS Q&A (most recent last):\n${previousQA()}\n\nNEW SPEECH:\n${text}`;
+}
+async function analyze(text){
+  return parseItems(await callClaude(systemPrompt(), buildUser(text)));
+}
+async function askTyped(q){
+  if(!S.key){ showBanner('Add your Claude API key in Settings to get answers.'); return; }
+  setThinking(true);
+  try{
+    const items = parseItems(await callClaude(systemPrompt(), buildUser(q)));
+    if(items.length) items.forEach(addCard); else addCard({question:q, answer:'Not answered: outside your Technologies list (Settings).', keywords:[]});
+    hideBanner();
+  }catch(err){ showBanner(err.message); }
+  setThinking(false);
+}
+function highlight(answer, kws){
+  let html = esc(answer);
+  const list = [...new Set(kws.map(k=>String(k).trim()).filter(k=>k.length>1))].sort((a,b)=>b.length-a.length);
+  if(!list.length) return html;
+  const re = new RegExp('('+list.map(k=>esc(k).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','gi');
+  return html.replace(re,'<mark>$1</mark>');
+}
+function addCard(it){
+  answersEl.querySelector('.empty')?.remove();
+  qCount++; $('qCount').textContent = qCount+(qCount===1?' question':' questions');
+  const parent = it.followUp && +it.followUpOf && +it.followUpOf < qCount ? +it.followUpOf : 0;
+  const kws = Array.isArray(it.keywords)?it.keywords:[];
+  const cv = Array.isArray(it.resume)?it.resume.filter(Boolean).slice(0,3):[];
+  const det = Array.isArray(it.details)?it.details.filter(d=>d&&d.term&&d.detail).slice(0,6):[];
+  answered.push({n:qCount, question:it.question, answer:it.answer, keywords:kws, details:det, resume:cv, followUpOf:parent});
+  const card=document.createElement('div'); card.className='qa';
+  card.innerHTML = `${parent?`<div class="fu">↳ follow-up to Q${parent}</div>`:''}<div class="q">Q${qCount}. ${esc(it.question)}</div>
+    <div class="a">${highlight(it.answer, kws)}</div>
+    ${det.length?detailsHTML(det):(kws.length?`<div class="chips">${kws.map(k=>`<span>${esc(String(k))}</span>`).join('')}</div>`:'')}
+    ${cv.length?`<div class="cv"><b>From your resume</b><ul>${cv.map(c=>`<li>${highlight(String(c), kws)}</li>`).join('')}</ul></div>`:''}`;
+  answersEl.appendChild(card); scrollEnd(answersEl);
+}
+function detailsHTML(det){
+  return `<details class="kd" ${S.showDetails?'open':''}><summary>Keyword details</summary><dl>${det.map(d=>`<dt>${esc(String(d.term))}</dt><dd>${esc(String(d.detail))}</dd>`).join('')}</dl></details>`;
+}
+function showBanner(t){ const b=$('banner'); b.textContent=t; b.hidden=false; }
+function hideBanner(){ $('banner').hidden=true; }
+$('askForm').addEventListener('submit', e=>{ e.preventDefault(); const v=$('askInput').value.trim(); if(v){ askTyped(v); $('askInput').value=''; } });
+
+/* ---------- speech recognition ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec=null, listening=false, wake=null;
+function setStatus(t){ $('statusText').textContent=t; }
+async function keepAwake(){ try{ wake = await navigator.wakeLock?.request('screen'); }catch(e){} }
+document.addEventListener('visibilitychange', ()=>{ if(listening && document.visibilityState==='visible') keepAwake(); });
+
+function start(){
+  if(!SR){ setStatus('Speech not supported — use Chrome, Edge or Safari'); return; }
+  clearExamples();
+  rec = new SR(); rec.lang=S.lang; rec.continuous=true; rec.interimResults=true;
+  rec.onresult = e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const r=e.results[i];
+      if(r.isFinal) addFinal(r[0].transcript.trim()); else interim += r[0].transcript;
+    }
+    setInterim(interim.trim());
+  };
+  rec.onerror = e=>{
+    if(e.error==='not-allowed' || e.error==='service-not-allowed'){ setStatus('Microphone blocked — allow it in the browser'); stop(); }
+    else if(e.error!=='no-speech' && e.error!=='aborted') setStatus('Mic error: '+e.error+' — retrying');
+  };
+  rec.onend = ()=>{ if(listening){ try{ rec.lang=S.lang; rec.start(); }catch(e){} } };  // keep running forever
+  listening=true; rec.start(); keepAwake();
+  document.body.classList.add('on'); $('status').classList.add('on'); setStatus('Listening');
+  $('toggle').textContent='Stop interview'; $('toggle').className='btn stop';
+}
+function stop(){
+  listening=false; try{ rec && rec.stop(); }catch(e){}
+  finishTurn(); wake?.release?.(); wake=null;
+  $('status').classList.remove('on'); setStatus('Paused');
+  $('toggle').textContent='Start interview'; $('toggle').className='btn primary';
+}
+$('clear').onclick = ()=>{ transcriptEl.innerHTML=''; answersEl.innerHTML=''; turns=0; qCount=0; answered.length=0; buffer=''; current=null; hideBanner();
+  $('turnCount').textContent='0 turns'; $('qCount').textContent='0 questions'; showEmpty(); };
+
+/* ---------- microphone test (required once per page load before an interview) ---------- */
+// Phones (especially iPhone) can't run the level meter and speech recognition at the same time,
+// so the test runs in two steps: 1) level meter until sound is heard, 2) speech recognition.
+const T = { stream:null, ctx:null, raf:0, rec:null, open:false, heardSound:false, gotText:false, then:null };
+let micVerified = false;
+function mark(id, state, text){ const el=$(id); el.className=state; el.textContent = text || (state==='ok'?'✓':state==='bad'?'✗':'…'); }
+function testMsg(t){ $('testMsg').textContent=t; }
+function testPassed(){
+  micVerified = true;
+  testMsg(T.then ? 'Microphone ready.' : 'All good. Your microphone is ready.');
+  $('testGo').hidden = false;
+  $('testGo').textContent = T.then ? 'Start interview' : 'Done';
+}
+function openTest(then){
+  if(listening) stop();
+  T.open=true; T.heardSound=false; T.gotText=false; T.then = then || null;
+  $('testTitle').textContent = then ? 'Quick mic check before the interview' : 'Microphone test';
+  $('testGo').hidden = true;
+  $('testPanel').classList.add('open'); $('heard').textContent='Say: "How does Kubernetes autoscaling work?"';
+  ['cSpeech','cSecure','cMic','cLevel','cRec'].forEach(id=>mark(id,'wait'));
+  // Create the audio context inside the tap so iPhone/Android allow it to run
+  try{ T.ctx = new (window.AudioContext||window.webkitAudioContext)(); T.ctx.resume?.(); }catch(e){ T.ctx=null; }
+  runTest();
+}
+async function runTest(){
+  mark('cSpeech', SR ? 'ok' : 'bad');
+  let framed=false; try{ framed = window.self !== window.top; }catch(e){ framed=true; }
+  mark('cSecure', framed ? 'bad' : 'ok');
+  if(framed){ testMsg('This is running inside a preview, which blocks the microphone. Open the file directly in Chrome, Edge or Safari.'); return; }
+  if(!navigator.mediaDevices?.getUserMedia){ mark('cMic','bad'); testMsg('This browser cannot use the microphone here. Open the file in Chrome, Edge or Safari.'); return; }
+  try{
+    T.stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}});
+    mark('cMic','ok');
+  }catch(err){
+    mark('cMic','bad');
+    testMsg(err.name==='NotAllowedError'
+      ? (isMobile ? 'Microphone blocked. iPhone: Settings → Safari (or Chrome) → Microphone → Allow. Android: tap the lock icon in the address bar → Permissions → Microphone → Allow. Then test again.'
+                  : 'Microphone blocked. Click the lock/mic icon in the address bar and allow it, then test again.')
+      : err.name==='NotFoundError' ? 'No microphone found. Check the input device in system settings.'
+      : 'Microphone error: '+err.name);
+    return;
+  }
+  // Step 1: level meter
+  testMsg('Step 1 of 2: say something…');
+  const sound = await levelCheck(6000);
+  mark('cLevel', sound ? 'ok' : 'bad');
+  if(!T.open) return;
+  if(isMobile){ T.stream.getTracks().forEach(t=>t.stop()); T.stream=null; $('level').style.width='0'; }   // free the mic for speech recognition
+  if(!SR){ testMsg('The microphone works, but this browser has no speech-to-text. Use Chrome (Android) or Safari (iPhone).'); return; }
+  // Step 2: speech recognition
+  testMsg('Step 2 of 2: say the sentence above…');
+  speechCheck();
+}
+function levelCheck(ms){
+  return new Promise(resolve=>{
+    if(!T.ctx){ resolve(true); return; }   // no audio context: skip the meter, speech step still verifies
+    let an;
+    try{ an=T.ctx.createAnalyser(); an.fftSize=1024; T.ctx.createMediaStreamSource(T.stream).connect(an); T.ctx.resume?.(); }
+    catch(e){ resolve(true); return; }
+    const buf=new Uint8Array(an.fftSize), t0=Date.now();
+    const loop=()=>{
+      if(!T.open){ resolve(false); return; }
+      an.getByteTimeDomainData(buf);
+      let sum=0; for(const v of buf){ const x=(v-128)/128; sum+=x*x; }
+      const pct=Math.min(100, Math.sqrt(sum/buf.length)*400);
+      $('level').style.width=pct+'%';
+      if(pct>10 && !T.heardSound){ T.heardSound=true; setTimeout(()=>{ cancelAnimationFrame(T.raf); resolve(true); }, isMobile?400:0); if(!isMobile) resolve(true); }
+      if(!T.heardSound && Date.now()-t0>ms){ resolve(false); return; }
+      if(!isMobile || !T.heardSound) T.raf=requestAnimationFrame(loop);
+    };
+    loop();
+  });
+}
+function speechCheck(){
+  let tries=0;
+  const startRec=()=>{
+    T.rec = new SR(); T.rec.lang=S.lang; T.rec.interimResults=true; T.rec.continuous=!isMobile;
+    T.rec.onresult = e=>{
+      let txt='', final=false;
+      for(let i=0;i<e.results.length;i++){ txt+=e.results[i][0].transcript; if(e.results[i].isFinal) final=true; }
+      $('heard').textContent = txt;
+      if(txt.trim().split(/\s+/).length>=2 && !T.gotText && (final || isMobile)){ T.gotText=true; mark('cRec','ok'); if(!T.heardSound) mark('cLevel','ok'); testPassed(); try{ T.rec.stop(); }catch(e){} }
+    };
+    T.rec.onerror = e=>{
+      if(e.error==='no-speech' || e.error==='aborted') return;
+      mark('cRec','bad');
+      testMsg(e.error==='not-allowed' || e.error==='service-not-allowed'
+              ? (isMobile ? 'Speech recognition blocked. iPhone: Settings → Privacy & Security → Speech Recognition → allow your browser; also allow Microphone. Then test again.'
+                          : 'Speech service blocked. Allow the microphone for this page and test again.')
+            : e.error==='network' ? 'Speech-to-text needs internet. Check your connection.'
+            : e.error==='audio-capture' ? 'The mic is busy. Close other apps using it (calls, recorders), then test again.'
+            : 'Speech error: '+e.error);
+      tries=99;
+    };
+    T.rec.onend = ()=>{ if(T.open && !T.gotText && ++tries<6) try{ startRec(); }catch(e){} };
+    try{ T.rec.start(); }catch(e){}
+  };
+  startRec();
+}
+function closeTest(){
+  T.open=false; cancelAnimationFrame(T.raf);
+  try{ T.rec && T.rec.abort(); }catch(e){}
+  T.stream?.getTracks().forEach(t=>t.stop()); T.stream=null;
+  try{ T.ctx && T.ctx.close(); }catch(e){} T.ctx=null;
+  $('level').style.width='0'; $('testPanel').classList.remove('open');
+}
+$('testBtn').onclick = ()=> T.open ? closeTest() : openTest();
+$('testStop').onclick = closeTest;
+$('testGo').onclick = ()=>{ const go=T.then; closeTest(); if(go) setTimeout(go, 300); };   // short pause so the mic is released first
+const _start = start;
+start = function(){ if(T.open) closeTest(); _start(); };
+
+/* ---------- interview sessions: start/stop, summary, save HTML + TXT ---------- */
+let session=null, clockTimer=null;
+const pad=n=>String(n).padStart(2,'0');
+function stamp(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`; }
+function dur(ms){ const m=Math.floor(ms/60000), s=Math.floor(ms/1000)%60; return m+':'+pad(s); }
+function details(){ return { company:$('dCompany').value.trim(), role:$('dRole').value.trim(), interviewer:$('dWho').value.trim(), round:$('dRound').value.trim(), when:$('dWhen').value.trim() }; }
+['dCompany','dRole','dWho','dRound','dWhen','dEmail'].forEach(id=>{
+  $(id).value = store.get(id,''); $(id).addEventListener('change', e=>store.set(id, e.target.value));
+});
+
+// Fill interview details from the JD and/or a pasted Gmail invite
+$('dFill').onclick = async ()=>{
+  const src = [$('dEmail').value.trim() && 'INTERVIEW EMAIL:\n'+$('dEmail').value.trim(), S.jd && 'JOB DESCRIPTION:\n'+S.jd].filter(Boolean).join('\n\n');
+  if(!src){ $('dMsg').textContent='Paste the interview email here, or add a job description above, then try again.'; return; }
+  if(!S.key){ $('dMsg').textContent='Add your Claude API key first.'; return; }
+  $('dMsg').textContent='Reading…';
+  try{
+    const t = await callClaude('Extract interview details. Reply with JSON only: {"company":"","role":"","interviewer":"","round":"","when":""}. "interviewer" = names (and titles) of interviewers. "round" = e.g. "Technical round 2". "when" = date and time with time zone as written. Use "" when unknown. Never guess.', src.slice(0,15000));
+    const j = JSON.parse(t.match(/\{[\s\S]*\}/)[0]);
+    const map={company:'dCompany',role:'dRole',interviewer:'dWho',round:'dRound',when:'dWhen'};
+    for(const k in map) if(j[k]){ $(map[k]).value=j[k]; store.set(map[k], j[k]); }
+    $('dMsg').textContent='Details filled. Check and edit if needed.';
+  }catch(err){ $('dMsg').textContent = err.message || 'Could not read details.'; }
+};
+
+function beginInterview(){
+  $('clear').click(); examples=false;
+  session = { start:new Date(), details:details() };
+  start();
+  $('toggle').textContent='Stop interview';
+  clockTimer = setInterval(()=> setStatus('Interview · '+dur(Date.now()-session.start)), 1000);
+}
+async function endInterview(){
+  stop(); clearInterval(clockTimer);
+  if(!session) return;
+  session.end = new Date();
+  // wait for any question still being analyzed
+  for(let i=0;i<40 && (busy||buffer);i++){ if(buffer && !busy) flushSpeech(); await new Promise(r=>setTimeout(r,250)); }
+  session.transcript = [...transcriptEl.querySelectorAll('.turn')].map(t=>({time:t.querySelector('time')?.textContent||'', text:t.querySelector('.final')?.textContent||''})).filter(t=>t.text);
+  session.qa = answered.map(x=>({...x}));
+  session.details = details();
+  setStatus('Interview ended · '+dur(session.end-session.start));
+  showSummaryPanel('Writing the summary…');
+  try{ session.summary = await summarize(session); }
+  catch(err){ session.summary = null; session.summaryError = err.message; }
+  renderSummary(session);
+  saveFiles(session);
+  try{ const hist=JSON.parse(store.get('history','[]')); hist.unshift(session); store.set('history', JSON.stringify(hist.slice(0,10))); }catch(e){}
+}
+async function summarize(sx){
+  if(!S.key) throw new Error('No API key, so no AI summary. Questions and answers were still saved.');
+  if(!sx.transcript.length && !sx.qa.length) throw new Error('Nothing was captured in this interview.');
+  const qa = sx.qa.map(x=>`Q${x.n}. ${x.question}\nA: ${x.answer}`).join('\n');
+  const tr = sx.transcript.map(t=>`[${t.time}] ${t.text}`).join('\n').slice(-20000);
+  const t = await callClaude(
+`You review a job interview the candidate just finished, using its speech-to-text transcript and the questions detected. Be specific and honest. Reply with JSON only:
+{"overview":"2-3 sentences: what the interview focused on and how it went",
+ "topics":["main technical topics covered"],
+ "went_well":["areas the candidate seemed strong in, or that the transcript supports"],
+ "improve":["specific gaps or answers to strengthen, with what to study"],
+ "prepare_next":["likely next-round topics or questions to prepare"],
+ "follow_up":["action items: thank-you note points, things promised, questions to ask the recruiter"]}`,
+`INTERVIEW: ${JSON.stringify(sx.details)}\nDURATION: ${dur(sx.end-sx.start)}\n${S.jd?'JOB DESCRIPTION:\n'+S.jd.slice(0,5000)+'\n':''}\nQUESTIONS DETECTED:\n${qa||'(none)'}\n\nTRANSCRIPT:\n${tr||'(empty)'}`);
+  return JSON.parse(t.match(/\{[\s\S]*\}/)[0]);
+}
+const SUM_SECTIONS = [['topics','Topics covered'],['went_well','Went well'],['improve','To improve'],['prepare_next','Prepare for next round'],['follow_up','Follow-up actions']];
+function showSummaryPanel(msg){ $('sumBody').innerHTML='<p class="note">'+esc(msg)+'</p>'; $('sumPanel').classList.add('open'); }
+function summaryHTML(sx){
+  const d=sx.details, sm=sx.summary;
+  let h = `<p class="meta">${[d.company,d.role,d.round].filter(Boolean).map(esc).join(' · ')||'Interview'}<br>${esc(sx.start.toLocaleString())} · ${dur(sx.end-sx.start)} · ${sx.qa.length} questions${d.interviewer?' · '+esc(d.interviewer):''}</p>`;
+  if(sm){
+    h += `<p>${esc(sm.overview||'')}</p>`;
+    for(const [k,label] of SUM_SECTIONS) if(sm[k]?.length) h += `<h4>${label}</h4><ul>${sm[k].map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`;
+  } else h += `<p class="note">${esc(sx.summaryError||'No summary.')}</p>`;
+  return h;
+}
+function renderSummary(sx){
+  $('sumBody').innerHTML = summaryHTML(sx) + `<p class="note">Saved to your Downloads folder as ${esc(fileBase(sx))}.html and .txt</p>`;
+}
+function fileBase(sx){ const c=(sx.details.company||'Interview').replace(/[^\w-]+/g,'_').slice(0,40); return `Interview_${c}_${stamp(sx.start)}`; }
+function download(name, text, type){
+  const url = URL.createObjectURL(new Blob([text],{type}));
+  const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+}
+function reportHTML(sx){
+  const d=sx.details;
+  const qa = sx.qa.map(x=>`<div class="qa">${x.followUpOf?`<div class="fu">↳ follow-up to Q${x.followUpOf}</div>`:''}<div class="q">Q${x.n}. ${esc(x.question)}</div><div class="a">${highlight(x.answer, x.keywords||[])}</div>${x.details?.length?`<dl class="kd">${x.details.map(d=>`<dt>${esc(String(d.term))}</dt><dd>${esc(String(d.detail))}</dd>`).join('')}</dl>`:(x.keywords?.length?`<div class="chips">${x.keywords.map(k=>`<span>${esc(String(k))}</span>`).join('')}</div>`:'')}${x.resume?.length?`<div class="cv"><b>From your resume</b><ul>${x.resume.map(c=>`<li>${esc(String(c))}</li>`).join('')}</ul></div>`:''}</div>`).join('');
+  const tr = sx.transcript.map(t=>`<p><time>${esc(t.time)}</time> ${esc(t.text)}</p>`).join('');
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(fileBase(sx))}</title>
+<style>body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;max-width:860px;margin:0 auto;padding:24px 16px;color:#15202b;line-height:1.5}
+h1{font-size:24px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 8px;border-bottom:1px solid #d9e0e6;padding-bottom:4px}h4{margin:14px 0 4px}
+.meta{color:#5f6d7a}.qa{border-bottom:1px solid #e3e8ec;padding:10px 0}.q{font-weight:600}.fu{font-size:12px;color:#0b6e8a}
+mark{background:#ffe58a;padding:0 .15em;border-radius:3px;font-weight:600}.chips span{display:inline-block;font-size:12px;border:1px solid #0b6e8a;color:#0b6e8a;border-radius:999px;padding:1px 8px;margin:4px 4px 0 0}
+.cv{margin-top:6px;padding:4px 10px;border-left:3px solid #0b6e8a;background:#f3f5f7}.cv b{font-size:11px;text-transform:uppercase;color:#0b6e8a}
+.kd{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:6px 0 0;font-size:14px}.kd dt{font-weight:600;color:#0b6e8a}.kd dd{margin:0}
+time{font-family:ui-monospace,monospace;font-size:12px;color:#5f6d7a}table td{padding:2px 12px 2px 0;vertical-align:top}</style></head><body>
+<h1>${esc(d.company||'Interview')}${d.role?' — '+esc(d.role):''}</h1>
+<table>${[['Round',d.round],['Interviewer',d.interviewer],['Scheduled',d.when],['Recorded',sx.start.toLocaleString()+' – '+sx.end.toLocaleTimeString()],['Duration',dur(sx.end-sx.start)],['Questions',String(sx.qa.length)]].filter(r=>r[1]).map(r=>`<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}</td></tr>`).join('')}</table>
+<h2>Summary</h2>${sx.summary?`<p>${esc(sx.summary.overview||'')}</p>`+SUM_SECTIONS.filter(([k])=>sx.summary[k]?.length).map(([k,l])=>`<h4>${l}</h4><ul>${sx.summary[k].map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`).join(''):`<p>${esc(sx.summaryError||'No summary.')}</p>`}
+<h2>Questions &amp; answers</h2>${qa||'<p>No questions detected.</p>'}
+<h2>Transcript</h2>${tr||'<p>Empty.</p>'}
+</body></html>`;
+}
+function reportTXT(sx){
+  const d=sx.details, L=[];
+  L.push(`INTERVIEW: ${d.company||'-'}${d.role?' — '+d.role:''}`);
+  if(d.round) L.push('Round: '+d.round); if(d.interviewer) L.push('Interviewer: '+d.interviewer); if(d.when) L.push('Scheduled: '+d.when);
+  L.push(`Recorded: ${sx.start.toLocaleString()} – ${sx.end.toLocaleTimeString()} (${dur(sx.end-sx.start)})`, `Questions: ${sx.qa.length}`, '', '== SUMMARY ==');
+  if(sx.summary){ L.push(sx.summary.overview||''); for(const [k,l] of SUM_SECTIONS) if(sx.summary[k]?.length){ L.push('', l+':'); sx.summary[k].forEach(x=>L.push('  - '+x)); } }
+  else L.push(sx.summaryError||'No summary.');
+  L.push('', '== QUESTIONS & ANSWERS ==');
+  sx.qa.forEach(x=>{ L.push('', `Q${x.n}. ${x.question}${x.followUpOf?` (follow-up to Q${x.followUpOf})`:''}`, `A: ${x.answer}`);
+    if(x.details?.length){ L.push('Keyword details:'); x.details.forEach(d=>L.push(`  - ${d.term}: ${d.detail}`)); }
+    else if(x.keywords?.length) L.push('Keywords: '+x.keywords.join(', '));
+    if(x.resume?.length) L.push('From resume: '+x.resume.join(' | ')); });
+  L.push('', '== TRANSCRIPT ==');
+  sx.transcript.forEach(t=>L.push(`[${t.time}] ${t.text}`));
+  return L.join('\n');
+}
+function saveFiles(sx){
+  const base=fileBase(sx);
+  download(base+'.html', reportHTML(sx), 'text/html');
+  setTimeout(()=>download(base+'.txt', reportTXT(sx), 'text/plain'), 600);
+}
+$('sumSave').onclick = ()=> session?.end && saveFiles(session);
+$('sumClose').onclick = ()=> $('sumPanel').classList.remove('open');
+$('toggle').onclick = ()=> listening ? endInterview() : (micVerified ? beginInterview() : openTest(beginInterview));
+$('toggle').textContent='Start interview';
+const _stop = stop;
+stop = function(){ clearInterval(clockTimer); _stop(); };
+
+if(location.protocol==='file:' && store.get('hideFileBanner','')!=='1'){ $('fileBanner').hidden=false; $('fileBanner').title='Tap to hide'; $('fileBanner').style.cursor='pointer'; $('fileBanner').onclick=()=>{ $('fileBanner').hidden=true; store.set('hideFileBanner','1'); }; $('fileBanner').textContent += ' (Tap to hide.)'; }
+
+/* view switch: split / answers only / transcript only (handy on phones) */
+const VIEWS=[['split','Split',''],['answers','Answers','only-answers'],['transcript','Transcript','only-transcript']];
+let view = Math.max(0, VIEWS.findIndex(v=>v[0]===store.get('view'+DEV,'split')));
+function applyView(){ const v=VIEWS[view]; $('app').classList.remove('only-answers','only-transcript'); if(v[2]) $('app').classList.add(v[2]); $('viewBtn').textContent='View: '+v[1]; store.set('view'+DEV, v[0]); }
+$('viewBtn').onclick=()=>{ view=(view+1)%VIEWS.length; applyView(); };
+applyView();
+matchMedia(MOBILE_Q).addEventListener?.('change', e=>{ if(!listening && e.matches!==isMobile) location.reload(); });
+// on phones, add Clear inside settings since the toolbar hides it
+if(isMobile){ const c=$('clear').cloneNode(true); c.id='clear2'; c.type='button'; c.onclick=()=>$('clear').click(); c.style.display='inline-block'; $('settings').querySelector('.grid').appendChild(c); }
+
+/* ---------- example state shown before first start ---------- */
+function showEmpty(){ answersEl.innerHTML='<div class="empty">Detected questions and short answers appear here.</div>'; }
+let examples=true;
+function clearExamples(){ if(!examples) return; examples=false; $('clear').click(); }
+(function seed(){
+  transcriptEl.innerHTML = `
+    <div class="turn"><time>Example</time><span class="final">Let's talk about the platform migration. How do you handle high availability in EKS?</span></div>
+    <div class="turn q"><time>Example</time><span class="final">And what's the difference between RTO and RPO?</span></div>`;
+  answersEl.innerHTML = `
+    <div class="qa"><div class="q">Q1: How do you handle high availability in EKS?</div>
+      <div class="a">Spread nodes across <mark>multiple AZs</mark>, run several replicas with <mark>PodDisruptionBudgets</mark>, use <mark>HPA</mark> and ALB health checks.</div></div>
+    <div class="qa"><div class="q">Q2: What's the difference between RTO and RPO?</div>
+      <div class="a"><mark>RTO</mark> is the maximum acceptable downtime; <mark>RPO</mark> is the maximum acceptable <mark>data loss</mark>, measured in time.</div>
+      <details class="kd" open><summary>Keyword details</summary><dl>
+        <dt>RTO</dt><dd>Recovery Time Objective: how long the service may be down, e.g. 1 hour, driving warm-standby or multi-region design.</dd>
+        <dt>RPO</dt><dd>Recovery Point Objective: how much data you can lose, e.g. 5 minutes, met with Aurora replicas or frequent backups.</dd>
+        <dt>data loss</dt><dd>Measured in time since the last good copy; shrink it with continuous replication.</dd></dl></details></div>`;
+  $('turnCount').textContent='Example'; $('qCount').textContent='Example';
+})();
+</script>
+</body>
+</html>
