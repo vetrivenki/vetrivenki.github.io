@@ -313,13 +313,37 @@ function scrollEnd(el){ el.scrollTop = el.scrollHeight; }
 /* ---------- transcript ---------- */
 const transcriptEl=$('transcript'), answersEl=$('answers');
 let turns=0, current=null, lastFinalAt=0;
-const GAP_MS = 1800; // silence longer than this starts a new turn
+const GAP_MS = 6000; // only a long silence starts a new paragraph; otherwise speech flows on
+
+/* Remove words the recognizer repeats (e.g. "are you able to hear me" then "uh are you able to hear me today…") */
+let recentWords = '';
+const FILLERS = new Set(['uh','um','umm','er','ah','so','and','okay','ok','like','yeah']);
+const normTok = t => t.toLowerCase().replace(/[^\p{L}\p{N}']+/gu,'');
+function stripRepeat(text){
+  const toks = text.trim().split(/\s+/).filter(Boolean);
+  const n = toks.map(normTok);
+  const p = recentWords.split(' ').filter(Boolean);
+  if(!p.length) return text.trim();
+  let skip=0; while(skip<n.length && FILLERS.has(n[skip])) skip++;
+  // whole new text already said -> drop it
+  const nj = n.slice(skip).filter(Boolean).join(' ');
+  if(nj && p.join(' ').endsWith(nj)) return '';
+  for(let k=Math.min(p.length, n.length-skip); k>=3; k--){
+    if(p.slice(-k).join(' ') === n.slice(skip, skip+k).join(' ')) return toks.slice(skip+k).join(' ');
+  }
+  return text.trim();
+}
+function remember(text){ recentWords = (recentWords+' '+text.trim().split(/\s+/).map(normTok).filter(Boolean).join(' ')).trim().split(' ').slice(-60).join(' '); }
 function newTurn(){
   current=document.createElement('div'); current.className='turn';
-  current.innerHTML = `<time>${clock()}</time><span class="final"></span> <span class="interim"></span>`;
+  current.dataset.time = clock();
+  current.innerHTML = `<span class="final"></span> <span class="interim"></span>`;
   transcriptEl.appendChild(current); turns++; $('turnCount').textContent = turns+(turns===1?' turn':' turns');
 }
 function addFinal(text){
+  text = stripRepeat(text);
+  if(!text){ if(current) current.querySelector('.interim').textContent=''; return; }
+  remember(text);
   const now=Date.now();
   if(!current || now-lastFinalAt > GAP_MS) newTurn();
   lastFinalAt=now;
@@ -566,7 +590,7 @@ function stop(){
   $('toggle').textContent='Start interview'; $('toggle').className='btn primary';
 }
 $('resumeBtn').onclick = ()=>{ if(!listening) return; hideResume(); quickEnds=0; gen++; try{ rec && rec.abort(); }catch(e){} try{ startRec(); }catch(err){ showResume(); } };
-$('clear').onclick = ()=>{ transcriptEl.innerHTML=''; answersEl.innerHTML=''; turns=0; qCount=0; answered.length=0; buffer=''; current=null; hideBanner();
+$('clear').onclick = ()=>{ recentWords=''; transcriptEl.innerHTML=''; answersEl.innerHTML=''; turns=0; qCount=0; answered.length=0; buffer=''; current=null; hideBanner();
   $('turnCount').textContent='0 turns'; $('qCount').textContent='0 questions'; showEmpty(); };
 
 /* ---------- microphone test (required once per page load before an interview) ---------- */
@@ -719,7 +743,7 @@ async function endInterview(){
   session.end = new Date();
   // wait for any question still being analyzed
   for(let i=0;i<40 && (busy||buffer);i++){ if(buffer && !busy) flushSpeech(); await new Promise(r=>setTimeout(r,250)); }
-  session.transcript = [...transcriptEl.querySelectorAll('.turn')].map(t=>({time:t.querySelector('time')?.textContent||'', text:t.querySelector('.final')?.textContent||''})).filter(t=>t.text);
+  session.transcript = [...transcriptEl.querySelectorAll('.turn')].map(t=>({time:t.dataset.time||'', text:t.querySelector('.final')?.textContent||''})).filter(t=>t.text);
   session.qa = answered.map(x=>({...x}));
   session.details = details();
   setStatus('Interview ended · '+dur(session.end-session.start));
@@ -831,8 +855,8 @@ let examples=true;
 function clearExamples(){ if(!examples) return; examples=false; $('clear').click(); }
 (function seed(){
   transcriptEl.innerHTML = `
-    <div class="turn"><time>Example</time><span class="final">Let's talk about the platform migration. How do you handle high availability in EKS?</span></div>
-    <div class="turn q"><time>Example</time><span class="final">And what's the difference between RTO and RPO?</span></div>`;
+    <div class="turn"><span class="final">Let's talk about the platform migration. How do you handle high availability in EKS?</span></div>
+    <div class="turn q"><span class="final">And what's the difference between RTO and RPO?</span></div>`;
   answersEl.innerHTML = `
     <div class="qa"><div class="q">Q1: How do you handle high availability in EKS?</div>
       <div class="a">Spread nodes across <mark>multiple AZs</mark>, run several replicas with <mark>PodDisruptionBudgets</mark>, use <mark>HPA</mark> and ALB health checks.</div></div>
