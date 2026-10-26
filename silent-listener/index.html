@@ -26,6 +26,7 @@
   --bg:#0e1419; --panel:#151d24; --ink:#e7edf2; --muted:#8b9aa7; --line:#25313b;
   --accent:#4cc3e0; --mark:#5a4a12; --markInk:#ffe9a6; --live:#ff6b5e; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%;margin:0}
 body{height:100dvh}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);display:flex;flex-direction:column;
@@ -94,6 +95,14 @@ mark{background:var(--mark);color:var(--markInk);padding:0 .15em;border-radius:3
 .heard{font-size:18px;min-height:1.4em;padding:8px 10px;background:var(--bg);border-radius:6px}
 .testmsg{font-size:14px}
 .test strong{font-size:16px}
+.keysetup{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
+.kscard{max-width:440px;width:100%;display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.kscard h2{margin:0;font-size:20px}.kscard p{margin:0;font-size:15px;line-height:1.45;color:var(--muted)}
+.kscard code{font-family:var(--mono);font-size:13px;color:var(--ink)}
+.kscard .btn{min-height:48px;font-size:16px}
+.kscard #ksPasteInput{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px;font-size:16px}
+.btn.linkish{border:0;background:none;color:var(--muted);min-height:40px}
 .resume{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);z-index:35;min-height:56px;font-size:17px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .sumBody{max-height:45vh;overflow-y:auto;font-size:15px;line-height:1.45}
 .sumBody h4{margin:10px 0 2px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
@@ -162,7 +171,8 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
           <option value="en-GB">English (UK)</option><option value="ta-IN">Tamil</option>
           <option value="hi-IN">Hindi</option>
         </select></label>
-      <label>Claude API key (stored only in this browser)<input id="key" type="password" placeholder="sk-ant-…" autocomplete="off"></label>
+      <label>Claude API key (stored only in this browser)<input id="key" type="password" placeholder="sk-ant-…" autocomplete="off">
+        <span class="resumeRow"><span id="keyInfo"></span><button id="keyChange" class="btn" type="button">Load from key file</button></span></label>
 
       <label>Answer quality
         <select id="model">
@@ -190,6 +200,20 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
+
+<section class="keysetup" id="keySetup" hidden aria-labelledby="ksTitle">
+  <div class="kscard">
+    <h2 id="ksTitle">Connect your Claude API key</h2>
+    <p>Choose the file on this device that holds your key, for example <code>claude-key.txt</code> or a <code>.env</code> file containing <code>sk-ant-…</code>. The key is saved only in this browser and never leaves it except to call Claude.</p>
+    <button id="ksReload" class="btn primary" type="button" hidden></button>
+    <button id="ksPick" class="btn primary" type="button">Choose key file</button>
+    <input id="ksFile" type="file" accept=".txt,.key,.env,.cfg,.conf,text/plain" hidden>
+    <button id="ksPaste" class="btn" type="button">Paste the key instead</button>
+    <div id="ksPasteRow" class="resumeRow" hidden><input id="ksPasteInput" type="password" placeholder="sk-ant-…" autocomplete="off"><button id="ksPasteSave" class="btn primary" type="button">Save</button></div>
+    <p id="ksMsg" class="note" role="status"></p>
+    <button id="ksSkip" class="btn linkish" type="button">Skip for now</button>
+  </div>
+</section>
 
 <section class="test" id="testPanel" aria-live="polite">
   <strong id="testTitle">Microphone test</strong>
@@ -289,10 +313,9 @@ $('resumeFile').addEventListener('change', async e=>{
   }catch(err){ $('resumeMsg').textContent = err.message || 'Could not read that file.'; }
 });
 ['lang','model'].forEach(id => $(id).addEventListener('change', e => { S[id]=e.target.value; applySettings(); if(id==='lang' && listening){ rec.stop(); } }));
-$('key').addEventListener('change', e => { S.key=e.target.value.trim(); applySettings(); });
+$('key').addEventListener('change', e => { S.key=e.target.value.trim(); applySettings(); store.set('keyFile',''); updateKeyInfo(); });
 $('fontUp').onclick = () => { S.tFont=Math.min(48,S.tFont+2); S.aFont=Math.min(56,S.aFont+2); applySettings(); };
 $('fontDown').onclick = () => { S.tFont=Math.max(12,S.tFont-2); S.aFont=Math.max(12,S.aFont-2); applySettings(); };
-if(!S.key) $('settings').open = true;
 applySettings();
 
 /* ---------- drag divider ---------- */
@@ -836,6 +859,64 @@ $('toggle').onclick = ()=> listening ? endInterview() : (micVerified ? beginInte
 $('toggle').textContent='Start interview';
 const _stop = stop;
 stop = function(){ clearInterval(clockTimer); _stop(); };
+
+/* ---------- API key from a local key file ---------- */
+// First run asks for a key file (.txt / .key / .env containing sk-ant-…). The key is saved in this
+// browser only. On Chrome/Edge desktop the file itself is also remembered ("mapped") so the key can be
+// re-read from the same file later, e.g. after you rotate the key or clear browser data.
+const KEY_RE = /sk-ant-[A-Za-z0-9_\-]{20,}/;
+const idb = {
+  open(){ return new Promise((ok,bad)=>{ try{ const r=indexedDB.open('silent-listener',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); }catch(e){ bad(e); } }); },
+  async get(k){ try{ const db=await this.open(); return await new Promise(ok=>{ const q=db.transaction('kv').objectStore('kv').get(k); q.onsuccess=()=>ok(q.result); q.onerror=()=>ok(null); }); }catch(e){ return null; } },
+  async set(k,v){ try{ const db=await this.open(); await new Promise(ok=>{ const t=db.transaction('kv','readwrite'); t.objectStore('kv').put(v,k); t.oncomplete=ok; t.onerror=ok; }); }catch(e){} }
+};
+function keyMsg(t){ $('ksMsg').textContent=t; }
+function useKeyText(text, fileName){
+  const m = String(text).match(KEY_RE);
+  if(!m){ keyMsg('No Claude API key (sk-ant-…) found in '+fileName+'. Check the file and try again.'); return false; }
+  S.key = m[0]; applySettings();
+  store.set('keyFile', fileName);
+  updateKeyInfo();
+  $('keySetup').hidden = true;
+  return true;
+}
+async function pickKeyFile(){
+  if(window.showOpenFilePicker){
+    try{
+      const [h] = await showOpenFilePicker({ multiple:false, types:[{ description:'API key file', accept:{ 'text/plain':['.txt','.key','.env','.cfg','.conf'] } }] });
+      const f = await h.getFile();
+      if(useKeyText(await f.text(), f.name)) await idb.set('keyHandle', h);
+      return;
+    }catch(e){ if(e.name==='AbortError') return; }   // fall back to the plain file chooser
+  }
+  $('ksFile').click();
+}
+$('ksFile').addEventListener('change', async e=>{ const f=e.target.files[0]; if(f) useKeyText(await f.text(), f.name); e.target.value=''; });
+async function reloadMappedKey(){
+  const h = await idb.get('keyHandle'); if(!h){ pickKeyFile(); return; }
+  try{
+    let perm = await h.queryPermission?.({mode:'read'});
+    if(perm!=='granted') perm = await h.requestPermission?.({mode:'read'});
+    if(perm && perm!=='granted'){ keyMsg('Permission to read '+h.name+' was not given.'); return; }
+    useKeyText(await (await h.getFile()).text(), h.name);
+  }catch(e){ keyMsg('Could not read '+h.name+'. Choose the key file again.'); }
+}
+function updateKeyInfo(){
+  const f = store.get('keyFile','');
+  $('keyInfo').textContent = S.key ? (f ? 'Key loaded from '+f+' ✓' : 'Key saved ✓') : 'No key yet';
+}
+$('ksPick').onclick = pickKeyFile;
+$('ksPaste').onclick = ()=>{ $('ksPasteRow').hidden=false; $('ksPasteInput').focus(); };
+$('ksPasteSave').onclick = ()=>{ const v=$('ksPasteInput').value; if(!useKeyText(v,'pasted text')) return; store.set('keyFile',''); updateKeyInfo(); };
+$('ksSkip').onclick = ()=>{ $('keySetup').hidden = true; };
+$('keyChange').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
+(async ()=>{
+  updateKeyInfo();
+  if(S.key) return;
+  const h = await idb.get('keyHandle');
+  if(h){ $('ksReload').hidden=false; $('ksReload').textContent='Reload key from '+h.name; $('ksReload').onclick=reloadMappedKey; }
+  $('keySetup').hidden = false;
+})();
 
 if(location.protocol==='file:' && store.get('hideFileBanner','')!=='1'){ $('fileBanner').hidden=false; $('fileBanner').title='Tap to hide'; $('fileBanner').style.cursor='pointer'; $('fileBanner').onclick=()=>{ $('fileBanner').hidden=true; store.set('hideFileBanner','1'); }; $('fileBanner').textContent += ' (Tap to hide.)'; }
 
