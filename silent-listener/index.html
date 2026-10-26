@@ -160,6 +160,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
   <button id="fontUp" class="btn" aria-label="Larger text">A+</button>
   <button id="clear" class="btn">Clear</button>
   <button id="testBtn" class="btn">Test mic</button>
+  <button id="folderBtn" class="btn" type="button">Folder</button>
   <button id="viewBtn" class="btn" aria-label="Change view">View: Split</button>
   <details class="settings" id="settings">
     <summary><span class="sClosed">Settings</span><span class="sOpen">Done</span></summary>
@@ -200,7 +201,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26 · folder setup.</div>
+    <div class="note">Version 2026-10-26b · folder setup.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -915,7 +916,7 @@ function updateKeyInfo(){
 $('ksPick').onclick = pickKeyFile;
 $('ksPaste').onclick = ()=>{ $('ksPasteRow').hidden=false; $('ksPasteInput').focus(); };
 $('ksPasteSave').onclick = ()=>{ const v=$('ksPasteInput').value; if(!useKeyText(v,'pasted text')) return; store.set('keyFile',''); updateKeyInfo(); };
-$('ksSkip').onclick = ()=>{ $('keySetup').hidden = true; store.set('keySetupSkipped','1'); };
+$('ksSkip').onclick = ()=>{ $('keySetup').hidden = true; store.set('folderSkipped','1'); };
 $('keyChange').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
 updateKeyInfo();
 
@@ -1008,6 +1009,7 @@ async function reloadFolder(interactive){
   }catch(e){ return false; }
 }
 $('ksPickFolder').onclick = pickFolder;
+$('folderBtn').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
 $('folderChange').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
 (async ()=>{
   $('folderInfo').textContent = store.get('folderName','') ? 'Folder: '+store.get('folderName','') : 'No folder chosen';
@@ -1019,9 +1021,9 @@ $('folderChange').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
     $('ksReload').hidden=false; $('ksReload').textContent='Reload from folder “'+dir.name+'”';
     $('ksReload').onclick=()=>reloadFolder(true).then(ok=>{ if(!ok) keyMsg('Permission to read the folder was not given.'); });
   }
-  const mapped = store.get('folderName','')!=='' || store.get('keyFile','')!=='';
-  if(S.key && (mapped || store.get('keySetupSkipped','')==='1')) return;
-  if(S.key) keyMsg('A key is already saved in this browser. Choose your folder to map it, or skip to keep the saved key.');
+  // Ask until a folder is chosen (or this screen is skipped), even if a key was saved by an older version.
+  if(S.key && (store.get('folderName','')!=='' || store.get('folderSkipped','')==='1')) return;
+  if(S.key) keyMsg('A key is already saved in this browser. Choose your interview folder so the key and resume load from it.');
   $('keySetup').hidden = false;
 })();
 
