@@ -88,6 +88,7 @@ mark{background:var(--mark);color:var(--markInk);padding:0 .15em;border-radius:3
 .heard{font-size:18px;min-height:1.4em;padding:8px 10px;background:var(--bg);border-radius:6px}
 .testmsg{font-size:14px}
 .test strong{font-size:16px}
+.resume{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);z-index:35;min-height:56px;font-size:17px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .sumBody{max-height:45vh;overflow-y:auto;font-size:15px;line-height:1.45}
 .sumBody h4{margin:10px 0 2px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
 .sumBody ul{margin:0;padding-left:1.2em}.sumBody .meta{color:var(--muted);margin:0}
@@ -204,6 +205,8 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
   <div id="sumBody" class="sumBody"></div>
   <div class="resumeRow"><button id="sumSave" class="btn" type="button">Save HTML + TXT again</button><button id="sumClose" class="btn" type="button">Close</button></div>
 </section>
+
+<button id="resumeBtn" class="btn primary resume" type="button" hidden>Mic paused. Tap to resume listening.</button>
 
 <main class="app" id="app">
   <section class="pane" id="top">
@@ -468,39 +471,95 @@ function hideBanner(){ $('banner').hidden=true; }
 $('askForm').addEventListener('submit', e=>{ e.preventDefault(); const v=$('askInput').value.trim(); if(v){ askTyped(v); $('askInput').value=''; } });
 
 /* ---------- speech recognition ---------- */
+// iPhone Safari notes: it rarely marks results final in continuous mode, and a recognizer can stop
+// on its own. So on iPhone we run short sessions, treat text that stays unchanged for 1.3 s as final,
+// restart automatically, and show a big "Tap to resume" button if Safari refuses to restart without a tap.
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec=null, listening=false, wake=null;
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+let rec=null, listening=false, wake=null, gen=0, quickEnds=0, sessionStart=0, gotAny=false, interimTimer=null, pendingInterim='';
 function setStatus(t){ $('statusText').textContent=t; }
 async function keepAwake(){ try{ wake = await navigator.wakeLock?.request('screen'); }catch(e){} }
-document.addEventListener('visibilitychange', ()=>{ if(listening && document.visibilityState==='visible') keepAwake(); });
+document.addEventListener('visibilitychange', ()=>{
+  if(!listening) return;
+  if(document.visibilityState==='visible'){ keepAwake(); if(isIOS) showResume('Welcome back. Tap to resume listening.'); }
+});
+function showResume(msg){ $('resumeBtn').textContent = msg || 'Mic paused. Tap to resume listening.'; $('resumeBtn').hidden=false; setStatus('Mic paused'); }
+function hideResume(){ $('resumeBtn').hidden=true; }
 
-function start(){
-  if(!SR){ setStatus('Speech not supported — use Chrome, Edge or Safari'); return; }
-  clearExamples();
-  rec = new SR(); rec.lang=S.lang; rec.continuous=true; rec.interimResults=true;
-  rec.onresult = e=>{
+function startRec(){
+  const g = ++gen;
+  const r = new SR(); rec = r;
+  r.lang = S.lang; r.interimResults = true; r.continuous = !isIOS; r.maxAlternatives = 1;
+  sessionStart = Date.now(); gotAny = false;
+  r.onstart = ()=>{ if(g===gen){ hideResume(); setStatus(session ? 'Interview · '+dur(Date.now()-session.start) : 'Listening'); } };
+  r.onresult = e=>{
+    if(g!==gen) return;
+    gotAny = true; quickEnds = 0;
     let interim='';
     for(let i=e.resultIndex;i<e.results.length;i++){
-      const r=e.results[i];
-      if(r.isFinal) addFinal(r[0].transcript.trim()); else interim += r[0].transcript;
+      const res=e.results[i];
+      if(res.isFinal){ addFinal(res[0].transcript.trim()); pendingInterim=''; }
+      else interim += res[0].transcript;
     }
-    setInterim(interim.trim());
+    interim = interim.trim();
+    setInterim(interim);
+    if(isIOS){
+      pendingInterim = interim;
+      clearTimeout(interimTimer);
+      if(interim) interimTimer = setTimeout(()=>commitInterim(g), 1300);
+    }
   };
-  rec.onerror = e=>{
-    if(e.error==='not-allowed' || e.error==='service-not-allowed'){ setStatus('Microphone blocked — allow it in the browser'); stop(); }
-    else if(e.error!=='no-speech' && e.error!=='aborted') setStatus('Mic error: '+e.error+' — retrying');
+  r.onerror = e=>{
+    if(g!==gen) return;
+    if(e.error==='no-speech' || e.error==='aborted') return;
+    if(e.error==='not-allowed' || e.error==='service-not-allowed'){
+      if(gotAny || Date.now()-sessionStart > 3000){ showResume(); return; }   // worked before: Safari wants a tap
+      setStatus(isIOS ? 'Blocked: enable Dictation and Safari mic access' : 'Microphone blocked — allow it in the browser');
+      showBanner(isIOS ? 'Speech recognition is blocked. On iPhone: Settings → General → Keyboard → turn on Enable Dictation; Settings → Safari → Microphone → Allow; Settings → Privacy & Security → Speech Recognition → allow Safari. Then reload.'
+                       : 'Speech recognition is blocked. Allow the microphone for this page and reload.');
+      stop(); return;
+    }
+    if(e.error==='audio-capture'){ showResume('Mic is busy (another app?). Tap to retry.'); return; }
+    if(e.error==='network'){ setStatus('No internet for speech-to-text — retrying'); return; }
+    setStatus('Mic error: '+e.error+' — retrying');
   };
-  rec.onend = ()=>{ if(listening){ try{ rec.lang=S.lang; rec.start(); }catch(e){} } };  // keep running forever
-  listening=true; rec.start(); keepAwake();
+  r.onend = ()=>{
+    if(g!==gen || !listening) return;
+    if(isIOS && pendingInterim){ commitInterim(g, true); }
+    if(!gotAny && Date.now()-sessionStart < 1500) quickEnds++;
+    if(quickEnds >= 4){ quickEnds=0; showResume(); return; }
+    setTimeout(()=>{ if(listening && g===gen){ try{ startRec(); }catch(err){ showResume(); } } }, 120);
+  };
+  r.start();
+}
+function commitInterim(g, fromEnd){
+  if(g!==gen || !pendingInterim) return;
+  const t = pendingInterim; pendingInterim='';
+  addFinal(t);
+  if(!fromEnd && listening){        // reset Safari so the next sentence starts fresh
+    const old = rec; gen++;          // ignore anything the old recognizer still sends
+    try{ old.abort(); }catch(e){}
+    setTimeout(()=>{ if(listening){ try{ startRec(); }catch(err){ showResume(); } } }, 150);
+  }
+}
+function start(){
+  if(!SR){ setStatus('Speech not supported — use Chrome, Edge or Safari'); return; }
+  clearExamples(); hideResume();
+  listening=true; quickEnds=0;
+  try{ startRec(); }catch(err){ showResume('Tap to start listening'); }
+  keepAwake();
   document.body.classList.add('on'); $('status').classList.add('on'); setStatus('Listening');
   $('toggle').textContent='Stop interview'; $('toggle').className='btn stop';
 }
 function stop(){
-  listening=false; try{ rec && rec.stop(); }catch(e){}
-  finishTurn(); wake?.release?.(); wake=null;
+  listening=false; gen++; clearTimeout(interimTimer);
+  if(pendingInterim){ addFinal(pendingInterim); pendingInterim=''; }
+  try{ rec && rec.abort(); }catch(e){}
+  hideResume(); finishTurn(); wake?.release?.(); wake=null;
   $('status').classList.remove('on'); setStatus('Paused');
   $('toggle').textContent='Start interview'; $('toggle').className='btn primary';
 }
+$('resumeBtn').onclick = ()=>{ if(!listening) return; hideResume(); quickEnds=0; gen++; try{ rec && rec.abort(); }catch(e){} try{ startRec(); }catch(err){ showResume(); } };
 $('clear').onclick = ()=>{ transcriptEl.innerHTML=''; answersEl.innerHTML=''; turns=0; qCount=0; answered.length=0; buffer=''; current=null; hideBanner();
   $('turnCount').textContent='0 turns'; $('qCount').textContent='0 questions'; showEmpty(); };
 
@@ -612,7 +671,7 @@ function closeTest(){
 }
 $('testBtn').onclick = ()=> T.open ? closeTest() : openTest();
 $('testStop').onclick = closeTest;
-$('testGo').onclick = ()=>{ const go=T.then; closeTest(); if(go) setTimeout(go, 300); };   // short pause so the mic is released first
+$('testGo').onclick = ()=>{ const go=T.then; closeTest(); if(go) go(); };   // start inside the tap: iPhone requires it
 const _start = start;
 start = function(){ if(T.open) closeTest(); _start(); };
 
@@ -646,7 +705,7 @@ function beginInterview(){
   session = { start:new Date(), details:details() };
   start();
   $('toggle').textContent='Stop interview';
-  clockTimer = setInterval(()=> setStatus('Interview · '+dur(Date.now()-session.start)), 1000);
+  clockTimer = setInterval(()=>{ if($('resumeBtn').hidden) setStatus('Interview · '+dur(Date.now()-session.start)); }, 1000);
 }
 async function endInterview(){
   stop(); clearInterval(clockTimer);
