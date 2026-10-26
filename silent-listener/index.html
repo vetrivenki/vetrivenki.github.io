@@ -111,6 +111,9 @@ mark{background:var(--mark);color:var(--markInk);padding:0 .15em;border-radius:3
 .sumBody ul{margin:0;padding-left:1.2em}.sumBody .meta{color:var(--muted);margin:0}
 .banner{margin:8px 14px 0;padding:8px 10px;border-radius:6px;background:var(--mark);color:var(--markInk);font-size:14px}
 .head em{font-style:normal;color:var(--accent)}
+.qa.live .a{color:var(--muted)}
+.caret{animation:blink 1s steps(1) infinite;color:var(--accent)}@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.caret{animation:none}}
 .qa .fu{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:2px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .chips span{font-family:var(--mono);font-size:calc(var(--aFont)*.6);padding:2px 8px;border-radius:999px;border:1px solid var(--accent);color:var(--accent)}
@@ -180,8 +183,8 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
 
       <label>Answer quality
         <select id="model">
-          <option value="claude-sonnet-5-5">Best answers (Sonnet)</option>
-          <option value="claude-haiku-5-5">Fastest (Haiku)</option>
+          <option value="claude-haiku-5-5">Fast — best for live interviews (Haiku)</option>
+          <option value="claude-sonnet-5-5">Deeper but slower (Sonnet)</option>
         </select></label>
       <label style="flex-direction:row;align-items:center;gap:8px"><input id="showDetails" type="checkbox"> Expand keyword details by default</label>
       <label class="wide">Technologies — only questions in these areas get answered (comma separated)
@@ -201,7 +204,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26b · folder setup.</div>
+    <div class="note">Version 2026-10-26c · streaming answers.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -281,7 +284,7 @@ document.documentElement.dataset.device = isMobile ? 'mobile' : 'desktop';
 /* ---------- settings ---------- */
 const S = {
   tFont: +store.get('tFont'+DEV, isMobile?15:20), aFont: +store.get('aFont'+DEV, isMobile?18:22), split: +store.get('split'+DEV, isMobile?35:55),
-  lang: store.get('lang', 'en-US'), key: store.get('key', ''), tech: store.get('tech', 'AWS, Amazon EKS, Kubernetes, Docker, Terraform, CI/CD, DevOps, SRE, observability, AI engineering, LLMs, RAG, AI agents, MLOps, Python'), jd: store.get('jd', ''), resume: store.get('resume', ''), model: store.get('model', 'claude-sonnet-5-5'), showDetails: store.get('showDetails','1')==='1'
+  lang: store.get('lang', 'en-US'), key: store.get('key', ''), tech: store.get('tech', 'AWS, Amazon EKS, Kubernetes, Docker, Terraform, CI/CD, DevOps, SRE, observability, AI engineering, LLMs, RAG, AI agents, MLOps, Python'), jd: store.get('jd', ''), resume: store.get('resume', ''), model: (store.get('modelFastMigrated','')==='1' ? store.get('model', 'claude-haiku-5-5') : (store.set('modelFastMigrated','1'), 'claude-haiku-5-5')), showDetails: store.get('showDetails','1')==='1'
 };
 function applySettings(){
   root.setProperty('--tFont', S.tFont+'px'); root.setProperty('--aFont', S.aFont+'px');
@@ -400,7 +403,7 @@ function queueSpeech(text, turnEl){
   buffer = (buffer+' '+text).trim(); bufferTurns.add(turnEl);
   clearTimeout(flushTimer);
   if(buffer.split(/\s+/).length > 50) flushSpeech();
-  else flushTimer = setTimeout(flushSpeech, 1500);
+  else flushTimer = setTimeout(flushSpeech, 900);
 }
 async function flushSpeech(){
   clearTimeout(flushTimer);
@@ -460,25 +463,61 @@ For each question give:
 
 Reply with JSON only: {"items":[{"question":"","answer":"","keywords":[""],"details":[{"term":"","detail":""}],"resume":[],"followUp":false,"followUpOf":0}]}. If there is no question, reply {"items":[]}.`;
 }
-async function callClaude(system, user){
+// Streams the reply so answers appear word by word; the long system prompt (resume + JD) is cached
+// by the API, which makes every later question faster.
+async function callClaude(system, user, opts={}){
+  const body = { model:S.model, max_tokens:opts.maxTokens||1200, stream:true,
+    system:[{type:'text', text:system, cache_control:{type:'ephemeral'}}],
+    messages:[{role:'user',content:user}] };
   let res;
   try{
     res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'content-type':'application/json','x-api-key':S.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({ model:S.model, max_tokens:1600, system, messages:[{role:'user',content:user}] })
+      body: JSON.stringify(body)
     });
   }catch(e){ throw new Error('Could not reach Claude. Check your internet connection.'); }
-  const data = await res.json().catch(()=>({}));
   if(!res.ok){
+    const data = await res.json().catch(()=>({}));
     const msg = data?.error?.message || ('HTTP '+res.status);
     if(res.status===401) throw new Error('API key rejected: '+msg);
     if(res.status===429) throw new Error('Rate limited. Answers resume in a moment.');
     if(res.status===400 && /credit/i.test(msg)) throw new Error('No API credits left. Add credits in the Claude Console billing page.');
     throw new Error('Claude error: '+msg);
   }
-  return (data.content||[]).map(c=>c.text||'').join('').trim();
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf='', text='';
+  for(;;){
+    const {value, done} = await reader.read();
+    if(done) break;
+    buf += dec.decode(value, {stream:true});
+    let i;
+    while((i = buf.indexOf('\n')) >= 0){
+      const line = buf.slice(0,i).trim(); buf = buf.slice(i+1);
+      if(!line.startsWith('data:')) continue;
+      let ev; try{ ev = JSON.parse(line.slice(5)); }catch(e){ continue; }
+      if(ev.type==='content_block_delta' && ev.delta?.text){ text += ev.delta.text; opts.onText?.(text); }
+      else if(ev.type==='error') throw new Error('Claude error: '+(ev.error?.message||'stream failed'));
+    }
+  }
+  return text.trim();
 }
+// Live preview card: shows the first question and the answer while it streams in.
+let liveEl=null;
+function partialFirst(t){
+  const un = s=>s.replace(/\\n/g,' ').replace(/\\"/g,'"').replace(/\\\\/g,'\\');
+  const q = t.match(/"question"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+  const a = t.match(/"answer"\s*:\s*"((?:[^"\\]|\\.)*)/);
+  return { q: q?un(q[1]):'', a: a?un(a[1]):'' };
+}
+function showLive(t){
+  const {q,a} = partialFirst(t);
+  if(!q) return;
+  if(!liveEl){ answersEl.querySelector('.empty')?.remove(); liveEl=document.createElement('div'); liveEl.className='qa live'; answersEl.appendChild(liveEl); }
+  liveEl.innerHTML = `<div class="q">Q${qCount+1}. ${esc(q)}</div><div class="a">${esc(a)}<span class="caret">▍</span></div>`;
+  scrollEnd(answersEl);
+}
+function clearLive(){ liveEl?.remove(); liveEl=null; }
 function parseItems(t){
   const m=t.match(/\{[\s\S]*\}/); if(!m) return [];
   try{ const j=JSON.parse(m[0]); return Array.isArray(j.items)?j.items.filter(i=>i&&i.question&&i.answer):[]; }catch(e){ return []; }
@@ -490,13 +529,15 @@ function buildUser(text){
   return `EARLIER CONVERSATION:\n${recentContext()}\n\nPREVIOUS Q&A (most recent last):\n${previousQA()}\n\nNEW SPEECH:\n${text}`;
 }
 async function analyze(text){
-  return parseItems(await callClaude(systemPrompt(), buildUser(text)));
+  try{ return parseItems(await callClaude(systemPrompt(), buildUser(text), {onText:showLive})); }
+  finally{ clearLive(); }
 }
 async function askTyped(q){
+  if(typeof examples!=='undefined' && examples) clearExamples();
   if(!S.key){ showBanner('Add your Claude API key in Settings to get answers.'); return; }
   setThinking(true);
   try{
-    const items = parseItems(await callClaude(systemPrompt(), buildUser(q)));
+    let items; try{ items = parseItems(await callClaude(systemPrompt(), buildUser(q), {onText:showLive})); } finally{ clearLive(); }
     if(items.length) items.forEach(addCard); else addCard({question:q, answer:'Not answered: outside your Technologies list (Settings).', keywords:[]});
     hideBanner();
   }catch(err){ showBanner(err.message); }
