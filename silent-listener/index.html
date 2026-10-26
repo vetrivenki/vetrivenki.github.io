@@ -69,9 +69,11 @@ details.settings summary{cursor:pointer;color:var(--muted);font-size:13px}
 .scroll{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
 .divider{height:14px;cursor:row-resize;display:flex;align-items:center;justify-content:center;touch-action:none}
 .divider span{width:48px;height:4px;border-radius:2px;background:var(--line)}
-.turn{font-size:var(--tFont);line-height:1.45}
-.turn time{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:2px}
-.turn .interim{color:var(--muted)}
+.turn{font-size:var(--tFont);line-height:1.5;color:var(--muted);transition:color .3s}
+.turn time{display:none}                      /* times are kept only for the saved report */
+.turn:last-child{color:var(--ink)}
+.turn .interim{color:var(--muted);font-style:italic}
+.turn.q{border-left:3px solid var(--accent);padding-left:10px;color:var(--ink)}
 .turn.q{border-left:3px solid var(--accent);padding-left:10px}
 .qa{font-size:var(--aFont);line-height:1.4;border-bottom:1px solid var(--line);padding-bottom:12px}
 .qa:last-child{border-bottom:0}
