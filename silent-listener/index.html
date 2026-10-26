@@ -102,6 +102,8 @@ mark{background:var(--mark);color:var(--markInk);padding:0 .15em;border-radius:3
 .kscard code{font-family:var(--mono);font-size:13px;color:var(--ink)}
 .kscard .btn{min-height:48px;font-size:16px}
 .kscard #ksPasteInput{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px;font-size:16px}
+.phoneOnly{display:none}
+@media (max-width:640px), (pointer:coarse) and (max-width:950px){.phoneOnly{display:block}}
 .btn.linkish{border:0;background:none;color:var(--muted);min-height:40px}
 .resume{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);z-index:35;min-height:56px;font-size:17px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .sumBody{max-height:45vh;overflow-y:auto;font-size:15px;line-height:1.45}
@@ -172,7 +174,8 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
           <option value="hi-IN">Hindi</option>
         </select></label>
       <label>Claude API key (stored only in this browser)<input id="key" type="password" placeholder="sk-ant-…" autocomplete="off">
-        <span class="resumeRow"><span id="keyInfo"></span><button id="keyChange" class="btn" type="button">Load from key file</button></span></label>
+        <span class="resumeRow"><span id="keyInfo"></span><button id="keyChange" class="btn" type="button">Load from key file</button></span>
+        <span class="resumeRow"><span id="folderInfo"></span><button id="folderChange" class="btn" type="button">Choose folder</button></span></label>
 
       <label>Answer quality
         <select id="model">
@@ -197,17 +200,20 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26 · key file setup.</div>
+    <div class="note">Version 2026-10-26 · folder setup.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
 
 <section class="keysetup" id="keySetup" hidden aria-labelledby="ksTitle">
   <div class="kscard">
-    <h2 id="ksTitle">Connect your Claude API key</h2>
-    <p>Choose the file on this device that holds your key, for example <code>claude-key.txt</code> or a <code>.env</code> file containing <code>sk-ant-…</code>. The key is saved only in this browser and never leaves it except to call Claude.</p>
+    <h2 id="ksTitle">Choose your interview folder</h2>
+    <p>Pick the folder that holds your <code>claude-key.txt</code> and your resume PDF (optionally a <code>jd.txt</code>). Everything is read on this device and saved only in this browser.</p>
+    <p class="phoneOnly">On iPhone: open the folder and select the key file and the resume together.</p>
     <button id="ksReload" class="btn primary" type="button" hidden></button>
-    <button id="ksPick" class="btn primary" type="button">Choose key file</button>
+    <button id="ksPickFolder" class="btn primary" type="button">Choose folder</button>
+    <input id="ksFolder" type="file" multiple accept=".txt,.env,.key,.pdf,.md,text/plain,application/pdf" hidden>
+    <button id="ksPick" class="btn" type="button">Choose key file only</button>
     <input id="ksFile" type="file" accept=".txt,.key,.env,.cfg,.conf,text/plain" hidden>
     <button id="ksPaste" class="btn" type="button">Paste the key instead</button>
     <div id="ksPasteRow" class="resumeRow" hidden><input id="ksPasteInput" type="password" placeholder="sk-ant-…" autocomplete="off"><button id="ksPasteSave" class="btn primary" type="button">Save</button></div>
@@ -911,14 +917,111 @@ $('ksPaste').onclick = ()=>{ $('ksPasteRow').hidden=false; $('ksPasteInput').foc
 $('ksPasteSave').onclick = ()=>{ const v=$('ksPasteInput').value; if(!useKeyText(v,'pasted text')) return; store.set('keyFile',''); updateKeyInfo(); };
 $('ksSkip').onclick = ()=>{ $('keySetup').hidden = true; store.set('keySetupSkipped','1'); };
 $('keyChange').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
+updateKeyInfo();
+
+/* ---------- interview folder: key file + resume (+ optional job description) ---------- */
+// One folder holds everything. The app looks for:
+//   key     → a .txt/.env/.key file containing sk-ant-…
+//   resume  → a PDF (or .txt) with "resume" or "cv" in the name; otherwise the only PDF
+//   JD      → optional .txt/.pdf with "jd" or "job" in the name
+// Chrome/Edge on a computer remember the folder; phones pick the files once (select them together).
+async function fileText(f){
+  if(/\.pdf$/i.test(f.name)){
+    if(!window.pdfjsLib){
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+      pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+    const pdf = await pdfjsLib.getDocument({data: await f.arrayBuffer()}).promise;
+    let text='';
+    for(let i=1;i<=pdf.numPages;i++){
+      const c = await (await pdf.getPage(i)).getTextContent();
+      text += c.items.map(it=>it.str + (it.hasEOL?'\n':' ')).join('') + '\n';
+    }
+    return text.replace(/[ \t]+/g,' ').replace(/\n\s*\n+/g,'\n').trim();
+  }
+  return (await f.text()).trim();
+}
+async function loadFromFiles(files, folderName){
+  const textLike = f => /\.(txt|env|key|cfg|conf|md)$/i.test(f.name) && f.size < 200000;
+  const out = [];
+  // key
+  let keyFound=false;
+  const keyCands = files.filter(textLike).sort((a,b)=> (/key|\.env$/i.test(b.name)?1:0) - (/key|\.env$/i.test(a.name)?1:0));
+  for(const f of keyCands){
+    const m = (await f.text()).match(KEY_RE);
+    if(m){ S.key=m[0]; store.set('keyFile', (folderName?folderName+'/':'')+f.name); keyFound=true; out.push('key ✓ ('+f.name+')'); break; }
+  }
+  // resume
+  const pdfs = files.filter(f=>/\.pdf$/i.test(f.name));
+  const resumeFile = files.find(f=>/(resume|cv)/i.test(f.name) && /\.(pdf|txt|md)$/i.test(f.name)) || (pdfs.length===1 ? pdfs[0] : null);
+  if(resumeFile){
+    try{ S.resume = (await fileText(resumeFile)).slice(0,12000); out.push('resume ✓ ('+resumeFile.name+')'); }
+    catch(e){ out.push('resume ✗ (could not read '+resumeFile.name+')'); }
+  } else out.push('resume not found');
+  // optional job description
+  const jdFile = files.find(f=>/(^|[^a-z])(jd|job)/i.test(f.name) && f!==resumeFile && /\.(pdf|txt|md)$/i.test(f.name));
+  if(jdFile){ try{ S.jd = (await fileText(jdFile)).slice(0,12000); out.push('job description ✓ ('+jdFile.name+')'); }catch(e){} }
+  applySettings(); updateKeyInfo();
+  if(folderName) store.set('folderName', folderName);
+  return { keyFound, summary: out.join(' · ') };
+}
+async function filesFromHandle(dir){
+  const files=[];
+  for await (const entry of dir.values()){
+    if(entry.kind==='file' && /\.(pdf|txt|env|key|cfg|conf|md)$/i.test(entry.name)) files.push(await entry.getFile());
+  }
+  return files;
+}
+async function finishFolder(res){
+  $('folderInfo').textContent = res.summary;
+  if(res.keyFound){ $('keySetup').hidden = true; }
+  else keyMsg('Loaded: '+res.summary+'. No key file found in that folder — add claude-key.txt and choose the folder again.');
+}
+async function pickFolder(){
+  keyMsg('');
+  if(window.showDirectoryPicker){
+    try{
+      const dir = await showDirectoryPicker({ mode:'read', id:'silent-listener' });
+      keyMsg('Reading '+dir.name+'…');
+      const res = await loadFromFiles(await filesFromHandle(dir), dir.name);
+      await idb.set('folderHandle', dir);
+      return finishFolder(res);
+    }catch(e){ if(e.name==='AbortError') return; }
+  }
+  $('ksFolder').click();   // phones: pick the key file and resume together
+}
+$('ksFolder').addEventListener('change', async e=>{
+  const files=[...e.target.files]; e.target.value='';
+  if(!files.length) return;
+  keyMsg('Reading '+files.length+' file(s)…');
+  const dirName = (files[0].webkitRelativePath||'').split('/')[0] || '';
+  finishFolder(await loadFromFiles(files, dirName));
+});
+async function reloadFolder(interactive){
+  const dir = await idb.get('folderHandle'); if(!dir) return false;
+  try{
+    let perm = await dir.queryPermission?.({mode:'read'});
+    if(perm!=='granted' && interactive) perm = await dir.requestPermission?.({mode:'read'});
+    if(perm!=='granted') return false;
+    finishFolder(await loadFromFiles(await filesFromHandle(dir), dir.name));
+    return true;
+  }catch(e){ return false; }
+}
+$('ksPickFolder').onclick = pickFolder;
+$('folderChange').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
 (async ()=>{
-  updateKeyInfo();
-  // Ask when there is no key, or when a key was typed earlier but never mapped to a key file.
-  const mapped = store.get('keyFile','') !== '';
+  $('folderInfo').textContent = store.get('folderName','') ? 'Folder: '+store.get('folderName','') : 'No folder chosen';
+  // phones: let the picker select several files; computers without the folder picker: choose a folder
+  if(!window.showDirectoryPicker && !isMobile && 'webkitdirectory' in $('ksFolder')) $('ksFolder').webkitdirectory = true;
+  const dir = await idb.get('folderHandle');
+  if(dir){
+    if(await reloadFolder(false)) return;            // permission still granted: refreshed silently
+    $('ksReload').hidden=false; $('ksReload').textContent='Reload from folder “'+dir.name+'”';
+    $('ksReload').onclick=()=>reloadFolder(true).then(ok=>{ if(!ok) keyMsg('Permission to read the folder was not given.'); });
+  }
+  const mapped = store.get('folderName','')!=='' || store.get('keyFile','')!=='';
   if(S.key && (mapped || store.get('keySetupSkipped','')==='1')) return;
-  if(S.key) keyMsg('A key is already saved in this browser. Choose your key file to map it, or skip to keep the saved key.');
-  const h = await idb.get('keyHandle');
-  if(h){ $('ksReload').hidden=false; $('ksReload').textContent='Reload key from '+h.name; $('ksReload').onclick=reloadMappedKey; }
+  if(S.key) keyMsg('A key is already saved in this browser. Choose your folder to map it, or skip to keep the saved key.');
   $('keySetup').hidden = false;
 })();
 
