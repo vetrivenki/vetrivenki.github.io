@@ -218,7 +218,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26f · live answer area + connection test.</div>
+    <div class="note">Version 2026-10-26g · live answer area + connection test.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -1115,8 +1115,15 @@ $('folderChange').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
 // question and answers in one line. Shown in the Live answer box; the full card still follows below.
 let liveSaid='', liveInterim='', liveBusy=false, liveDirty=false, liveLastText='', liveTimer=null;
 function liveSource(){ return (liveSaid+' '+liveInterim).trim().split(/\s+/).slice(-40).join(' '); }
+function liveReason(){
+  if(!S.key) return 'No API key loaded — tap Folder (or Settings → Test connection)';
+  if(!listening) return 'Not listening — tap Start interview';
+  return '';
+}
 function scheduleLive(){
-  if(!S.liveAnswer || !S.key || !listening) return;
+  const why = liveReason();
+  if(why){ $('liveState').textContent = why; }
+  if(!S.liveAnswer || why) return;
   clearTimeout(liveTimer); liveTimer=setTimeout(runLive, 450);
 }
 function livePrompt(){
@@ -1164,6 +1171,7 @@ function resetLive(){ liveSaid=''; liveInterim=''; liveLastText=''; $('liveBody'
 $('liveToggle').addEventListener('change', e=>{ S.liveAnswer=e.target.checked; store.set('liveAnswer', S.liveAnswer?'1':'0'); $('liveBox').hidden=!S.liveAnswer; });
 $('liveToggle').checked = S.liveAnswer; $('liveBox').hidden = !S.liveAnswer;
 resetLive();
+$('liveState').textContent = liveReason() || 'waiting for a question';
 
 if(location.protocol==='file:' && store.get('hideFileBanner','')!=='1'){ $('fileBanner').hidden=false; $('fileBanner').title='Tap to hide'; $('fileBanner').style.cursor='pointer'; $('fileBanner').onclick=()=>{ $('fileBanner').hidden=true; store.set('hideFileBanner','1'); }; $('fileBanner').textContent += ' (Tap to hide.)'; }
 
@@ -1178,7 +1186,7 @@ matchMedia(MOBILE_Q).addEventListener?.('change', e=>{ if(!listening && e.matche
 if(isMobile){ const c=$('clear').cloneNode(true); c.id='clear2'; c.type='button'; c.onclick=()=>$('clear').click(); c.style.display='inline-block'; $('settings').querySelector('.grid').appendChild(c); }
 
 /* ---------- example state shown before first start ---------- */
-function showEmpty(){ answersEl.innerHTML='<div class="empty">Detected questions and short answers appear here.</div>'; }
+function showEmpty(){ answersEl.innerHTML='<div class="empty">Detected questions and short answers appear here.'+(S.key?'':' <b>No API key is loaded yet — tap Folder.</b>')+'</div>'; }
 let examples=true;
 function clearExamples(){ if(!examples) return; examples=false; $('clear').click(); }
 (function seed(){
