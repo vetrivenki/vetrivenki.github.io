@@ -136,6 +136,7 @@ button.chip{cursor:pointer}
 .progress.none{color:var(--muted)}
 .progress.err{border-style:solid;border-color:var(--live);color:var(--live)}
 .progress.ok{border-style:solid;border-color:#1f8a4c;color:#1f8a4c}
+.turn.fixed .final::after{content:" ✎";color:var(--accent);font-size:.7em}
 .qa.live .a{color:var(--muted)}
 .caret{animation:blink 1s steps(1) infinite;color:var(--accent)}@keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.caret{animation:none}}
@@ -222,6 +223,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         </select></label>
       <label style="flex-direction:row;align-items:center;gap:8px"><input id="showDetails" type="checkbox"> Expand keyword details by default</label>
       <label style="flex-direction:row;align-items:center;gap:8px"><input id="liveToggle" type="checkbox"> Live answer while the question is being asked</label>
+      <label style="flex-direction:row;align-items:center;gap:8px"><input id="acToggle" type="checkbox"> Auto-correct speech (tech terms, fillers)</label>
       <label class="wide">Technologies — only questions in these areas get answered (comma separated)
         <textarea id="tech" rows="2"></textarea></label>
       <label class="wide">Job description (optional) — answers are tailored to this role
@@ -239,7 +241,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26j · answer progress.</div>
+    <div class="note">Version 2026-10-26k · auto-correct.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -324,7 +326,7 @@ document.documentElement.dataset.device = isMobile ? 'mobile' : 'desktop';
 /* ---------- settings ---------- */
 const S = {
   tFont: +store.get('tFont'+DEV, isMobile?15:20), aFont: +store.get('aFont'+DEV, isMobile?18:22), split: +store.get('split'+DEV, isMobile?35:55),
-  lang: store.get('lang', 'en-US'), key: store.get('key', ''), tech: store.get('tech', 'AWS, Amazon EKS, Kubernetes, Docker, Terraform, CI/CD, DevOps, SRE, observability, AI engineering, LLMs, RAG, AI agents, MLOps, Python'), jd: store.get('jd', ''), resume: store.get('resume', ''), model: (store.get('modelFastMigrated','')==='1' ? store.get('model', 'claude-haiku-5-5') : (store.set('modelFastMigrated','1'), 'claude-haiku-5-5')), showDetails: store.get('showDetails','1')==='1', liveAnswer: store.get('liveAnswer','1')==='1'
+  lang: store.get('lang', 'en-US'), key: store.get('key', ''), tech: store.get('tech', 'AWS, Amazon EKS, Kubernetes, Docker, Terraform, CI/CD, DevOps, SRE, observability, AI engineering, LLMs, RAG, AI agents, MLOps, Python'), jd: store.get('jd', ''), resume: store.get('resume', ''), model: (store.get('modelFastMigrated','')==='1' ? store.get('model', 'claude-haiku-5-5') : (store.set('modelFastMigrated','1'), 'claude-haiku-5-5')), showDetails: store.get('showDetails','1')==='1', liveAnswer: store.get('liveAnswer','1')==='1', autoCorrect: store.get('autoCorrect','1')==='1'
 };
 function applySettings(){
   root.setProperty('--tFont', S.tFont+'px'); root.setProperty('--aFont', S.aFont+'px');
@@ -332,7 +334,7 @@ function applySettings(){
   $('tFont').value=S.tFont; $('aFont').value=S.aFont; $('split').value=S.split;
   $('tVal').textContent=S.tFont+'px'; $('aVal').textContent=S.aFont+'px'; $('sVal').textContent=S.split+'%';
   $('lang').value=S.lang; $('key').value=S.key; $('tech').value=S.tech; $('jd').value=S.jd; $('resume').value=S.resume; $('model').value=S.model;
-  for(const k in S) if(k!=='liveAnswer') store.set(['tFont','aFont','split'].includes(k) ? k+DEV : k, k==='showDetails' ? (S[k]?'1':'0') : S[k]);
+  for(const k in S) if(k!=='liveAnswer' && k!=='autoCorrect') store.set(['tFont','aFont','split'].includes(k) ? k+DEV : k, k==='showDetails' ? (S[k]?'1':'0') : S[k]);
   $('showDetails').checked = S.showDetails;
   const w = S.resume ? S.resume.split(/\s+/).length : 0;
   $('cvState').textContent = w ? 'Resume ✓ ('+w+' words) · ' : 'No resume · ';
@@ -414,7 +416,66 @@ function newTurn(){
   current.innerHTML = `<span class="final"></span> <span class="interim"></span>`;
   transcriptEl.appendChild(current); turns++; $('turnCount').textContent = turns+(turns===1?' turn':' turns');
 }
+/* ---------- auto-correct: fix misheard tech terms instantly, then Claude cleans the sentence ---------- */
+const FIXES = [
+  [/\b(a\.?\s?w\.?\s?s|aws|a w s|aw's|aw)\b(?=\s+(is|are|resource|resources|services?|cloud|account|lambda|eks|ec2|s3|iam|vpc|architecture|region|regions|solutions?|certified)\b)/gi, 'AWS'],
+  [/\b(a\.?\s?w\.?\s?s|a w s)\b/gi, 'AWS'],
+  [/\baws\b/gi, 'AWS'],
+  [/\b(e\.?\s?k\.?\s?s|eks|e k s|ekes)\b/gi, 'EKS'],
+  [/\b(e\.?\s?c\.?\s?2|ec2|easy two|easy 2|e c two)\b/gi, 'EC2'],
+  [/\b(e\.?\s?c\.?\s?s|e c s)\b/gi, 'ECS'],
+  [/\b(e\.?\s?c\.?\s?r|e c r)\b/gi, 'ECR'],
+  [/\b(s\s?3|s three|ask three)\b/gi, 'S3'],
+  [/\b(i\.a\.m\.?|iam)(?=\W|$)/gi, 'IAM'],
+  [/\bi am (?=(role|roles|policy|policies|permissions|user|users)\b)/gi, 'IAM '],
+  [/\b(v\.?\s?p\.?\s?c|v p c)\b/gi, 'VPC'],
+  [/\b(r\.?\s?d\.?\s?s|r d s)\b/gi, 'RDS'],
+  [/\b(cloud watch|cloudwatch)\b/gi, 'CloudWatch'],
+  [/\b(cloud trail|cloudtrail)\b/gi, 'CloudTrail'],
+  [/\b(cloud formation|cloudformation)\b/gi, 'CloudFormation'],
+  [/\broute fifty three\b|\broute 53\b/gi, 'Route 53'],
+  [/\b(lamda|lambda)\b/gi, 'Lambda'],
+  [/\b(bed rock|bedrock)\b/gi, 'Bedrock'],
+  [/\b(cooper ?net(t)?ies|cuber ?net(t)?es|kubernetes|kubernetes's|cooper nettie's)\b/gi, 'Kubernetes'],
+  [/\b(k8s|k eights)\b/gi, 'Kubernetes'],
+  [/\b(cube ?(cuddle|control|c t l|ctl)|kube ?(cuddle|control|ctl))\b/gi, 'kubectl'],
+  [/\b(carpenter|karpenter)\b/gi, 'Karpenter'],
+  [/\b(psyllium|sillium|cilium|silly um)\b/gi, 'Cilium'],
+  [/\b(helm chart|helm)\b/gi, m=>m.toLowerCase()==='helm chart'?'Helm chart':'Helm'],
+  [/\b(h\.?\s?p\.?\s?a|h p a)\b/gi, 'HPA'],
+  [/\b(p\.?\s?d\.?\s?b|p d b)\b/gi, 'PDB'],
+  [/\b(terra ?form|terraform)\b/gi, 'Terraform'],
+  [/\b(open tofu)\b/gi, 'OpenTofu'],
+  [/\b(dyna ?trace|dynatrace|diner trace)\b/gi, 'Dynatrace'],
+  [/\b(prometheus|promethius)\b/gi, 'Prometheus'],
+  [/\b(grafana|grafanna)\b/gi, 'Grafana'],
+  [/\b(jenkins|jenkin)\b/gi, 'Jenkins'],
+  [/\b(git ?hub actions)\b/gi, 'GitHub Actions'],
+  [/\b(git ?lab)\b/gi, 'GitLab'],
+  [/\b(c\.?\s?i\.?\s?c\.?\s?d|ci ?cd|c i c d|ci slash cd)\b/gi, 'CI/CD'],
+  [/\b(s\.?\s?r\.?\s?e|s r e)\b/gi, 'SRE'],
+  [/\b(l\.?\s?l\.?\s?m|l l m)(s)?\b/gi, (m,a,pl)=>'LLM'+(pl||'')],
+  [/\b(r\.?\s?a\.?\s?g|rag)\b/gi, 'RAG'],
+  [/\b(m\.?\s?c\.?\s?p|m c p)\b/gi, 'MCP'],
+  [/\b(rto)\b/gi, 'RTO'], [/\b(rpo)\b/gi, 'RPO'],
+  [/\b(mttr)\b/gi, 'MTTR'],
+  [/\b(dev ?ops)\b/gi, 'DevOps'],
+  [/\b(ml ?ops)\b/gi, 'MLOps'],
+  [/\b(docker)\b/gi, 'Docker'],
+  [/\b(python)\b/gi, 'Python'],
+  [/\b(claude|cloud ai)\b(?=\s+(model|api|code|sonnet|haiku|opus))/gi, 'Claude'],
+];
+const FILLER_RE = /(^|[\s,.])(um+|uh+|er+|ah+|hmm+)(?=[\s,.]|$)/gi;
+function autoCorrect(t){
+  if(!S.autoCorrect) return t;
+  let out = t;
+  for(const [re, rep] of FIXES) out = out.replace(re, rep);
+  out = out.replace(FILLER_RE, '$1').replace(/\s{2,}/g,' ').replace(/^[\s,]+/,'').trim();
+  if(out) out = out[0].toUpperCase() + out.slice(1);
+  return out;
+}
 function addFinal(text){
+  text = autoCorrect(text);
   if(typeof H!=='undefined') H.lastSpeech=Date.now();
   text = stripRepeat(text);
   if(!text){ if(current) current.querySelector('.interim').textContent=''; return; }
@@ -433,7 +494,7 @@ function setInterim(text){
   if(text && typeof H!=='undefined') H.lastSpeech=Date.now();
   liveInterim = text; if(text) scheduleLive();
   if(!current || Date.now()-lastFinalAt > GAP_MS){ if(!text) return; newTurn(); lastFinalAt=Date.now(); }
-  current.querySelector('.interim').textContent = text;
+  current.querySelector('.interim').textContent = autoCorrect(text);
   scrollEnd(transcriptEl);
 }
 function finishTurn(){ flushSpeech(); }
@@ -461,6 +522,7 @@ async function flushSpeech(){
   progress('work', '⏳ Checking for a question in “'+snippet+'”…');
   try{
     const items = await analyze(text);
+    applyCorrection(text, els);
     const secs = ((performance.now()-t0)/1000).toFixed(1)+' s';
     if(items.length){ els.forEach(el=>el.classList.add('q')); progress('ok', '✓ Answered '+items.length+' question'+(items.length>1?'s':'')+' in '+secs); }
     else progress('none', 'No question found in “'+snippet+'” ('+secs+'). Ask a full question, or name a topic.');
@@ -510,7 +572,9 @@ For each question give:
 - "resume": supporting facts from the resume, as described above ([] if no resume).
 - "followUp" and "followUpOf": only for follow-ups, as described above.
 
-Reply with JSON only: {"items":[{"question":"","answer":"","keywords":[""],"details":[{"term":"","detail":""}],"resume":[],"followUp":false,"followUpOf":0}]}. If there is no question, reply {"items":[]}.`;
+Also return "corrected": NEW SPEECH rewritten as clean text with misheard technical terms fixed ("Aw" = AWS, "cooper netties" = Kubernetes), fillers removed and punctuation added; same meaning, nothing added.
+
+Reply with JSON only: {"corrected":"","items":[{"question":"","answer":"","keywords":[""],"details":[{"term":"","detail":""}],"resume":[],"followUp":false,"followUpOf":0}]}. If there is no question, still reply with "corrected" and "items":[].`;
 }
 // Streams the reply so answers appear word by word; the long system prompt (resume + JD) is cached
 // by the API, which makes every later question faster.
@@ -600,9 +664,24 @@ function previousQA(){
 function buildUser(text){
   return `EARLIER CONVERSATION:\n${recentContext()}\n\nPREVIOUS Q&A (most recent last):\n${previousQA()}\n\nNEW SPEECH:\n${text}`;
 }
+let lastCorrected='';
 async function analyze(text){
-  try{ return parseItems(await callClaude(systemPrompt(), buildUser(text), {onText:showLive, kind:'main'})); }
+  try{
+    const out = await callClaude(systemPrompt(), buildUser(text), {onText:showLive, kind:'main'});
+    lastCorrected = '';
+    try{ const j = JSON.parse(out.match(/\{[\s\S]*\}/)[0]); lastCorrected = typeof j.corrected==='string' ? j.corrected.trim() : ''; }catch(e){}
+    return parseItems(out);
+  }
   finally{ clearLive(); }
+}
+// Swap the raw words in the transcript for Claude's cleaned version (only when it is the end of a turn).
+function applyCorrection(raw, els){
+  if(!S.autoCorrect || !lastCorrected || !els.length) return;
+  const el = els[els.length-1], f = el.querySelector('.final'); if(!f) return;
+  const cur = f.textContent, rawT = raw.trim();
+  if(!rawT || !cur.endsWith(rawT) || lastCorrected === rawT) return;
+  f.textContent = (cur.slice(0, cur.length-rawT.length) + lastCorrected).trim();
+  el.classList.add('fixed'); el.title = 'Auto-corrected. Heard: ' + rawT;
 }
 async function askTyped(q){
   progress('work', '⏳ Answering “'+q+'”…');
@@ -1221,6 +1300,7 @@ async function runLive(){
 }
 function resetLive(){ liveSaid=''; liveInterim=''; liveLastText=''; $('liveBody').innerHTML='<div class="lq">Answers appear here while the question is still being asked.</div>'; $('liveBox').classList.add('idle'); }
 $('liveToggle').addEventListener('change', e=>{ S.liveAnswer=e.target.checked; store.set('liveAnswer', S.liveAnswer?'1':'0'); $('liveBox').hidden=!S.liveAnswer; });
+$('acToggle').checked = S.autoCorrect; $('acToggle').addEventListener('change', e=>{ S.autoCorrect=e.target.checked; store.set('autoCorrect', S.autoCorrect?'1':'0'); });
 $('liveToggle').checked = S.liveAnswer; $('liveBox').hidden = !S.liveAnswer;
 resetLive();
 $('liveState').textContent = liveReason() || 'waiting for a question';
