@@ -123,6 +123,14 @@ mark{background:var(--mark);color:var(--markInk);padding:0 .15em;border-radius:3
 .livebox .la{font-size:var(--aFont);line-height:1.4;font-weight:500;margin-top:2px}
 .livebox.idle .la{opacity:.6}
 @media (prefers-reduced-motion:reduce){.livebox.busy .ldot{animation:none}}
+.health{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1 1 100%;order:0}
+.chip{font:500 12px/1 var(--mono);padding:6px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);white-space:nowrap;min-height:0}
+button.chip{cursor:pointer}
+.chip.ok{border-color:#1f8a4c;color:#1f8a4c}
+.chip.bad{border-color:var(--live);color:var(--live);font-weight:600}
+.chip.wait{border-color:var(--accent);color:var(--accent)}
+.herr{font-size:12px;color:var(--live);flex:1 1 100%}
+.herr:empty{display:none}
 .qa.live .a{color:var(--muted)}
 .caret{animation:blink 1s steps(1) infinite;color:var(--accent)}@keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.caret{animation:none}}
@@ -170,6 +178,14 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
 <div class="bar">
   <button id="toggle" class="btn primary">Start interview</button>
   <div id="status" class="status"><span class="dot"></span><span id="statusText">Idle</span></div>
+  <div class="health" id="health" aria-live="polite">
+    <button class="chip" id="hMic" type="button">Mic off</button>
+    <button class="chip" id="hKey" type="button">No key</button>
+    <button class="chip" id="hClaude" type="button">Claude ?</button>
+    <span class="chip" id="hAns">Answers 0</span>
+    <span class="chip" id="hLive">Live</span>
+    <span class="herr" id="hErr"></span>
+  </div>
   <div class="spacer"></div>
   <button id="fontDown" class="btn" aria-label="Smaller text">A−</button>
   <button id="fontUp" class="btn" aria-label="Larger text">A+</button>
@@ -218,7 +234,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26g · live answer area + connection test.</div>
+    <div class="note">Version 2026-10-26h · health bar.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -393,6 +409,7 @@ function newTurn(){
   transcriptEl.appendChild(current); turns++; $('turnCount').textContent = turns+(turns===1?' turn':' turns');
 }
 function addFinal(text){
+  if(typeof H!=='undefined') H.lastSpeech=Date.now();
   text = stripRepeat(text);
   if(!text){ if(current) current.querySelector('.interim').textContent=''; return; }
   remember(text);
@@ -407,6 +424,7 @@ function addFinal(text){
   queueSpeech(text, current);
 }
 function setInterim(text){
+  if(text && typeof H!=='undefined') H.lastSpeech=Date.now();
   liveInterim = text; if(text) scheduleLive();
   if(!current || Date.now()-lastFinalAt > GAP_MS){ if(!text) return; newTurn(); lastFinalAt=Date.now(); }
   current.querySelector('.interim').textContent = text;
@@ -486,6 +504,18 @@ Reply with JSON only: {"items":[{"question":"","answer":"","keywords":[""],"deta
 // Streams the reply so answers appear word by word; the long system prompt (resume + JD) is cached
 // by the API, which makes every later question faster.
 async function callClaude(system, user, opts={}){
+  const t0 = performance.now();
+  try{
+    const out = await callClaudeWithFallback(system, user, opts);
+    const ms = performance.now()-t0;
+    H.claude='ok'; H.claudeErr=''; H.claudeMs=ms;
+    if(opts.kind==='main') H.answerMs=ms;
+    if(opts.kind==='live') H.liveMs=ms;
+    renderHealth();
+    return out;
+  }catch(e){ H.claude='bad'; H.claudeErr=e.message; renderHealth(); throw e; }
+}
+async function callClaudeWithFallback(system, user, opts){
   try{ return await callClaudeOnce(system, user, opts); }
   catch(e){
     if(e.modelMissing){          // model name not available on this account: try the other one once
@@ -560,7 +590,7 @@ function buildUser(text){
   return `EARLIER CONVERSATION:\n${recentContext()}\n\nPREVIOUS Q&A (most recent last):\n${previousQA()}\n\nNEW SPEECH:\n${text}`;
 }
 async function analyze(text){
-  try{ return parseItems(await callClaude(systemPrompt(), buildUser(text), {onText:showLive})); }
+  try{ return parseItems(await callClaude(systemPrompt(), buildUser(text), {onText:showLive, kind:'main'})); }
   finally{ clearLive(); }
 }
 async function askTyped(q){
@@ -568,7 +598,7 @@ async function askTyped(q){
   if(!S.key){ showBanner('Add your Claude API key in Settings to get answers.'); return; }
   setThinking(true);
   try{
-    let items; try{ items = parseItems(await callClaude(systemPrompt(), buildUser(q), {onText:showLive})); } finally{ clearLive(); }
+    let items; try{ items = parseItems(await callClaude(systemPrompt(), buildUser(q), {onText:showLive, kind:'main'})); } finally{ clearLive(); }
     if(items.length) items.forEach(addCard); else addCard({question:q, answer:'Not answered: outside your Technologies list (Settings).', keywords:[]});
     hideBanner();
   }catch(err){ showBanner(err.message); }
@@ -582,6 +612,7 @@ function highlight(answer, kws){
   return html.replace(re,'<mark>$1</mark>');
 }
 function addCard(it){
+  if(typeof H!=='undefined') H.answers++;
   if(typeof liveSaid!=='undefined'){ liveSaid=''; liveLastText=''; }
   answersEl.querySelector('.empty')?.remove();
   qCount++; $('qCount').textContent = qCount+(qCount===1?' question':' questions');
@@ -694,7 +725,7 @@ function stop(){
   $('toggle').textContent='Start interview'; $('toggle').className='btn primary';
 }
 $('resumeBtn').onclick = ()=>{ if(!listening) return; hideResume(); quickEnds=0; gen++; try{ rec && rec.abort(); }catch(e){} try{ startRec(); }catch(err){ showResume(); } };
-$('clear').onclick = ()=>{ recentWords=''; if(typeof resetLive==='function') resetLive(); transcriptEl.innerHTML=''; answersEl.innerHTML=''; turns=0; qCount=0; answered.length=0; buffer=''; current=null; hideBanner();
+$('clear').onclick = ()=>{ if(typeof H!=='undefined'){ H.answers=0; H.answerMs=0; H.liveMs=0; } recentWords=''; if(typeof resetLive==='function') resetLive(); transcriptEl.innerHTML=''; answersEl.innerHTML=''; turns=0; qCount=0; answered.length=0; buffer=''; current=null; hideBanner();
   $('turnCount').textContent='0 turns'; $('qCount').textContent='0 questions'; showEmpty(); };
 
 /* ---------- microphone test (required once per page load before an interview) ---------- */
@@ -1160,7 +1191,7 @@ async function runLive(){
   try{
     const ctx = [...transcriptEl.querySelectorAll('.final')].slice(-3).map(e=>e.textContent).join('\n').slice(-600);
     const out = await callClaude(livePrompt(), `Recent conversation:\n${ctx}\n\nSpeech so far (still talking):\n${text}`,
-                                 {model:'claude-haiku-5-5', maxTokens:150, onText:t=>renderLive(t,false)});
+                                 {model:'claude-haiku-5-5', maxTokens:150, kind:'live', onText:t=>renderLive(t,false)});
     renderLive(out, true);
     $('liveState').textContent='listening';
   }catch(e){ $('liveState').textContent='error'; $('liveBody').insertAdjacentHTML('beforeend', '<div class="lerr">'+esc(e.message||'Live answer failed')+'</div>'); }
@@ -1172,6 +1203,42 @@ $('liveToggle').addEventListener('change', e=>{ S.liveAnswer=e.target.checked; s
 $('liveToggle').checked = S.liveAnswer; $('liveBox').hidden = !S.liveAnswer;
 resetLive();
 $('liveState').textContent = liveReason() || 'waiting for a question';
+
+/* ---------- always-on health bar: mic, key, Claude connection, answer timing ---------- */
+const H = { lastSpeech:0, claude:'untested', claudeMs:0, claudeErr:'', answers:0, answerMs:0, liveMs:0 };
+function chip(id, state, text){ const c=$(id); c.className='chip '+state; c.textContent=text; }
+function renderHealth(){
+  // mic
+  if(!listening) chip('hMic','off','Mic off');
+  else if(Date.now()-H.lastSpeech < 3000) chip('hMic','ok','Mic ● hearing');
+  else chip('hMic','ok','Mic ● on');
+  // key
+  const kf = store.get('keyFile','');
+  chip('hKey', S.key?'ok':'bad', S.key ? 'Key ✓' : 'No key');
+  $('hKey').title = S.key ? (kf ? 'From '+kf : 'Saved in this browser') : 'Tap to choose your folder';
+  // Claude
+  if(H.claude==='ok') chip('hClaude','ok','Claude ✓ '+(H.claudeMs/1000).toFixed(1)+' s');
+  else if(H.claude==='bad') chip('hClaude','bad','Claude ✗');
+  else if(H.claude==='testing') chip('hClaude','wait','Claude …');
+  else chip('hClaude','off','Claude ?');
+  $('hClaude').title = H.claudeErr || 'Tap to test the connection';
+  // answers
+  chip('hAns', H.answers?'ok':'off', 'Answers '+H.answers+(H.answerMs?' · '+(H.answerMs/1000).toFixed(1)+' s':''));
+  chip('hLive', !S.liveAnswer?'off':(H.liveMs?'ok':'off'), S.liveAnswer ? ('Live '+(H.liveMs?(H.liveMs/1000).toFixed(1)+' s':'ready')) : 'Live off');
+  $('hErr').textContent = H.claude==='bad' ? H.claudeErr : '';
+}
+async function testClaude(){
+  if(!S.key){ H.claude='bad'; H.claudeErr='No API key loaded. Tap Folder.'; renderHealth(); return; }
+  H.claude='testing'; renderHealth();
+  try{ await callClaude('Reply with the single word OK.', 'ping', {maxTokens:5, kind:'test'}); }catch(e){}
+  renderHealth();
+}
+$('hMic').onclick = ()=> T.open ? closeTest() : openTest();
+$('hKey').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
+$('hClaude').onclick = testClaude;
+setInterval(renderHealth, 1000);
+renderHealth();
+setTimeout(()=>{ if(S.key) testClaude(); }, 1500);   // check the connection once when the page opens
 
 if(location.protocol==='file:' && store.get('hideFileBanner','')!=='1'){ $('fileBanner').hidden=false; $('fileBanner').title='Tap to hide'; $('fileBanner').style.cursor='pointer'; $('fileBanner').onclick=()=>{ $('fileBanner').hidden=true; store.set('hideFileBanner','1'); }; $('fileBanner').textContent += ' (Tap to hide.)'; }
 
