@@ -234,7 +234,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26h · health bar.</div>
+    <div class="note">Version 2026-10-26i · eager live answer.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -1172,11 +1172,19 @@ ${S.jd.slice(0,4000)}
 Reply in exactly two lines, nothing else:
 Q: <the likely full question, max 12 words>
 A: <direct, specific answer, max 25 words; wrap the 2-3 most important terms in **double asterisks**>
-If the speech is not a question yet or is out of scope, reply exactly: NONE`;
+Be eager: if the words could be the start of an in-scope question, guess the most likely full question and answer it.
+Reply exactly NONE only for greetings, small talk, audio checks ("can you hear me"), or speech that is clearly not a question.`;
 }
+let liveHeard='';
 function renderLive(t, done){
   const box=$('liveBox'), body=$('liveBody');
-  if(/^\s*NONE/i.test(t)){ if(done){ box.classList.add('idle'); $('liveState').textContent='waiting for a question'; } return; }
+  if(/^\s*NONE/i.test(t)){
+    if(done){
+      box.classList.add('idle'); $('liveState').textContent='not a question yet';
+      body.innerHTML = `<div class="lq">Heard: “${esc(liveHeard.split(/\s+/).slice(-14).join(' '))}”</div><div class="la">Not a question yet. Keep listening…</div>`;
+    }
+    return;
+  }
   const q=(t.match(/Q:\s*([^\n]*)/)||[])[1]||'', a=(t.match(/A:\s*([\s\S]*)/)||[])[1]||'';
   if(!q && !a) return;
   box.classList.remove('idle');
@@ -1187,13 +1195,13 @@ async function runLive(){
   const text = liveSource();
   if(text.split(/\s+/).filter(Boolean).length < 3 || text===liveLastText) return;
   if(liveBusy){ liveDirty=true; return; }
-  liveBusy=true; liveLastText=text; $('liveBox').classList.add('busy'); $('liveState').textContent='thinking…';
+  liveBusy=true; liveLastText=text; liveHeard=text; $('liveBox').classList.add('busy'); $('liveState').textContent='thinking…';
   try{
     const ctx = [...transcriptEl.querySelectorAll('.final')].slice(-3).map(e=>e.textContent).join('\n').slice(-600);
     const out = await callClaude(livePrompt(), `Recent conversation:\n${ctx}\n\nSpeech so far (still talking):\n${text}`,
                                  {model:'claude-haiku-5-5', maxTokens:150, kind:'live', onText:t=>renderLive(t,false)});
     renderLive(out, true);
-    $('liveState').textContent='listening';
+    if(!/^\s*NONE/i.test(out)) $('liveState').textContent='answered';
   }catch(e){ $('liveState').textContent='error'; $('liveBody').insertAdjacentHTML('beforeend', '<div class="lerr">'+esc(e.message||'Live answer failed')+'</div>'); }
   liveBusy=false; $('liveBox').classList.remove('busy');
   if(liveDirty){ liveDirty=false; runLive(); }
