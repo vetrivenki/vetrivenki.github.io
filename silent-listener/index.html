@@ -241,7 +241,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26k · auto-correct.</div>
+    <div class="note">Version 2026-10-27l · answers fixed (no thinking cut-off).</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -411,6 +411,8 @@ function stripRepeat(text){
 }
 function remember(text){ recentWords = (recentWords+' '+text.trim().split(/\s+/).map(normTok).filter(Boolean).join(' ')).trim().split(' ').slice(-60).join(' '); }
 function newTurn(){
+  // drop a previous paragraph that never got any final words
+  if(current && !current.querySelector('.final')?.textContent.trim()){ current.remove(); turns=Math.max(0,turns-1); }
   current=document.createElement('div'); current.className='turn';
   current.dataset.time = clock();
   current.innerHTML = `<span class="final"></span> <span class="interim"></span>`;
@@ -493,7 +495,8 @@ function addFinal(text){
 function setInterim(text){
   if(text && typeof H!=='undefined') H.lastSpeech=Date.now();
   liveInterim = text; if(text) scheduleLive();
-  if(!current || Date.now()-lastFinalAt > GAP_MS){ if(!text) return; newTurn(); lastFinalAt=Date.now(); }
+  if(!current || Date.now()-lastFinalAt > GAP_MS){ if(!text) return; newTurn(); }
+  if(text) lastFinalAt=Date.now();
   current.querySelector('.interim').textContent = autoCorrect(text);
   scrollEnd(transcriptEl);
 }
@@ -601,9 +604,10 @@ async function callClaudeWithFallback(system, user, opts){
   }
 }
 async function callClaudeOnce(system, user, opts={}){
-  const body = { model:opts.model||S.model, max_tokens:opts.maxTokens||1200, stream:true,
+  const body = { model:opts.model||S.model, max_tokens:opts.maxTokens||1500, stream:true, thinking:{type:'disabled'},
     system:[{type:'text', text:system, cache_control:{type:'ephemeral'}}],
     messages:[{role:'user',content:user}] };
+  if(opts.noThinkingField) delete body.thinking;
   let res;
   try{
     res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -618,6 +622,7 @@ async function callClaudeOnce(system, user, opts={}){
     if(res.status===401) throw new Error('API key rejected: '+msg);
     if(res.status===429) throw new Error('Rate limited. Answers resume in a moment.');
     if(res.status===400 && /credit/i.test(msg)) throw new Error('No API credits left. Add credits in the Claude Console billing page.');
+    if(res.status===400 && /thinking/i.test(msg) && !opts.noThinkingField){ return callClaudeOnce(system, user, {...opts, noThinkingField:true}); }
     if(res.status===404 || /model/i.test(msg) && /not.?found|invalid/i.test(msg)){ const err=new Error('Model not available: '+msg); err.modelMissing=true; throw err; }
     throw new Error('Claude error: '+msg);
   }
@@ -634,8 +639,10 @@ async function callClaudeOnce(system, user, opts={}){
       let ev; try{ ev = JSON.parse(line.slice(5)); }catch(e){ continue; }
       if(ev.type==='content_block_delta' && ev.delta?.text){ text += ev.delta.text; opts.onText?.(text); }
       else if(ev.type==='error') throw new Error('Claude error: '+(ev.error?.message||'stream failed'));
+      else if(ev.type==='message_delta' && ev.delta?.stop_reason==='max_tokens') opts.cutOff=true;
     }
   }
+  if(opts.cutOff && opts.kind==='main' && !text.trim().endsWith('}')) throw new Error('Answer was cut off before it finished. Try again.');
   return text.trim();
 }
 // Live preview card: shows the first question and the answer while it streams in.
