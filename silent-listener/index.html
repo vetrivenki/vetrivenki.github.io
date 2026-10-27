@@ -131,6 +131,11 @@ button.chip{cursor:pointer}
 .chip.wait{border-color:var(--accent);color:var(--accent)}
 .herr{font-size:12px;color:var(--live);flex:1 1 100%}
 .herr:empty{display:none}
+.progress{margin:8px 10px 0;padding:7px 10px;border-radius:8px;border:1px dashed var(--line);font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.progress.work{border-style:solid;border-color:var(--accent);color:var(--ink)}
+.progress.none{color:var(--muted)}
+.progress.err{border-style:solid;border-color:var(--live);color:var(--live)}
+.progress.ok{border-style:solid;border-color:#1f8a4c;color:#1f8a4c}
 .qa.live .a{color:var(--muted)}
 .caret{animation:blink 1s steps(1) infinite;color:var(--accent)}@keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.caret{animation:none}}
@@ -234,7 +239,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-26i · eager live answer.</div>
+    <div class="note">Version 2026-10-26j · answer progress.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -293,6 +298,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
   <section class="pane" id="bottom">
     <div class="head"><span>Questions · short answers <em id="thinking" hidden>· analyzing…</em></span><span><span id="cvState"></span><span id="qCount">0 questions</span></span></div>
     <div class="banner" id="banner" hidden></div>
+    <div class="progress" id="progress" role="status">Waiting for speech…</div>
     <div class="scroll" id="answers"></div>
     <form class="ask" id="askForm">
       <input id="askInput" placeholder="Type a question to test…" autocomplete="off">
@@ -451,22 +457,27 @@ async function flushSpeech(){
   if(text.split(/\s+/).length < (answered.length ? 1 : 3)) return;
   if(!S.key){ showBanner('Add your Claude API key in Settings to get answers.'); return; }
   busy=true; setThinking(true);
+  const snippet = text.split(/\s+/).slice(-14).join(' '), t0=performance.now();
+  progress('work', '⏳ Checking for a question in “'+snippet+'”…');
   try{
     const items = await analyze(text);
-    if(items.length) els.forEach(el=>el.classList.add('q'));
+    const secs = ((performance.now()-t0)/1000).toFixed(1)+' s';
+    if(items.length){ els.forEach(el=>el.classList.add('q')); progress('ok', '✓ Answered '+items.length+' question'+(items.length>1?'s':'')+' in '+secs); }
+    else progress('none', 'No question found in “'+snippet+'” ('+secs+'). Ask a full question, or name a topic.');
     items.forEach(addCard);
     hideBanner();
-  }catch(err){ showBanner(err.message); }
+  }catch(err){ showBanner(err.message); progress('err', '✗ '+err.message); }
   busy=false; setThinking(false);
   if(again){ again=false; flushSpeech(); }
 }
+function progress(kind, text){ const p=$('progress'); p.className='progress '+kind; p.textContent=text; }
 function setThinking(on){ $('thinking').hidden = !on; }
 
 const recentContext = () => [...transcriptEl.querySelectorAll('.final')].slice(-8).map(e=>e.textContent).join('\n').slice(-2000);
 function systemPrompt(){
   return `You silently help a person during a live spoken conversation. You receive speech-to-text, which often has no punctuation and has misheard words; infer what was really said.
 
-Task: find every question in NEW SPEECH that someone wants answered. Count direct questions and requests such as "explain…", "tell me about…", "walk me through…", "what's the difference between…". Skip small talk ("how are you"), rhetorical questions, and questions already in PREVIOUS Q&A.
+Task: find every question in NEW SPEECH that someone wants answered. Count direct questions and requests such as "explain…", "tell me about…", "walk me through…", "what's the difference between…". A short phrase that names an in-scope technical topic ("AWS resources list", "Kubernetes autoscaling", "Terraform state") is a request to explain it: answer it. Speech-to-text often mishears terms ("Aw" = AWS, "eks" = EKS, "cube" = Kube). Skip small talk ("how are you"), audio checks, rhetorical questions, and questions already in PREVIOUS Q&A.
 
 Scope. The person is a candidate in a job interview for an AWS / EKS / DevOps / AI engineer role. Answer ONLY these two kinds of question:
 1. Technical questions about: ${S.tech || 'AWS, EKS, DevOps, AI engineering'}.
@@ -594,14 +605,16 @@ async function analyze(text){
   finally{ clearLive(); }
 }
 async function askTyped(q){
+  progress('work', '⏳ Answering “'+q+'”…');
   if(typeof examples!=='undefined' && examples) clearExamples();
   if(!S.key){ showBanner('Add your Claude API key in Settings to get answers.'); return; }
   setThinking(true);
   try{
     let items; try{ items = parseItems(await callClaude(systemPrompt(), buildUser(q), {onText:showLive, kind:'main'})); } finally{ clearLive(); }
     if(items.length) items.forEach(addCard); else addCard({question:q, answer:'Not answered: outside your Technologies list (Settings).', keywords:[]});
+    progress(items.length?'ok':'none', items.length?'✓ Answered':'Outside your Technologies list');
     hideBanner();
-  }catch(err){ showBanner(err.message); }
+  }catch(err){ showBanner(err.message); progress('err','✗ '+err.message); }
   setThinking(false);
 }
 function highlight(answer, kws){
@@ -1153,7 +1166,7 @@ function liveReason(){
 }
 function scheduleLive(){
   const why = liveReason();
-  if(why){ $('liveState').textContent = why; }
+  $('liveState').textContent = why || (liveBusy ? $('liveState').textContent : 'hearing…');
   if(!S.liveAnswer || why) return;
   clearTimeout(liveTimer); liveTimer=setTimeout(runLive, 450);
 }
@@ -1172,7 +1185,7 @@ ${S.jd.slice(0,4000)}
 Reply in exactly two lines, nothing else:
 Q: <the likely full question, max 12 words>
 A: <direct, specific answer, max 25 words; wrap the 2-3 most important terms in **double asterisks**>
-Be eager: if the words could be the start of an in-scope question, guess the most likely full question and answer it.
+Be eager: if the words could be the start of an in-scope question, or just name an in-scope topic ("AWS resources list"), guess the most likely full question and answer it. Words are often misheard ("Aw" = AWS).
 Reply exactly NONE only for greetings, small talk, audio checks ("can you hear me"), or speech that is clearly not a question.`;
 }
 let liveHeard='';
@@ -1186,7 +1199,7 @@ function renderLive(t, done){
     return;
   }
   const q=(t.match(/Q:\s*([^\n]*)/)||[])[1]||'', a=(t.match(/A:\s*([\s\S]*)/)||[])[1]||'';
-  if(!q && !a) return;
+  if(!q && !a){ if(done && t.trim()){ box.classList.remove('idle'); body.innerHTML='<div class="la">'+esc(t.trim())+'</div>'; } return; }
   box.classList.remove('idle');
   const html = esc(a.trim()).replace(/\*\*(.+?)\*\*/g,'<mark>$1</mark>').replace(/\*\*/g,'');
   body.innerHTML = `<div class="lq">${esc(q.trim())}</div><div class="la">${html}${done?'':'<span class="caret">▍</span>'}</div>`;
@@ -1195,7 +1208,7 @@ async function runLive(){
   const text = liveSource();
   if(text.split(/\s+/).filter(Boolean).length < 3 || text===liveLastText) return;
   if(liveBusy){ liveDirty=true; return; }
-  liveBusy=true; liveLastText=text; liveHeard=text; $('liveBox').classList.add('busy'); $('liveState').textContent='thinking…';
+  liveBusy=true; liveLastText=text; liveHeard=text; $('liveBox').classList.add('busy'); $('liveState').textContent='⏳ thinking about “'+text.split(/\s+/).slice(-6).join(' ')+'”';
   try{
     const ctx = [...transcriptEl.querySelectorAll('.final')].slice(-3).map(e=>e.textContent).join('\n').slice(-600);
     const out = await callClaude(livePrompt(), `Recent conversation:\n${ctx}\n\nSpeech so far (still talking):\n${text}`,
