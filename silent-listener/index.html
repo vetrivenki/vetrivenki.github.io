@@ -241,7 +241,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27l · answers fixed (no thinking cut-off).</div>
+    <div class="note">Version 2026-10-27m · answers fixed, live box clears per question.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -411,6 +411,8 @@ function stripRepeat(text){
 }
 function remember(text){ recentWords = (recentWords+' '+text.trim().split(/\s+/).map(normTok).filter(Boolean).join(' ')).trim().split(' ').slice(-60).join(' '); }
 function newTurn(){
+  // a new paragraph = a new question: clear the previous live answer so it is not mistaken for this one
+  if(document.getElementById('liveBody') && S.liveAnswer){ $('liveBody').innerHTML='<div class="lq">Listening for the next question…</div>'; $('liveBox').classList.add('idle'); }
   // drop a previous paragraph that never got any final words
   if(current && !current.querySelector('.final')?.textContent.trim()){ current.remove(); turns=Math.max(0,turns-1); }
   current=document.createElement('div'); current.className='turn';
