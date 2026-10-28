@@ -244,7 +244,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
-    <span class="chip ver" id="hVer" title="App version">v2026-10-27u</span>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27v</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -297,7 +297,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27u · PDF, audio files, topic library.</div>
+    <div class="note">Version 2026-10-27v · error log.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -401,6 +401,15 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
 
 <script>
 const $ = id => document.getElementById(id);
+function logErr(where, msg){
+  try{
+    const log = JSON.parse(localStorage.getItem('sl_errlog')||'[]');
+    log.push({ at:new Date().toISOString(), where, msg:String(msg).slice(0,500), v:(document.getElementById('hVer')||{}).textContent||'', ua:navigator.userAgent.slice(0,120) });
+    localStorage.setItem('sl_errlog', JSON.stringify(log.slice(-30)));
+  }catch(e){}
+}
+window.addEventListener('error', e => logErr('page', (e.message||'error') + ' @' + (e.lineno||'?')));
+window.addEventListener('unhandledrejection', e => logErr('promise', e.reason && (e.reason.stack || e.reason.message) || String(e.reason)));
 const store = {
   get(k, d){ try{ const v = localStorage.getItem('sl_'+k); return v===null ? d : v; }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem('sl_'+k, v); }catch(e){} }
@@ -627,7 +636,7 @@ async function flushSpeech(){
   busy=false; setThinking(false);
   if(again){ again=false; flushSpeech(); }
 }
-function progress(kind, text){ const p=$('progress'); p.className='progress '+kind; p.textContent=text; }
+function progress(kind, text){ if(kind==='err') logErr('progress', text); const p=$('progress'); p.className='progress '+kind; p.textContent=text; }
 function setThinking(on){ $('thinking').hidden = !on; }
 
 const recentContext = () => [...transcriptEl.querySelectorAll('.final')].slice(-8).map(e=>e.textContent).join('\n').slice(-2000);
@@ -881,7 +890,7 @@ function addCard(it){
 function detailsHTML(det){
   return `<details class="kd" ${S.showDetails?'open':''}><summary>Keyword details</summary><dl>${det.map(d=>`<dt>${esc(String(d.term))}</dt><dd>${esc(String(d.detail))}</dd>`).join('')}</dl></details>`;
 }
-function showBanner(t){ const b=$('banner'); b.textContent=t; b.hidden=false; }
+function showBanner(t){ logErr('answers', t); const b=$('banner'); b.textContent=t; b.hidden=false; }
 function hideBanner(){ $('banner').hidden=true; }
 $('askForm').addEventListener('submit', e=>{ e.preventDefault(); const v=$('askInput').value.trim(); if(v){ askTyped(v); $('askInput').value=''; } });
 
@@ -1549,7 +1558,7 @@ async function claudeJSON(sys, user, o, check){
     catch(e){ if(attempt===2) throw new Error('Claude returned an unreadable reply twice; tap Retry'); prepMsg('⏳ Reply was not readable, asking again…', 'work'); }
   }
 }
-function prepMsg(text, kind){ const p=$('prepMsg'); p.className='progress pmsg '+(kind||''); p.textContent=text; }
+function prepMsg(text, kind){ const p=$('prepMsg'); p.className='progress pmsg '+(kind||''); p.textContent=text; if(kind==='err') logErr('prepare', text); }
 
 function setMode(prep){
   if(prep && listening) return;              // never leave a running interview
@@ -1594,7 +1603,7 @@ async function analyzeJD(){
   stopSpeaking();
   $('prepAnalyze').disabled = true;
   prepMsg('⏳ Checking your topic library…', 'work');
-  await loadFolderLibrary(true);
+  try{ await loadFolderLibrary(true); }catch(e){ logErr('library', e.name + ': ' + e.message); }
   prepMsg('⏳ Reading the JD and building a ' + prepTotal + '-minute plan…', 'work');
   const sys = `You plan interview preparation from a job description (JD).
 Rules:
@@ -1852,8 +1861,9 @@ async function folderHandle(write, interactive){
     const mode = write ? 'readwrite' : 'read';
     let p = await dir.queryPermission({mode});
     if(p !== 'granted' && interactive) p = await dir.requestPermission({mode});
+    if(p !== 'granted' && interactive) logErr('folder', 'permission ' + p + ' for ' + mode);
     return p === 'granted' ? dir : null;
-  }catch(e){ return null; }
+  }catch(e){ logErr('folder', e.name + ': ' + e.message); return null; }
 }
 async function loadFolderLibrary(interactive){
   const dir = await folderHandle(false, interactive); if(!dir) return -1;
@@ -1955,10 +1965,11 @@ echo "Done: $made new audio file(s), $kept already up to date."
 async function savePrepToFolder(){
   if(!PREP) return;
   const name = prepFileBase(), md = prepMarkdown();
+  prepMsg('⏳ Asking for permission to save in your folder…', 'work');
+  const dir = await folderHandle(true, true);          // first, while the click still counts for Chrome
   prepMsg('⏳ Making PDFs and saving…', 'work');
   let pdfAll;
   try{ pdfAll = await planPdf(); }catch(e){ prepMsg('✗ ' + e.message, 'err'); return; }
-  const dir = await folderHandle(true, true);
   if(!dir){
     blobDownload(name + '.pdf', pdfAll);
     setTimeout(() => download(name + '.md', md, 'text/markdown'), 600);
