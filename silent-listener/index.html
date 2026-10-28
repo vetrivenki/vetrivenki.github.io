@@ -138,6 +138,8 @@ button.chip{cursor:pointer}
 .progress.err{border-style:solid;border-color:var(--live);color:var(--live)}
 .progress.ok{border-style:solid;border-color:#1f8a4c;color:#1f8a4c}
 .turn.fixed .final::after{content:" ✎";color:var(--accent);font-size:.7em}
+.qa.older{display:none}
+.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-decoration:underline;text-transform:none;letter-spacing:0}
 .qa .cost{margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
 .qa.live .a{color:var(--muted)}
 .caret{animation:blink 1s steps(1) infinite;color:var(--accent)}@keyframes blink{50%{opacity:0}}
@@ -193,7 +195,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
-    <span class="chip ver" id="hVer" title="App version">v2026-10-27p</span>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27q</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -245,7 +247,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27p · monthly spend in health bar.</div>
+    <div class="note">Version 2026-10-27q · latest answer only.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -302,7 +304,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <div id="liveBody"></div>
   </section>
   <section class="pane" id="bottom">
-    <div class="head"><span>Questions · short answers <em id="thinking" hidden>· analyzing…</em></span><span><span id="cvState"></span><span id="qCount">0 questions</span></span></div>
+    <div class="head"><span>Questions · short answers <em id="thinking" hidden>· analyzing…</em></span><span><span id="cvState"></span><span id="qCount">0 questions</span> · <button id="showAll" class="linkbtn" type="button" aria-pressed="false">Show all</button></span></div>
     <div class="banner" id="banner" hidden></div>
     <div class="progress" id="progress" role="status">Waiting for speech…</div>
     <div class="scroll" id="answers"></div>
@@ -750,6 +752,13 @@ function highlight(answer, kws){
   const re = new RegExp('('+list.map(k=>esc(k).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','gi');
   return html.replace(re,'<mark>$1</mark>');
 }
+// Short answers pane: only the newest question and answer, unless "Show all" is on.
+let showAllQA = store.get('showAllQA','0')==='1';
+function applyLatestOnly(){
+  const cards = [...answersEl.querySelectorAll('.qa')];
+  cards.forEach((c,i)=> c.classList.toggle('older', !showAllQA && i < cards.length-1));
+  const b = $('showAll'); if(b){ b.textContent = showAllQA ? 'Latest only' : (cards.length>1 ? 'Show all ('+cards.length+')' : 'Show all'); b.setAttribute('aria-pressed', showAllQA?'true':'false'); }
+}
 function addCard(it){
   const cardCost = answerCost;
   if(typeof H!=='undefined') H.answers++;
@@ -767,7 +776,9 @@ function addCard(it){
     ${det.length?detailsHTML(det):(kws.length?`<div class="chips">${kws.map(k=>`<span>${esc(String(k))}</span>`).join('')}</div>`:'')}
     ${cv.length?`<div class="cv"><b>From your resume</b><ul>${cv.map(c=>`<li>${highlight(String(c), kws)}</li>`).join('')}</ul></div>`:''}
     ${cardCost?`<div class="cost">API cost ${money(cardCost)}</div>`:''}`;
-  answersEl.appendChild(card); scrollEnd(answersEl);
+  answersEl.appendChild(card);
+  applyLatestOnly();
+  if(showAllQA) scrollEnd(answersEl); else answersEl.scrollTop = 0;
 }
 function detailsHTML(det){
   return `<details class="kd" ${S.showDetails?'open':''}><summary>Keyword details</summary><dl>${det.map(d=>`<dt>${esc(String(d.term))}</dt><dd>${esc(String(d.detail))}</dd>`).join('')}</dl></details>`;
@@ -1391,6 +1402,8 @@ async function testClaude(){
 $('hMic').onclick = ()=> T.open ? closeTest() : openTest();
 $('hKey').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
 $('hClaude').onclick = testClaude;
+$('showAll').onclick = ()=>{ showAllQA = !showAllQA; store.set('showAllQA', showAllQA?'1':'0'); applyLatestOnly(); if(showAllQA) scrollEnd(answersEl); };
+applyLatestOnly();
 $('hCost').onclick = ()=>{ const p=$('progress'); p.className='progress ok'; p.textContent = 'API cost · this session '+money(COST.session)+' ('+COST.sessionCalls+' calls) · today '+money(COST.today)+' · this month '+money(COST.month)+(COST.lastTokens?' · last call '+money(COST.last)+' — '+COST.lastTokens:''); };
 setInterval(renderHealth, 1000);
 renderHealth();
