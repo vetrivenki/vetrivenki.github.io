@@ -140,6 +140,51 @@ button.chip{cursor:pointer}
 .turn.fixed .final::after{content:" ✎";color:var(--accent);font-size:.7em}
 .qa.older{display:none}
 .linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-decoration:underline;text-transform:none;letter-spacing:0}
+/* ---------- Prepare mode ---------- */
+.prep{flex:1 1 auto;min-height:0;overflow-y:auto;padding:4px 0 28px}
+.prepwrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.pmsg{position:sticky;top:0;z-index:3;margin:0;background:var(--panel)}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.pcard h2{margin:0;font-size:20px;text-wrap:balance}
+.pcard h3{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent)}
+.pcard p,.pcard li{font-size:15px;line-height:1.55}
+.pcard ul{margin:0;padding-left:1.2em}
+.pcard section{display:flex;flex-direction:column}
+.plabel{font-size:13px;font-weight:600;color:var(--ink)}
+.pcard textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:10px;font:inherit;font-size:14px;resize:vertical}
+.pcard select,.pnum{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 8px;font:inherit;font-size:14px}
+.pnum{width:84px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.durs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dur[aria-pressed="true"],#modeBtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sm{padding:5px 12px;font-size:13px}
+.phead{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between}
+.phead>div:first-child{min-width:0;flex:1 1 320px}
+.pstats{display:flex;gap:16px;font-size:13px;color:var(--muted)} .pstats b{color:var(--ink);font-size:17px;font-variant-numeric:tabular-nums}
+.pgap{font-size:14px;line-height:1.5;display:flex;flex-direction:column;gap:4px}
+.okc{color:#1f8a4c}.gapc{color:#b7791f}
+.ptable{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.prow{display:grid;grid-template-columns:26px minmax(0,1fr) 82px 62px 120px auto;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--line);font-size:14px}
+.prow:first-child{border-top:0}
+.pn{color:var(--muted);font-variant-numeric:tabular-nums}
+.pt{display:flex;flex-direction:column;min-width:0}.pt small{color:var(--muted);font-size:12px;line-height:1.4}
+.pm{font-variant-numeric:tabular-nums}.ps{font-size:13px;color:var(--muted)}
+.badge{font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;text-align:center;color:#fff}
+.p-crit{background:#c53030}.p-high{background:#b45309}.p-med{background:#7c6a0a}.p-low{background:#5b6472}
+.pa{display:flex;gap:10px;align-items:center;justify-content:flex-end}
+.stud{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.player{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.pq{border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-bottom:8px}
+.pq summary{cursor:pointer;font-size:15px;line-height:1.45}
+.pq .a{margin-top:8px;font-size:15px;line-height:1.55}
+.pdet{margin-top:6px;font-size:14px;color:var(--muted);line-height:1.55}
+.cvbox{border-left:3px solid var(--accent);padding-left:12px}
+@media (max-width:640px), (pointer:coarse) and (max-width:950px){
+  .prow{grid-template-columns:22px minmax(0,1fr) auto}
+  .prow .pm,.prow .ps{display:none}
+  .prow .pa{grid-column:2 / -1;justify-content:flex-start}
+  .pcard{padding:14px}
+}
 .qa .cost{margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
 .qa.live .a{color:var(--muted)}
 .caret{animation:blink 1s steps(1) infinite;color:var(--accent)}@keyframes blink{50%{opacity:0}}
@@ -195,13 +240,14 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
-    <span class="chip ver" id="hVer" title="App version">v2026-10-27q</span>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27r</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
   <button id="fontDown" class="btn" aria-label="Smaller text">A−</button>
   <button id="fontUp" class="btn" aria-label="Larger text">A+</button>
   <button id="clear" class="btn">Clear</button>
+  <button id="modeBtn" class="btn" type="button" aria-pressed="false">Prepare</button>
   <button id="testBtn" class="btn">Test mic</button>
   <button id="folderBtn" class="btn" type="button">Folder</button>
   <button id="viewBtn" class="btn" aria-label="Change view">View: Split</button>
@@ -247,7 +293,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27q · latest answer only.</div>
+    <div class="note">Version 2026-10-27r · Interview Preparation.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -314,6 +360,40 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     </form>
   </section>
 </main>
+
+<section id="prepView" class="prep" hidden aria-label="Interview preparation">
+  <div class="prepwrap">
+    <div class="progress pmsg" id="prepMsg" role="status">Pick a job description and how long you want to study.</div>
+
+    <div class="pcard" id="prepSetup">
+      <h2>Interview preparation</h2>
+      <label for="prepJd" class="plabel">Job description</label>
+      <textarea id="prepJd" rows="7" placeholder="Paste the job description, or load a file below…"></textarea>
+      <div class="row"><input id="prepJdFile" type="file" accept=".pdf,.txt,.md"><span id="prepJdMsg" class="note"></span></div>
+      <div class="row note" id="prepResume"></div>
+      <span class="plabel">Study time (minimum 30 minutes)</span>
+      <div class="durs" role="group" aria-label="Study time">
+        <button type="button" class="btn dur" data-min="30">30 min</button>
+        <button type="button" class="btn dur" data-min="45">45 min</button>
+        <button type="button" class="btn dur" data-min="60">60 min</button>
+        <button type="button" class="btn dur" data-min="90">90 min</button>
+        <button type="button" class="btn dur" data-min="120">120 min</button>
+        <label class="row note" for="prepCustom">Custom <input id="prepCustom" type="number" min="30" step="5" placeholder="min" class="pnum"></label>
+      </div>
+      <div class="row">
+        <label for="prepModel" class="plabel">Quality</label>
+        <select id="prepModel">
+          <option value="claude-sonnet-5-5">Better study material (Sonnet)</option>
+          <option value="claude-haiku-5-5">Cheaper (Haiku)</option>
+        </select>
+      </div>
+      <div class="row"><button id="prepAnalyze" class="btn primary" type="button">Analyze JD &amp; make plan</button><span id="prepEst" class="note"></span></div>
+    </div>
+
+    <div class="pcard" id="prepPlan" hidden></div>
+    <div class="pcard" id="prepStudy" hidden></div>
+  </div>
+</section>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -1122,7 +1202,7 @@ function saveFiles(sx){
 }
 $('sumSave').onclick = ()=> session?.end && saveFiles(session);
 $('sumClose').onclick = ()=> $('sumPanel').classList.remove('open');
-$('toggle').onclick = ()=> listening ? endInterview() : (micVerified ? beginInterview() : openTest(beginInterview));
+$('toggle').onclick = ()=>{ if(!listening && typeof setMode==='function' && !$('prepView').hidden) setMode(false); listening ? endInterview() : (micVerified ? beginInterview() : openTest(beginInterview)); };
 $('toggle').textContent='Start interview';
 const _stop = stop;
 stop = function(){ clearInterval(clockTimer); _stop(); };
@@ -1408,6 +1488,364 @@ $('hCost').onclick = ()=>{ const p=$('progress'); p.className='progress ok'; p.t
 setInterval(renderHealth, 1000);
 renderHealth();
 setTimeout(()=>{ if(S.key) testClaude(); }, 1500);   // check the connection once when the page opens
+
+/* ---------- Interview Preparation (phase 1): JD → timed plan → study guides → read aloud ---------- */
+let PREP = null; try{ PREP = JSON.parse(store.get('prep','null')); }catch(e){ PREP = null; }
+let PLIB = {};   try{ PLIB = JSON.parse(store.get('prepLibrary','{}')) || {}; }catch(e){ PLIB = {}; }   // guides kept for reuse across JDs
+let prepTotal = Math.max(30, +store.get('prepTotal', 60) || 60);
+const savePrep = () => store.set('prep', JSON.stringify(PREP));
+const saveLib  = () => store.set('prepLibrary', JSON.stringify(PLIB));
+const depthOf  = m => m <= 30 ? 'quick' : m <= 60 ? 'standard' : 'detailed';
+const depthRank = d => ({quick:0, standard:1, detailed:2})[d] || 0;
+const topicKey = n => String(n).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+const guideOf  = t => PLIB[topicKey(t.name)]?.guide || null;
+const estTok   = s => Math.ceil(String(s||'').length / 4);
+function prepMsg(text, kind){ const p=$('prepMsg'); p.className='progress pmsg '+(kind||''); p.textContent=text; }
+
+function setMode(prep){
+  if(prep && listening) return;              // never leave a running interview
+  $('prepView').hidden = !prep; $('app').hidden = prep;
+  $('modeBtn').textContent = prep ? 'Live interview' : 'Prepare';
+  $('modeBtn').setAttribute('aria-pressed', prep ? 'true' : 'false');
+  store.set('mode', prep ? 'prep' : 'live');
+  if(prep) renderPrepSetup(); else stopSpeaking();
+}
+
+function renderPrepSetup(){
+  if(!$('prepJd').value) $('prepJd').value = (PREP && PREP.jd) || S.jd || '';
+  const w = S.resume ? S.resume.split(/\s+/).length : 0;
+  $('prepResume').innerHTML = w ? `Resume ✓ ${w} words, used for examples and gaps.` : 'No resume loaded. Tap <b>Folder</b> to load it, or the plan will be generic.';
+  document.querySelectorAll('.dur').forEach(b => b.setAttribute('aria-pressed', +b.dataset.min === prepTotal ? 'true' : 'false'));
+  $('prepCustom').value = [30,45,60,90,120].includes(prepTotal) ? '' : prepTotal;
+  $('prepModel').value = store.get('prepModel', 'claude-sonnet-5-5');
+  updateEstimate(); renderPlan();
+}
+function updateEstimate(){
+  const p = PRICES[$('prepModel').value] || PRICES['claude-sonnet-5-5'];
+  const topics = prepTotal <= 30 ? 4 : prepTotal <= 60 ? 6 : 8;
+  const inTok = (topics + 1) * (estTok(S.resume) + estTok($('prepJd').value) + 900);
+  const outTok = prepTotal * 210 + 1800;
+  $('prepEst').textContent = `${prepTotal}-minute plan · about ${money((inTok*p.in + outTok*p.out)/1e6)} in API cost`;
+}
+function setTotal(m){ prepTotal = Math.max(30, Math.round(+m || 60)); store.set('prepTotal', prepTotal); renderPrepSetup(); }
+
+function fixMinutes(ts, total){
+  const sum = ts.reduce((a,t)=>a + (+t.minutes || 0), 0) || 1;
+  ts.forEach(t => t.minutes = Math.max(2, Math.round((+t.minutes || 1) * total / sum)));
+  const diff = total - ts.reduce((a,t)=>a + t.minutes, 0);
+  const big = ts.slice(0, -1).sort((a,b)=>b.minutes - a.minutes)[0] || ts[0];
+  big.minutes += diff;
+}
+
+async function analyzeJD(){
+  const jd = $('prepJd').value.trim();
+  if(jd.split(/\s+/).length < 30){ prepMsg('Paste or load the full job description first (a few sentences at least).', 'err'); return; }
+  if(!S.key){ prepMsg('No API key loaded. Tap Folder to load your key file.', 'err'); return; }
+  const model = $('prepModel').value; store.set('prepModel', model);
+  stopSpeaking();
+  prepMsg('⏳ Reading the JD and building a ' + prepTotal + '-minute plan…', 'work'); $('prepAnalyze').disabled = true;
+  const sys = `You plan interview preparation from a job description (JD).
+Rules:
+- Topics come ONLY from what the JD asks for. Never add a technology just because it is in the resume.
+- Priority: "Critical" = explicitly required and central; "High" = frequently mentioned or essential to the responsibilities; "Medium" = supporting skill; "Low" = optional or preferred.
+- Compare with the resume: "strong_matches" = JD needs the resume clearly supports; "gaps" = JD needs the resume does not clearly support. Give gap topics a little extra time.
+- Split exactly ${prepTotal} minutes across the topics by priority, whole minutes, summing to exactly ${prepTotal}. Use ${prepTotal<=30?'3 to 5':prepTotal<=60?'5 to 7':'6 to 10'} topics.
+- Include a behavioral / leadership topic when the JD mentions leading, mentoring, collaboration or stakeholders.
+- The LAST topic must be named "Final revision & questions to ask" with ${prepTotal<=30?3:5} minutes.
+Reply with JSON only:
+{"job_title":"","company":"","level":"","summary":"2 sentences","focus_areas":[""],"strong_matches":[""],"gaps":[""],"topics":[{"name":"","priority":"Critical","minutes":0,"why":"one line: where the JD asks for it","subtopics":[""]}]}`;
+  const user = `JOB DESCRIPTION:\n<<<\n${jd.slice(0,15000)}\n>>>\n\nRESUME:\n<<<\n${(S.resume||'(none)').slice(0,12000)}\n>>>`;
+  try{
+    const o = {model, maxTokens:2500, kind:'prep'};
+    const out = await callClaude(sys, user, o);
+    if(o.cutOff) throw new Error('The plan was cut off. Try again.');
+    const j = JSON.parse(out.match(/\{[\s\S]*\}/)[0]);
+    if(!Array.isArray(j.topics) || !j.topics.length) throw new Error('No topics came back. Try again.');
+    fixMinutes(j.topics, prepTotal);
+    PREP = { jd, total:prepTotal, model, createdAt:new Date().toISOString(), analysis:j, cost:o.costUsd||0,
+      topics: j.topics.map(t => ({ name:String(t.name||'Topic'), priority:t.priority||'Medium', minutes:t.minutes, why:t.why||'', subtopics:Array.isArray(t.subtopics)?t.subtopics:[], status:'planned', studied:false })) };
+    // Reuse a guide made earlier (any JD) when it is about the same topic, long enough and deep enough.
+    PREP.topics.forEach(t => { const g = PLIB[topicKey(t.name)]; if(g && g.minutes >= t.minutes*0.8 && depthRank(g.depth) >= depthRank(depthOf(PREP.total))) t.status = 'reused'; });
+    if(!S.jd) { S.jd = jd.slice(0,12000); applySettings(); }
+    savePrep(); renderPlan(); $('prepStudy').hidden = true;
+    const reused = PREP.topics.filter(t=>t.status==='reused').length;
+    prepMsg(`✓ Plan ready · ${PREP.topics.length} topics${reused?` · ${reused} reused from earlier preps`:''} · cost ${money(o.costUsd||0)}. ${reused===PREP.topics.length?'Everything is ready: tap Study on any topic.':'Next: Write all study guides.'}`, 'ok');
+    $('prepPlan').scrollIntoView({behavior:'smooth', block:'start'});
+  }catch(e){ prepMsg('✗ ' + (e.message || 'Could not build the plan.'), 'err'); }
+  $('prepAnalyze').disabled = false;
+}
+
+const PRIO_CLASS = {Critical:'p-crit', High:'p-high', Medium:'p-med', Low:'p-low'};
+function statusLabel(t){
+  return ({planned:'Not written yet', generating:'⏳ Writing…', ready:'✓ New', reused:'♻ Reused', error:'✗ Failed'})[t.status] || t.status;
+}
+function renderPlan(){
+  const box = $('prepPlan');
+  if(!PREP){ box.hidden = true; $('prepStudy').hidden = true; return; }
+  box.hidden = false;
+  const a = PREP.analysis || {}, n = PREP.topics.length;
+  const ready = PREP.topics.filter(t => t.status==='ready' || t.status==='reused').length;
+  const studied = PREP.topics.filter(t => t.studied).length;
+  const busy = PREP.topics.some(t => t.status==='generating');
+  box.innerHTML = `
+    <div class="phead">
+      <div><h2>${esc(a.job_title || 'Study plan')}${a.company ? ' · ' + esc(a.company) : ''}</h2>
+        <div class="note">${esc([a.level, a.summary].filter(Boolean).join(' · '))}</div></div>
+      <div class="pstats"><span><b>${PREP.total}</b> min</span><span><b>${ready}/${n}</b> guides</span><span><b>${studied}/${n}</b> studied</span></div>
+    </div>
+    ${a.focus_areas?.length ? `<div class="chips">${a.focus_areas.map(f=>`<span>${esc(f)}</span>`).join('')}</div>` : ''}
+    <div class="pgap">
+      ${a.strong_matches?.length ? `<div><b class="okc">Strong match:</b> ${a.strong_matches.map(esc).join(', ')}</div>` : ''}
+      ${a.gaps?.length ? `<div><b class="gapc">Gaps to cover:</b> ${a.gaps.map(esc).join(', ')}</div>` : ''}
+    </div>
+    <div class="ptable">
+      ${PREP.topics.map((t,i) => `<div class="prow">
+        <span class="pn">${i+1}</span>
+        <span class="pt"><b>${esc(t.name)}</b><small>${esc(t.why)}</small></span>
+        <span class="badge ${PRIO_CLASS[t.priority]||'p-med'}">${esc(t.priority)}</span>
+        <span class="pm">${t.minutes} min</span>
+        <span class="ps">${statusLabel(t)}</span>
+        <span class="pa">${(t.status==='ready'||t.status==='reused')
+            ? `<button class="btn sm primary" type="button" data-open="${i}">Study</button>`
+            : `<button class="btn sm" type="button" data-gen="${i}" ${t.status==='generating'?'disabled':''}>${t.status==='generating'?'Writing…':t.status==='error'?'Retry':'Write'}</button>`}
+          <label class="stud"><input type="checkbox" data-stud="${i}" ${t.studied?'checked':''}> Done</label></span>
+      </div>`).join('')}
+    </div>
+    <div class="row">
+      ${ready < n ? `<button class="btn primary" type="button" id="prepGenAll" ${busy?'disabled':''}>Write all study guides</button>` : ''}
+      ${ready ? `<button class="btn ${ready===n?'primary':''}" type="button" id="prepListenAll">▶ Listen to all</button>` : ''}
+      ${ready ? `<button class="btn" type="button" id="prepSave">Save to folder</button>` : ''}
+      <span class="note">${PREP.cost ? 'Spent on this plan: ' + money(PREP.cost) : ''}</span>
+      <span style="flex:1"></span>
+      <button class="btn linkish" type="button" id="prepNew">New preparation</button>
+    </div>`;
+}
+
+function guidePrompt(){
+  const a = PREP.analysis || {}, depth = depthOf(PREP.total);
+  return `You write interview study material for a candidate. It is read on screen and read aloud by a text-to-speech voice, so write plain sentences (no markdown, no tables).
+Role: ${a.job_title||'the role in the JD'}${a.company?' at '+a.company:''}. ${a.summary||''}
+Depth: ${depth==='quick'?'only the most important points and essential interview questions':depth==='standard'?'add implementation explanations, architecture examples and behavioral preparation':'add troubleshooting, design trade-offs, scenario-based questions and deeper explanations'}.
+Be accurate and specific: real service names, settings, commands and numbers. Avoid filler.
+Resume rules: use the resume for "resume_examples" and for first-person answers; never invent employers, numbers, dates or projects that are not in the resume.
+Reply with JSON only:
+{"overview":"3-5 sentences","key_points":["5-8 short bullets"],"questions":[{"q":"","a":"direct answer, 2-3 sentences","detail":"${depth==='quick'?'':'deeper explanation, example or trade-off, 2-4 sentences'}","keywords":["2-4 terms copied exactly from a"]}],"resume_examples":["how to talk about this from the resume, 1-2 sentences each"],"quick_revision":"a 5-6 line recap","ask_them":[]}
+
+RESUME:
+<<<
+${(S.resume||'(none)').slice(0,12000)}
+>>>`;
+}
+async function genGuide(i){
+  const t = PREP.topics[i]; if(!t || t.status==='generating') return;
+  const depth = depthOf(PREP.total), words = Math.round(t.minutes * 130);
+  const nq = Math.max(3, Math.round(t.minutes / (depth==='quick' ? 2.5 : 2)));
+  const final = /final revision/i.test(t.name);
+  t.status = 'generating'; renderPlan(); prepMsg(`⏳ Writing "${t.name}" (${t.minutes} min of study)…`, 'work');
+  const user = `TOPIC: ${t.name}
+Subtopics: ${(t.subtopics||[]).join(', ') || '(choose the most important)'}
+Why it matters for this JD: ${t.why}
+Length: about ${words} words in total (about ${t.minutes} minutes), with about ${nq} questions.
+${final ? `This is the final revision topic. "questions" = the most likely remaining questions across the whole JD (${PREP.topics.slice(0,-1).map(x=>x.name).join(', ')}), with short answers. Also fill "ask_them" with 3-5 smart questions to ask the interviewer about this role.` : 'Leave "ask_them" empty.'}`;
+  try{
+    const o = {model:PREP.model, maxTokens:Math.min(8000, words*2 + 1200), kind:'prep'};
+    const out = await callClaude(guidePrompt(), user, o);
+    if(o.cutOff) throw new Error('the guide was cut off; try again');
+    const g = JSON.parse(out.match(/\{[\s\S]*\}/)[0]);
+    if(!Array.isArray(g.questions)) throw new Error('the guide came back incomplete; try again');
+    PLIB[topicKey(t.name)] = { topic:t.name, minutes:t.minutes, depth, guide:g, createdAt:new Date().toISOString(), jdTitle:(PREP.analysis||{}).job_title||'' };
+    saveLib(); t.status = 'ready'; PREP.cost = (PREP.cost||0) + (o.costUsd||0);
+    prepMsg(`✓ "${t.name}" written · cost ${money(o.costUsd||0)}`, 'ok');
+  }catch(e){ t.status = 'error'; prepMsg(`✗ ${t.name}: ${e.message || 'failed'}`, 'err'); }
+  savePrep(); renderPlan();
+}
+async function genAll(){
+  for(let i=0; i<PREP.topics.length; i++){ const t = PREP.topics[i]; if(t.status==='planned' || t.status==='error') await genGuide(i); }
+  const left = PREP.topics.filter(t=>t.status!=='ready' && t.status!=='reused').length;
+  if(!left) prepMsg(`✓ All study guides ready · total spent ${money(PREP.cost||0)}. Tap Study on any topic, or Listen to all.`, 'ok');
+}
+
+/* study viewer */
+let studyIdx = -1;
+function speechSegments(t, g){
+  const s = [t.name ? t.name + '.' : '', g.overview || ''];
+  if(g.key_points?.length) s.push('Key points. ' + g.key_points.join('. '));
+  (g.questions||[]).forEach((q,n) => { s.push(`Question ${n+1}. ${q.q}`); s.push(q.a || ''); if(q.detail) s.push(q.detail); });
+  if(g.resume_examples?.length) s.push('From your resume. ' + g.resume_examples.join(' '));
+  if(g.ask_them?.length) s.push('Questions to ask them. ' + g.ask_them.join(' '));
+  if(g.quick_revision) s.push('Quick revision. ' + g.quick_revision);
+  // short chunks: some voices stop on long utterances
+  const out = [];
+  s.filter(x => x && x.trim()).forEach(x => {
+    const parts = x.match(/[^.!?]+[.!?]*\s*/g) || [x]; let cur = '';
+    parts.forEach(p => { if((cur + p).length > 220 && cur){ out.push(cur.trim()); cur = ''; } cur += p; });
+    if(cur.trim()) out.push(cur.trim());
+  });
+  return out;
+}
+const speakMinutes = g => Math.max(1, Math.round(speechSegments({name:''}, g).join(' ').split(/\s+/).length / 150));
+function openStudy(i){
+  const t = PREP.topics[i], g = guideOf(t); if(!g) return;
+  stopSpeaking(); studyIdx = i;
+  const bm = +store.get('bm_' + topicKey(t.name), 0);
+  const box = $('prepStudy'); box.hidden = false;
+  box.innerHTML = `
+    <div class="phead">
+      <div><h2>${esc(t.name)}</h2>
+        <div class="note">Topic ${i+1} of ${PREP.topics.length} · planned ${t.minutes} min · read aloud about ${speakMinutes(g)} min${t.status==='reused'?' · ♻ reused from an earlier prep':''}</div></div>
+      <div class="row"><button class="btn" type="button" data-nav="${i-1}" ${i?'':'disabled'}>← Previous</button><button class="btn" type="button" data-nav="${i+1}" ${i<PREP.topics.length-1?'':'disabled'}>Next →</button></div>
+    </div>
+    <div class="player">
+      <button class="btn primary" type="button" id="spPlay">▶ Listen${bm?' (resume)':''}</button>
+      <button class="btn" type="button" id="spRestart">⟲ From start</button>
+      <label class="row note" for="spRate">Speed <select id="spRate">${[0.9,1,1.1,1.25,1.5].map(r=>`<option value="${r}" ${+store.get('spRate',1)===r?'selected':''}>${r}×</option>`).join('')}</select></label>
+      <label class="row note" for="spVoice">Voice <select id="spVoice"></select></label>
+      <span id="spPos" class="note"></span>
+    </div>
+    <section><h3>Overview</h3><p>${esc(g.overview||'')}</p></section>
+    ${g.key_points?.length ? `<section><h3>Key points</h3><ul>${g.key_points.map(k=>`<li>${esc(k)}</li>`).join('')}</ul></section>` : ''}
+    <section><h3>Interview questions</h3>${(g.questions||[]).map((q,n)=>`
+      <details class="pq"><summary><b>Q${n+1}.</b> ${esc(q.q||'')}</summary>
+        <div class="a">${highlight(q.a||'', q.keywords||[])}</div>
+        ${q.detail ? `<div class="pdet">${esc(q.detail)}</div>` : ''}
+        ${q.keywords?.length ? `<div class="chips">${q.keywords.map(k=>`<span>${esc(String(k))}</span>`).join('')}</div>` : ''}
+      </details>`).join('')}</section>
+    ${g.resume_examples?.length ? `<section class="cvbox"><h3>From your resume</h3><ul>${g.resume_examples.map(k=>`<li>${esc(k)}</li>`).join('')}</ul></section>` : ''}
+    ${g.ask_them?.length ? `<section><h3>Questions to ask them</h3><ul>${g.ask_them.map(k=>`<li>${esc(k)}</li>`).join('')}</ul></section>` : ''}
+    ${g.quick_revision ? `<section><h3>Quick revision</h3><p style="white-space:pre-line">${esc(g.quick_revision)}</p></section>` : ''}
+    <label class="stud"><input type="checkbox" data-stud="${i}" ${t.studied?'checked':''}> Mark “${esc(t.name)}” as studied</label>`;
+  fillVoices(); updPos();
+  box.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* read aloud with the device voice (free; no audio file) */
+const SPK = { gen:0, segs:[], i:0, topic:-1, playing:false, all:false };
+function fillVoices(){
+  const sel = $('spVoice'); if(!sel || !('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+  const saved = store.get('spVoice', '');
+  sel.innerHTML = '<option value="">Default</option>' + vs.map(v=>`<option value="${esc(v.name)}" ${v.name===saved?'selected':''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('');
+}
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged = fillVoices;
+const pickVoice = () => { const n = store.get('spVoice',''); return n ? speechSynthesis.getVoices().find(v=>v.name===n) || null : null; };
+function updPos(){
+  const pos = $('spPos'), play = $('spPlay'); if(!pos || !play) return;
+  const here = SPK.topic === studyIdx;
+  pos.textContent = here && SPK.segs.length ? `Part ${Math.min(SPK.i+1, SPK.segs.length)} of ${SPK.segs.length}` : '';
+  play.textContent = here && SPK.playing ? '⏸ Pause' : '▶ Listen' + (+store.get('bm_'+topicKey(PREP.topics[studyIdx]?.name||''),0) ? ' (resume)' : '');
+}
+function stopSpeaking(){ SPK.gen++; SPK.playing = false; SPK.all = false; try{ speechSynthesis.cancel(); }catch(e){} updPos(); }
+function speakTopic(i, fromStart){
+  if(!('speechSynthesis' in window)){ prepMsg('This browser cannot read aloud.', 'err'); return; }
+  const t = PREP.topics[i], g = guideOf(t); if(!g) return;
+  const all = SPK.all; SPK.gen++; const gen = SPK.gen; try{ speechSynthesis.cancel(); }catch(e){}
+  const key = 'bm_' + topicKey(t.name);
+  SPK.segs = speechSegments(t, g); SPK.topic = i; SPK.playing = true; SPK.all = all;
+  SPK.i = fromStart ? 0 : Math.min(+store.get(key, 0), SPK.segs.length - 1);
+  const next = () => {
+    if(gen !== SPK.gen || !SPK.playing) return;
+    if(SPK.i >= SPK.segs.length){
+      store.set(key, '0'); SPK.playing = false; updPos();
+      if(!t.studied){ t.studied = true; savePrep(); renderPlan(); }
+      if(SPK.all){ const nx = PREP.topics.findIndex((x,k) => k > i && guideOf(x)); if(nx >= 0){ openStudy(nx); SPK.all = true; speakTopic(nx, true); } else { SPK.all = false; prepMsg('✓ Finished listening to all topics.', 'ok'); } }
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(SPK.segs[SPK.i]);
+    u.rate = +store.get('spRate', 1); const v = pickVoice(); if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'en-US';
+    u.onend = () => { if(gen !== SPK.gen) return; SPK.i++; store.set(key, String(SPK.i)); updPos(); setTimeout(next, 300); };
+    u.onerror = e => { if(gen !== SPK.gen) return; if(e.error !== 'interrupted' && e.error !== 'canceled'){ SPK.playing = false; updPos(); prepMsg('Read aloud stopped: ' + e.error, 'err'); } };
+    speechSynthesis.speak(u); updPos();
+  };
+  next();
+}
+
+/* save / export */
+function prepFileBase(){
+  const a = (PREP && PREP.analysis) || {};
+  const part = s => String(s||'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,30);
+  return ['Prep', part(a.company), part(a.job_title), (PREP?.createdAt||new Date().toISOString()).slice(0,10)].filter(Boolean).join('_');
+}
+function prepMarkdown(){
+  const a = PREP.analysis || {}, L = [];
+  L.push(`# Interview preparation: ${a.job_title||''}${a.company?' · '+a.company:''}`, '');
+  L.push(`- Study time: ${PREP.total} minutes`, `- Created: ${new Date(PREP.createdAt).toLocaleString()}`, `- API cost: ${money(PREP.cost||0)}`);
+  if(a.summary) L.push(`- JD summary: ${a.summary}`);
+  if(a.strong_matches?.length) L.push(`- Strong match: ${a.strong_matches.join(', ')}`);
+  if(a.gaps?.length) L.push(`- Gaps: ${a.gaps.join(', ')}`);
+  L.push('', '## Plan', '', '| # | Topic | Priority | Minutes | Studied |', '|---|---|---|---|---|');
+  PREP.topics.forEach((t,i) => L.push(`| ${i+1} | ${t.name} | ${t.priority} | ${t.minutes} | ${t.studied?'yes':''} |`));
+  PREP.topics.forEach((t,i) => {
+    const g = guideOf(t); L.push('', `## ${i+1}. ${t.name} (${t.minutes} min, ${t.priority})`, '');
+    if(!g){ L.push('_Not written yet._'); return; }
+    if(g.overview) L.push(g.overview, '');
+    if(g.key_points?.length){ L.push('**Key points**', ''); g.key_points.forEach(k => L.push('- ' + k)); L.push(''); }
+    (g.questions||[]).forEach((q,n) => { L.push(`**Q${n+1}. ${q.q}**`, '', q.a||''); if(q.detail) L.push('', q.detail); if(q.keywords?.length) L.push('', '_Keywords: ' + q.keywords.join(', ') + '_'); L.push(''); });
+    if(g.resume_examples?.length){ L.push('**From your resume**', ''); g.resume_examples.forEach(k => L.push('- ' + k)); L.push(''); }
+    if(g.ask_them?.length){ L.push('**Questions to ask them**', ''); g.ask_them.forEach(k => L.push('- ' + k)); L.push(''); }
+    if(g.quick_revision) L.push('**Quick revision**', '', g.quick_revision);
+  });
+  return L.join('\n');
+}
+const mdToTxt = md => md.replace(/^#+\s*/gm,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/_([^_]+)_/g,'$1');
+async function savePrepToFolder(){
+  const md = prepMarkdown(), name = prepFileBase();
+  const json = JSON.stringify({ plan:PREP, guides:Object.fromEntries(PREP.topics.map(t => [t.name, guideOf(t)])) }, null, 2);
+  const dir = await idb.get('folderHandle');
+  if(dir && dir.requestPermission){
+    try{
+      let perm = await dir.queryPermission({mode:'readwrite'});
+      if(perm !== 'granted') perm = await dir.requestPermission({mode:'readwrite'});
+      if(perm === 'granted'){
+        const sub = await (await dir.getDirectoryHandle('prep', {create:true})).getDirectoryHandle(name, {create:true});
+        for(const [fn, txt] of [['Preparation.md', md], ['Preparation.txt', mdToTxt(md)], ['plan.json', json]]){
+          const w = await (await sub.getFileHandle(fn, {create:true})).createWritable(); await w.write(txt); await w.close();
+        }
+        prepMsg(`✓ Saved to ${dir.name}/prep/${name}/ (Preparation.md, .txt, plan.json)`, 'ok'); return;
+      }
+    }catch(e){ /* fall back to downloads */ }
+  }
+  download(name + '.md', md, 'text/markdown');
+  setTimeout(() => download(name + '.txt', mdToTxt(md), 'text/plain'), 600);
+  prepMsg(`✓ Downloaded ${name}.md and .txt to your Downloads folder.`, 'ok');
+}
+
+/* events */
+$('modeBtn').onclick = () => setMode($('prepView').hidden);
+$('prepAnalyze').onclick = analyzeJD;
+document.querySelectorAll('.dur').forEach(b => b.onclick = () => setTotal(b.dataset.min));
+$('prepCustom').addEventListener('change', e => { if(e.target.value) setTotal(e.target.value); });
+$('prepModel').addEventListener('change', e => { store.set('prepModel', e.target.value); updateEstimate(); });
+$('prepJd').addEventListener('input', updateEstimate);
+$('prepJdFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; if(!f) return;
+  $('prepJdMsg').textContent = 'Reading ' + f.name + '…';
+  try{ const t = await fileText(f); $('prepJd').value = t.slice(0,15000); $('prepJdMsg').textContent = '✓ ' + f.name + ' (' + t.split(/\s+/).length + ' words)'; updateEstimate(); }
+  catch(err){ $('prepJdMsg').textContent = err.message || 'Could not read that file.'; }
+});
+let newPrepArmed = 0;
+$('prepView').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.gen != null) genGuide(+b.dataset.gen);
+  else if(b.dataset.open != null) openStudy(+b.dataset.open);
+  else if(b.dataset.nav != null) openStudy(+b.dataset.nav);
+  else if(b.id === 'prepGenAll') genAll();
+  else if(b.id === 'prepSave') savePrepToFolder();
+  else if(b.id === 'prepListenAll'){ const first = PREP.topics.findIndex(t => guideOf(t)); if(first >= 0){ openStudy(first); SPK.all = true; speakTopic(first, true); } }
+  else if(b.id === 'spPlay'){ if(SPK.playing && SPK.topic === studyIdx) stopSpeaking(); else { SPK.all = false; speakTopic(studyIdx, false); } }
+  else if(b.id === 'spRestart'){ SPK.all = false; speakTopic(studyIdx, true); }
+  else if(b.id === 'prepNew'){
+    if(Date.now() - newPrepArmed > 3000){ newPrepArmed = Date.now(); b.textContent = 'Tap again to start over'; return; }
+    stopSpeaking(); PREP = null; savePrep(); $('prepJd').value = ''; renderPrepSetup(); prepMsg('Pick a job description and how long you want to study.', '');
+    $('prepView').scrollTop = 0;
+  }
+});
+$('prepView').addEventListener('change', e => {
+  const el = e.target;
+  if(el.dataset.stud != null){ const t = PREP.topics[+el.dataset.stud]; t.studied = el.checked; savePrep(); renderPlan(); document.querySelectorAll(`[data-stud="${el.dataset.stud}"]`).forEach(x => x.checked = el.checked); }
+  else if(el.id === 'spRate'){ store.set('spRate', el.value); if(SPK.playing && SPK.topic === studyIdx) speakTopic(studyIdx, false); }
+  else if(el.id === 'spVoice'){ store.set('spVoice', el.value); if(SPK.playing && SPK.topic === studyIdx) speakTopic(studyIdx, false); }
+});
+if(store.get('mode','live') === 'prep') setMode(true);
 
 if(location.protocol==='file:' && store.get('hideFileBanner','')!=='1'){ $('fileBanner').hidden=false; $('fileBanner').title='Tap to hide'; $('fileBanner').style.cursor='pointer'; $('fileBanner').onclick=()=>{ $('fileBanner').hidden=true; store.set('hideFileBanner','1'); }; $('fileBanner').textContent += ' (Tap to hide.)'; }
 
