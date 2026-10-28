@@ -244,7 +244,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
-    <span class="chip ver" id="hVer" title="App version">v2026-10-27w</span>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27x</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -280,6 +280,8 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
       <label style="flex-direction:row;align-items:center;gap:8px"><input id="showDetails" type="checkbox"> Expand keyword details by default</label>
       <label style="flex-direction:row;align-items:center;gap:8px"><input id="liveToggle" type="checkbox"> Live answer while the question is being asked</label>
       <label style="flex-direction:row;align-items:center;gap:8px"><input id="acToggle" type="checkbox"> Auto-correct speech (tech terms, fillers)</label>
+      <label class="wide" for="gdClient">Google Drive client ID (for "Upload to Google Drive"; one-time setup) <span id="gdState" class="note"></span>
+        <input id="gdClient" type="text" placeholder="123456789-xxxx.apps.googleusercontent.com" autocomplete="off"></label>
       <label class="wide">Technologies — only questions in these areas get answered (comma separated)
         <textarea id="tech" rows="2"></textarea></label>
       <label class="wide">Job description (optional) — answers are tailored to this role
@@ -297,7 +299,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27w · prepare from a role or topics.</div>
+    <div class="note">Version 2026-10-27x · upload to Google Drive.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -442,7 +444,7 @@ function applySettings(){
 $('showDetails').addEventListener('change', e=>{ S.showDetails=e.target.checked; applySettings(); });
 ['tech','jd','resume'].forEach(id => $(id).addEventListener('change', e => { S[id]=e.target.value.trim().slice(0,12000); applySettings(); }));
 // Load resume from PDF (pdf.js loaded only when needed) or text file
-function loadScript(src){ return new Promise((ok,bad)=>{ const t=document.createElement('script'); t.src=src; t.onload=ok; t.onerror=()=>bad(new Error('Could not load the PDF reader. Check your internet connection.')); document.head.appendChild(t); }); }
+function loadScript(src){ return new Promise((ok,bad)=>{ const t=document.createElement('script'); t.src=src; t.onload=ok; t.onerror=()=>bad(new Error('Could not load '+(src.includes('gsi')?'Google sign-in':src.includes('jspdf')?'the PDF maker':'the PDF reader')+'. Check your internet connection.')); document.head.appendChild(t); }); }
 $('resumeFile').addEventListener('change', async e=>{
   const f=e.target.files[0]; if(!f) return;
   $('resumeMsg').textContent='Reading '+f.name+'…';
@@ -1605,6 +1607,7 @@ async function analyzeJD(){
   $('prepAnalyze').disabled = true;
   prepMsg('⏳ Checking your topic library…', 'work');
   try{ await loadFolderLibrary(true); }catch(e){ logErr('library', e.name + ': ' + e.message); }
+  try{ if(GD.token) await loadDriveLibrary(); }catch(e){ logErr('drive', e.message); }
   prepMsg('⏳ Reading the JD and building a ' + prepTotal + '-minute plan…', 'work');
   const sys = `You plan interview preparation from a job description (JD).${shortInput ? `
 The input is NOT a full JD: it is a role title or a short list of topics (it may contain typos, e.g. "arechitect" = architect). Treat it as a senior-level job description for that role: use the skills, responsibilities and interview topics that role normally requires, and the resume to judge seniority, strong matches and gaps. Put the corrected role name in "job_title" and leave "company" empty.` : ''}
@@ -1674,7 +1677,8 @@ function renderPlan(){
     <div class="row">
       ${ready < n ? `<button class="btn primary" type="button" id="prepGenAll" ${busy?'disabled':''}>Write all study guides</button>` : ''}
       ${ready ? `<button class="btn ${ready===n?'primary':''}" type="button" id="prepListenAll">▶ Listen to all</button>` : ''}
-      ${ready ? `<button class="btn" type="button" id="prepSave">Save PDF + files to folder</button><button class="btn" type="button" id="prepPdf">Download PDF</button>` : ''}
+      ${ready ? `<button class="btn" type="button" id="prepSave">Save PDF + files to folder</button><button class="btn" type="button" id="prepDrive">Upload to Google Drive</button><button class="btn" type="button" id="prepPdf">Download PDF</button>` : ''}
+      ${PREP.driveFolder ? `<a class="note" href="${PREP.driveFolder}" target="_blank" rel="noopener">Open in Google Drive ↗</a>` : ''}
       <span class="note">${PREP.cost ? 'Spent on this plan: ' + money(PREP.cost) : ''}</span>
       <span style="flex:1"></span>
       <button class="btn linkish" type="button" id="prepNew">New preparation</button>
@@ -2031,6 +2035,128 @@ async function attachRecordedAudio(i){
   }catch(e){ slot.innerHTML = '<span class="note">Audio file found, but the folder needs permission. Tap Folder.</span>'; }
 }
 
+/* ---------- Google Drive: upload the preparation, and reuse topics already in Drive ---------- */
+// Drive/AI Helper Interview Preparation/
+//   Topic Library/<topic>.json · .pdf · .txt · .m4a      (one copy per topic, reused across interviews)
+//   Interview Sessions/<company_role_date>/Preparation.pdf · .md · plan.json
+// Uses Google sign-in with the "drive.file" permission: the app can only see files it created.
+const GD = { token:null, exp:0, client:null, folders:{} };
+const DRIVE_ROOT = 'AI Helper Interview Preparation';
+function driveClientId(){ return (store.get('gdClient','') || '').trim(); }
+async function driveSignIn(){
+  const id = driveClientId();
+  if(!id) throw new Error('Add your Google Drive client ID in Settings first (one-time setup).');
+  if(GD.token && Date.now() < GD.exp - 60000) return GD.token;
+  if(!window.google?.accounts?.oauth2) await loadScript('https://accounts.google.com/gsi/client');
+  if(!window.google?.accounts?.oauth2) throw new Error('Could not load Google sign-in. Check your internet connection.');
+  return new Promise((ok, bad) => {
+    GD.client = google.accounts.oauth2.initTokenClient({
+      client_id: id, scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: r => { if(r.error){ bad(new Error('Google sign-in: ' + r.error)); return; } GD.token = r.access_token; GD.exp = Date.now() + (r.expires_in||3600)*1000; renderDriveState(); ok(GD.token); },
+      error_callback: e => bad(new Error('Google sign-in was closed or blocked' + (e?.type ? ' (' + e.type + ')' : '') + '. Allow pop-ups for this site and try again.'))
+    });
+    GD.client.requestAccessToken({prompt: GD.token ? '' : 'consent'});
+  });
+}
+async function gfetch(url, opt={}){
+  const r = await fetch(url, {...opt, headers:{...(opt.headers||{}), Authorization:'Bearer ' + GD.token}});
+  if(r.status === 401){ GD.token = null; throw new Error('Google sign-in expired. Tap Upload again.'); }
+  if(!r.ok){ const t = await r.text(); let m = t; try{ m = JSON.parse(t).error.message; }catch(e){} throw new Error('Google Drive: ' + m); }
+  return r;
+}
+const gq = s => String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+async function driveFind(name, parent, mime){
+  let q = `name='${gq(name)}' and trashed=false`;
+  if(parent) q += ` and '${parent}' in parents`;
+  if(mime) q += ` and mimeType='${mime}'`;
+  const r = await gfetch('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id,name,appProperties,modifiedTime)&q=' + encodeURIComponent(q));
+  return (await r.json()).files || [];
+}
+async function driveFolder(name, parent){
+  const key = (parent||'root') + '/' + name; if(GD.folders[key]) return GD.folders[key];
+  const found = await driveFind(name, parent, 'application/vnd.google-apps.folder');
+  let id = found[0]?.id;
+  if(!id){
+    const r = await gfetch('https://www.googleapis.com/drive/v3/files?fields=id', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, mimeType:'application/vnd.google-apps.folder', ...(parent ? {parents:[parent]} : {}) }) });
+    id = (await r.json()).id;
+  }
+  return GD.folders[key] = id;
+}
+async function driveUpload(name, mime, data, parent, appProps){
+  const existing = (await driveFind(name, parent))[0];
+  const meta = { name, mimeType:mime, ...(appProps ? {appProperties:appProps} : {}), ...(existing ? {} : {parents:[parent]}) };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+  form.append('file', data instanceof Blob ? data : new Blob([data], {type:mime}));
+  const url = existing ? `https://www.googleapis.com/upload/drive/v3/files/${existing.id}?uploadType=multipart&fields=id`
+                       : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id';
+  return (await (await gfetch(url, {method: existing ? 'PATCH' : 'POST', body: form})).json()).id;
+}
+// Read topic guides already in Drive into the reuse library.
+async function loadDriveLibrary(){
+  if(!GD.token || Date.now() > GD.exp) return -1;
+  const root = await driveFolder(DRIVE_ROOT), lib = await driveFolder('Topic Library', root);
+  const r = await gfetch('https://www.googleapis.com/drive/v3/files?spaces=drive&pageSize=500&fields=files(id,name,appProperties)&q=' +
+    encodeURIComponent(`'${lib}' in parents and trashed=false and name contains '.json'`));
+  let added = 0;
+  for(const f of (await r.json()).files || []){
+    const key = topicKey(f.appProperties?.topic || f.name.replace(/\.json$/,''));
+    if(PLIB[key] && (PLIB[key].createdAt||'') >= (f.appProperties?.createdAt||'')) continue;
+    try{ const rec = await (await gfetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`)).json(); PLIB[topicKey(rec.topic)] = rec; added++; }catch(e){}
+  }
+  if(added) saveLib();
+  return added;
+}
+async function uploadPrepToDrive(){
+  if(!PREP) return;
+  try{
+    prepMsg('⏳ Signing in to Google Drive…', 'work');
+    await driveSignIn();
+    prepMsg('⏳ Uploading to Google Drive…', 'work');
+    const root = await driveFolder(DRIVE_ROOT), lib = await driveFolder('Topic Library', root);
+    const sess = await driveFolder(prepFileBase(), await driveFolder('Interview Sessions', root));
+    const inDrive = {};
+    for(const f of (await (await gfetch('https://www.googleapis.com/drive/v3/files?spaces=drive&pageSize=500&fields=files(id,name,appProperties)&q=' +
+      encodeURIComponent(`'${lib}' in parents and trashed=false`))).json()).files || []) inDrive[f.name] = f;
+    let created = 0, reused = 0, audio = 0;
+    const localDir = await folderHandle(false, false);
+    for(const t of PREP.topics){
+      const g = guideOf(t); if(!g) continue;
+      const rec = PLIB[topicKey(t.name)], base = topicSlug(t.name);
+      if(inDrive[base + '.json']?.appProperties?.createdAt === rec.createdAt && inDrive[base + '.pdf']){ reused++; }
+      else {
+        const props = { aihelper:'1', topic:t.name.slice(0,100), createdAt:rec.createdAt };
+        await driveUpload(base + '.json', 'application/json', JSON.stringify(rec, null, 2), lib, props);
+        await driveUpload(base + '.pdf', 'application/pdf', await topicPdf(t, g), lib);
+        await driveUpload(base + '.txt', 'text/plain', speechText(t, g), lib);
+        created++;
+      }
+      const f = FOLDERLIB[topicKey(t.name)];
+      if(localDir && f?.audio && !inDrive[base + '.m4a']){
+        try{
+          const file = await (await (await (await localDir.getDirectoryHandle(LIB_DIR)).getDirectoryHandle(f.dir)).getFileHandle('guide.m4a')).getFile();
+          await driveUpload(base + '.m4a', 'audio/mp4', file, lib); audio++;
+        }catch(e){}
+      }
+      prepMsg(`⏳ Uploading to Google Drive… ${created + reused} of ${PREP.topics.filter(x=>guideOf(x)).length} topics`, 'work');
+    }
+    const md = prepMarkdown();
+    await driveUpload('Preparation.pdf', 'application/pdf', await planPdf(), sess);
+    await driveUpload('Preparation.md', 'text/markdown', md, sess);
+    await driveUpload('plan.json', 'application/json', JSON.stringify({ plan:PREP, guides:Object.fromEntries(PREP.topics.map(t => [t.name, guideOf(t)])) }, null, 2), sess);
+    PREP.driveFolder = `https://drive.google.com/drive/folders/${sess}`; savePrep(); renderPlan();
+    prepMsg(`✓ Uploaded to Google Drive › ${DRIVE_ROOT}: ${created} new topic(s), ${reused} already there${audio ? `, ${audio} audio file(s)` : ''} · Preparation.pdf in Interview Sessions/${prepFileBase()}`, 'ok');
+  }catch(e){ prepMsg('✗ ' + (e.message || 'Upload to Google Drive failed'), 'err'); }
+}
+function renderDriveState(){
+  const el = $('gdState'); if(!el) return;
+  el.textContent = !driveClientId() ? 'Not set up' : GD.token && Date.now() < GD.exp ? 'Signed in ✓' : 'Ready (signs in when you upload)';
+}
+$('gdClient').value = store.get('gdClient','');
+$('gdClient').addEventListener('change', e => { store.set('gdClient', e.target.value.trim()); GD.token = null; renderDriveState(); });
+renderDriveState();
+
 /* events */
 $('modeBtn').onclick = () => setMode($('prepView').hidden);
 $('prepAnalyze').onclick = analyzeJD;
@@ -2052,6 +2178,7 @@ $('prepView').addEventListener('click', e => {
   else if(b.dataset.nav != null) openStudy(+b.dataset.nav);
   else if(b.id === 'prepGenAll') genAll();
   else if(b.id === 'prepSave') savePrepToFolder();
+  else if(b.id === 'prepDrive') uploadPrepToDrive();
   else if(b.id === 'prepPdf'){ prepMsg('⏳ Making the PDF…', 'work'); planPdf().then(bl => { blobDownload(prepFileBase() + '.pdf', bl); prepMsg('✓ Downloaded ' + prepFileBase() + '.pdf', 'ok'); }).catch(err => prepMsg('✗ ' + err.message, 'err')); }
   else if(b.id === 'spPdf'){ const t = PREP.topics[studyIdx], g = guideOf(t); const w = window.open('', '_blank'); topicPdf(t, g).then(bl => { const u = URL.createObjectURL(bl); if(w) w.location = u; else blobDownload(topicSlug(t.name) + '.pdf', bl); }).catch(err => { if(w) w.close(); prepMsg('✗ ' + err.message, 'err'); }); }
   else if(b.id === 'prepListenAll'){ const first = PREP.topics.findIndex(t => guideOf(t)); if(first >= 0){ openStudy(first); SPK.all = true; speakTopic(first, true); } }
