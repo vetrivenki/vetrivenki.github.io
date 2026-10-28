@@ -129,6 +129,7 @@ button.chip{cursor:pointer}
 .chip.ok{border-color:#1f8a4c;color:#1f8a4c}
 .chip.bad{border-color:var(--live);color:var(--live);font-weight:600}
 .chip.wait{border-color:var(--accent);color:var(--accent)}
+.chip.ver{color:var(--accent);border-color:var(--accent)}
 .herr{font-size:12px;color:var(--live);flex:1 1 100%}
 .herr:empty{display:none}
 .progress{margin:8px 10px 0;padding:7px 10px;border-radius:8px;border:1px dashed var(--line);font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center}
@@ -192,6 +193,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27o</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -243,7 +245,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27n · API cost shown.</div>
+    <div class="note">Version 2026-10-27o · version + cost in health bar.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -607,7 +609,7 @@ function addCost(model, u){
   if(typeof renderHealth==='function') renderHealth();
   return usd;
 }
-const money = v => v < 0.01 ? '$'+v.toFixed(4) : v < 1 ? '$'+v.toFixed(3) : '$'+v.toFixed(2);
+const money = v => !v ? '$0' : v < 0.01 ? '$'+v.toFixed(4) : v < 1 ? '$'+v.toFixed(3) : '$'+v.toFixed(2);
 
 // Streams the reply so answers appear word by word; the long system prompt (resume + JD) is cached
 // by the API, which makes every later question faster.
