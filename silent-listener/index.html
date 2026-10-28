@@ -193,7 +193,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
-    <span class="chip ver" id="hVer" title="App version">v2026-10-27o</span>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27p</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -245,7 +245,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27o · version + cost in health bar.</div>
+    <div class="note">Version 2026-10-27p · monthly spend in health bar.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -601,6 +601,7 @@ function priceCall(model, u){
   return (inTok*p.in + cw*p.cw + cr*p.cr + out*p.out) / 1e6;
 }
 function addCost(model, u){
+  COST.today = +store.get(todayKey(),0); COST.month = +store.get(monthKey(),0);
   const usd = priceCall(model, u);
   COST.last = usd; COST.session += usd; COST.sessionCalls++;
   COST.today = +store.get(todayKey(),0) + usd; store.set(todayKey(), COST.today.toFixed(6));
@@ -1377,7 +1378,7 @@ function renderHealth(){
   // answers
   chip('hAns', H.answers?'ok':'off', 'Answers '+H.answers+(H.answerMs?' · '+(H.answerMs/1000).toFixed(1)+' s':''));
   chip('hLive', !S.liveAnswer?'off':(H.liveMs?'ok':'off'), S.liveAnswer ? ('Live '+(H.liveMs?(H.liveMs/1000).toFixed(1)+' s':'ready')) : 'Live off');
-  chip('hCost', COST.session>0?'ok':'off', 'Cost '+money(COST.session)+' · today '+money(COST.today));
+  chip('hCost', COST.session>0?'ok':'off', 'Cost '+money(COST.session)+' · today '+money(COST.today)+' · '+new Date().toLocaleString('en-US',{month:'short'})+' '+money(COST.month));
   $('hCost').title = 'This session: '+money(COST.session)+' over '+COST.sessionCalls+' calls\nToday: '+money(COST.today)+'\nThis month: '+money(COST.month)+(COST.lastTokens?'\nLast call: '+money(COST.last)+' ('+COST.lastTokens+')':'')+'\nPrices: Anthropic list price per million tokens';
   $('hErr').textContent = H.claude==='bad' ? H.claudeErr : '';
 }
