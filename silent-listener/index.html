@@ -240,7 +240,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
-    <span class="chip ver" id="hVer" title="App version">v2026-10-27r</span>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27s</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -293,7 +293,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27r · Interview Preparation.</div>
+    <div class="note">Version 2026-10-27s · Interview Preparation (robust guides).</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -1500,6 +1500,37 @@ const depthRank = d => ({quick:0, standard:1, detailed:2})[d] || 0;
 const topicKey = n => String(n).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const guideOf  = t => PLIB[topicKey(t.name)]?.guide || null;
 const estTok   = s => Math.ceil(String(s||'').length / 4);
+// Parse model JSON; repair the most common slip (an unescaped quote inside a string) before giving up.
+function parseLooseJSON(text){
+  const m = String(text).match(/\{[\s\S]*\}/); if(!m) throw new Error('no JSON in the reply');
+  try{ return JSON.parse(m[0]); }catch(e){}
+  // walk the text; a quote inside a string that is not followed by , : } ] is an inner quote -> escape it
+  const src = m[0]; let out = '', inStr = false;
+  for(let i=0; i<src.length; i++){
+    const c = src[i];
+    if(inStr && c === '\\'){ out += c + (src[i+1]||''); i++; continue; }
+    if(c === '"'){
+      if(!inStr){ inStr = true; out += c; continue; }
+      let j = i+1; while(j < src.length && /\s/.test(src[j])) j++;
+      if(j >= src.length || ',:}]'.includes(src[j])){ inStr = false; out += c; }
+      else out += '\\"';
+      continue;
+    }
+    if(inStr && (c === '\n' || c === '\r')){ out += c === '\n' ? '\\n' : ''; continue; }
+    out += c;
+  }
+  return JSON.parse(out);
+}
+async function claudeJSON(sys, user, o, check){
+  for(let attempt=1; attempt<=2; attempt++){
+    const opts = {...o};
+    const out = await callClaude(sys, user + (attempt>1 ? '\n\nYour previous reply was not valid JSON. Reply again with valid JSON only.' : ''), opts);
+    o.costUsd = (o.costUsd||0) + (opts.costUsd||0);
+    if(opts.cutOff && attempt===2) throw new Error('the reply was cut off; try again');
+    try{ const j = parseLooseJSON(out); if(check && !check(j)) throw new Error('incomplete'); return j; }
+    catch(e){ if(attempt===2) throw new Error('Claude returned an unreadable reply twice; tap Retry'); prepMsg('⏳ Reply was not readable, asking again…', 'work'); }
+  }
+}
 function prepMsg(text, kind){ const p=$('prepMsg'); p.className='progress pmsg '+(kind||''); p.textContent=text; }
 
 function setMode(prep){
@@ -1552,15 +1583,12 @@ Rules:
 - Split exactly ${prepTotal} minutes across the topics by priority, whole minutes, summing to exactly ${prepTotal}. Use ${prepTotal<=30?'3 to 5':prepTotal<=60?'5 to 7':'6 to 10'} topics.
 - Include a behavioral / leadership topic when the JD mentions leading, mentoring, collaboration or stakeholders.
 - The LAST topic must be named "Final revision & questions to ask" with ${prepTotal<=30?3:5} minutes.
-Reply with JSON only:
+Reply with valid JSON only. Inside text values never use double quotes; use single quotes instead.
 {"job_title":"","company":"","level":"","summary":"2 sentences","focus_areas":[""],"strong_matches":[""],"gaps":[""],"topics":[{"name":"","priority":"Critical","minutes":0,"why":"one line: where the JD asks for it","subtopics":[""]}]}`;
   const user = `JOB DESCRIPTION:\n<<<\n${jd.slice(0,15000)}\n>>>\n\nRESUME:\n<<<\n${(S.resume||'(none)').slice(0,12000)}\n>>>`;
   try{
     const o = {model, maxTokens:2500, kind:'prep'};
-    const out = await callClaude(sys, user, o);
-    if(o.cutOff) throw new Error('The plan was cut off. Try again.');
-    const j = JSON.parse(out.match(/\{[\s\S]*\}/)[0]);
-    if(!Array.isArray(j.topics) || !j.topics.length) throw new Error('No topics came back. Try again.');
+    const j = await claudeJSON(sys, user, o, x => Array.isArray(x.topics) && x.topics.length);
     fixMinutes(j.topics, prepTotal);
     PREP = { jd, total:prepTotal, model, createdAt:new Date().toISOString(), analysis:j, cost:o.costUsd||0,
       topics: j.topics.map(t => ({ name:String(t.name||'Topic'), priority:t.priority||'Medium', minutes:t.minutes, why:t.why||'', subtopics:Array.isArray(t.subtopics)?t.subtopics:[], status:'planned', studied:false })) };
@@ -1628,7 +1656,7 @@ Role: ${a.job_title||'the role in the JD'}${a.company?' at '+a.company:''}. ${a.
 Depth: ${depth==='quick'?'only the most important points and essential interview questions':depth==='standard'?'add implementation explanations, architecture examples and behavioral preparation':'add troubleshooting, design trade-offs, scenario-based questions and deeper explanations'}.
 Be accurate and specific: real service names, settings, commands and numbers. Avoid filler.
 Resume rules: use the resume for "resume_examples" and for first-person answers; never invent employers, numbers, dates or projects that are not in the resume.
-Reply with JSON only:
+Reply with valid JSON only. Inside text values never use double quotes (use single quotes), and do not use line breaks inside a value except in quick_revision as \n.
 {"overview":"3-5 sentences","key_points":["5-8 short bullets"],"questions":[{"q":"","a":"direct answer, 2-3 sentences","detail":"${depth==='quick'?'':'deeper explanation, example or trade-off, 2-4 sentences'}","keywords":["2-4 terms copied exactly from a"]}],"resume_examples":["how to talk about this from the resume, 1-2 sentences each"],"quick_revision":"a 5-6 line recap","ask_them":[]}
 
 RESUME:
@@ -1648,11 +1676,8 @@ Why it matters for this JD: ${t.why}
 Length: about ${words} words in total (about ${t.minutes} minutes), with about ${nq} questions.
 ${final ? `This is the final revision topic. "questions" = the most likely remaining questions across the whole JD (${PREP.topics.slice(0,-1).map(x=>x.name).join(', ')}), with short answers. Also fill "ask_them" with 3-5 smart questions to ask the interviewer about this role.` : 'Leave "ask_them" empty.'}`;
   try{
-    const o = {model:PREP.model, maxTokens:Math.min(8000, words*2 + 1200), kind:'prep'};
-    const out = await callClaude(guidePrompt(), user, o);
-    if(o.cutOff) throw new Error('the guide was cut off; try again');
-    const g = JSON.parse(out.match(/\{[\s\S]*\}/)[0]);
-    if(!Array.isArray(g.questions)) throw new Error('the guide came back incomplete; try again');
+    const o = {model:PREP.model, maxTokens:Math.min(8000, words*2 + 1500), kind:'prep'};
+    const g = await claudeJSON(guidePrompt(), user, o, x => Array.isArray(x.questions) && x.questions.length);
     PLIB[topicKey(t.name)] = { topic:t.name, minutes:t.minutes, depth, guide:g, createdAt:new Date().toISOString(), jdTitle:(PREP.analysis||{}).job_title||'' };
     saveLib(); t.status = 'ready'; PREP.cost = (PREP.cost||0) + (o.costUsd||0);
     prepMsg(`✓ "${t.name}" written · cost ${money(o.costUsd||0)}`, 'ok');
