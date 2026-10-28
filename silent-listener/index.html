@@ -179,6 +179,10 @@ button.chip{cursor:pointer}
 .pq .a{margin-top:8px;font-size:15px;line-height:1.55}
 .pdet{margin-top:6px;font-size:14px;color:var(--muted);line-height:1.55}
 .cvbox{border-left:3px solid var(--accent);padding-left:12px}
+.audiohint{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:8px;border:1px dashed var(--accent);font-size:14px}
+.audiohint code{font-family:var(--mono);font-size:12px;padding:6px 8px;border-radius:6px;background:var(--bg);overflow-x:auto;white-space:nowrap;user-select:all}
+.recaudio{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.recaudio audio{height:34px;max-width:100%}
+.ps small{font-size:11px}
 @media (max-width:640px), (pointer:coarse) and (max-width:950px){
   .prow{grid-template-columns:22px minmax(0,1fr) auto}
   .prow .pm,.prow .ps{display:none}
@@ -240,7 +244,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
-    <span class="chip ver" id="hVer" title="App version">v2026-10-27t</span>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27u</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -293,7 +297,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27t · Sonnet fix.</div>
+    <div class="note">Version 2026-10-27u · PDF, audio files, topic library.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -673,8 +677,9 @@ const PRICES = {
   'claude-haiku-5-5':  { in:0.10, out:0.50, cw:0.125, cr:0.01, big:{ in:0.50, out:2.50, cw:0.625, cr:0.05 } },
   'claude-sonnet-5-5': { in:2.00, out:10.00, cw:2.50, cr:0.10 }
 };
-const todayKey = () => 'cost_'+new Date().toISOString().slice(0,10);
-const monthKey = () => 'cost_'+new Date().toISOString().slice(0,7);
+const localDate = (d=new Date()) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const todayKey = () => 'cost_'+localDate();
+const monthKey = () => 'cost_'+localDate().slice(0,7);
 const COST = { session:0, sessionCalls:0, last:0, lastTokens:'', today:+store.get(todayKey(),0), month:+store.get(monthKey(),0) };
 function priceCall(model, u){
   const p0 = PRICES[model] || PRICES['claude-sonnet-5-5'];
@@ -1552,7 +1557,7 @@ function setMode(prep){
   $('modeBtn').textContent = prep ? 'Live interview' : 'Prepare';
   $('modeBtn').setAttribute('aria-pressed', prep ? 'true' : 'false');
   store.set('mode', prep ? 'prep' : 'live');
-  if(prep) renderPrepSetup(); else stopSpeaking();
+  if(prep){ renderPrepSetup(); loadFolderLibrary(false).then(() => renderPlan()); } else stopSpeaking();
 }
 
 function renderPrepSetup(){
@@ -1587,7 +1592,10 @@ async function analyzeJD(){
   if(!S.key){ prepMsg('No API key loaded. Tap Folder to load your key file.', 'err'); return; }
   const model = $('prepModel').value; store.set('prepModel', model);
   stopSpeaking();
-  prepMsg('⏳ Reading the JD and building a ' + prepTotal + '-minute plan…', 'work'); $('prepAnalyze').disabled = true;
+  $('prepAnalyze').disabled = true;
+  prepMsg('⏳ Checking your topic library…', 'work');
+  await loadFolderLibrary(true);
+  prepMsg('⏳ Reading the JD and building a ' + prepTotal + '-minute plan…', 'work');
   const sys = `You plan interview preparation from a job description (JD).
 Rules:
 - Topics come ONLY from what the JD asks for. Never add a technology just because it is in the resume.
@@ -1645,7 +1653,7 @@ function renderPlan(){
         <span class="pt"><b>${esc(t.name)}</b><small>${esc(t.why)}</small></span>
         <span class="badge ${PRIO_CLASS[t.priority]||'p-med'}">${esc(t.priority)}</span>
         <span class="pm">${t.minutes} min</span>
-        <span class="ps">${statusLabel(t)}</span>
+        <span class="ps">${statusLabel(t)}${FOLDERLIB[topicKey(t.name)] ? `<br><small>${FOLDERLIB[topicKey(t.name)].pdf?'PDF ✓':''}${FOLDERLIB[topicKey(t.name)].audio?' · Audio ✓':' · no audio'}</small>` : ''}</span>
         <span class="pa">${(t.status==='ready'||t.status==='reused')
             ? `<button class="btn sm primary" type="button" data-open="${i}">Study</button>`
             : `<button class="btn sm" type="button" data-gen="${i}" ${t.status==='generating'?'disabled':''}>${t.status==='generating'?'Writing…':t.status==='error'?'Retry':'Write'}</button>`}
@@ -1655,11 +1663,16 @@ function renderPlan(){
     <div class="row">
       ${ready < n ? `<button class="btn primary" type="button" id="prepGenAll" ${busy?'disabled':''}>Write all study guides</button>` : ''}
       ${ready ? `<button class="btn ${ready===n?'primary':''}" type="button" id="prepListenAll">▶ Listen to all</button>` : ''}
-      ${ready ? `<button class="btn" type="button" id="prepSave">Save to folder</button>` : ''}
+      ${ready ? `<button class="btn" type="button" id="prepSave">Save PDF + files to folder</button><button class="btn" type="button" id="prepPdf">Download PDF</button>` : ''}
       <span class="note">${PREP.cost ? 'Spent on this plan: ' + money(PREP.cost) : ''}</span>
       <span style="flex:1"></span>
       <button class="btn linkish" type="button" id="prepNew">New preparation</button>
-    </div>`;
+    </div>
+    ${PREP.audioCmd && PREP.topics.some(t => guideOf(t) && !FOLDERLIB[topicKey(t.name)]?.audio) ? `<div class="audiohint">
+      <b>Make the audio files (free, on your Mac):</b> open Terminal and run
+      <code id="audioCmd">bash "${esc(PREP.audioCmd.replace(/^bash "|"$/g,''))}"</code>
+      <span class="note">Replace the part in &lt; &gt; with your folder's path (drag the folder into Terminal). Topics that already have audio are skipped. Then reopen Prepare to see “Audio ✓”.</span>
+    </div>` : ''}`;
 }
 
 function guidePrompt(){
@@ -1739,6 +1752,8 @@ function openStudy(i){
       <label class="row note" for="spRate">Speed <select id="spRate">${[0.9,1,1.1,1.25,1.5].map(r=>`<option value="${r}" ${+store.get('spRate',1)===r?'selected':''}>${r}×</option>`).join('')}</select></label>
       <label class="row note" for="spVoice">Voice <select id="spVoice"></select></label>
       <span id="spPos" class="note"></span>
+      <button class="btn" type="button" id="spPdf">Open PDF</button>
+      <span id="recAudio" class="recaudio"></span>
     </div>
     <section><h3>Overview</h3><p>${esc(g.overview||'')}</p></section>
     ${g.key_points?.length ? `<section><h3>Key points</h3><ul>${g.key_points.map(k=>`<li>${esc(k)}</li>`).join('')}</ul></section>` : ''}
@@ -1752,7 +1767,7 @@ function openStudy(i){
     ${g.ask_them?.length ? `<section><h3>Questions to ask them</h3><ul>${g.ask_them.map(k=>`<li>${esc(k)}</li>`).join('')}</ul></section>` : ''}
     ${g.quick_revision ? `<section><h3>Quick revision</h3><p style="white-space:pre-line">${esc(g.quick_revision)}</p></section>` : ''}
     <label class="stud"><input type="checkbox" data-stud="${i}" ${t.studied?'checked':''}> Mark “${esc(t.name)}” as studied</label>`;
-  fillVoices(); updPos();
+  fillVoices(); updPos(); attachRecordedAudio(i);
   box.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
@@ -1801,7 +1816,7 @@ function speakTopic(i, fromStart){
 function prepFileBase(){
   const a = (PREP && PREP.analysis) || {};
   const part = s => String(s||'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,30);
-  return ['Prep', part(a.company), part(a.job_title), (PREP?.createdAt||new Date().toISOString()).slice(0,10)].filter(Boolean).join('_');
+  return ['Prep', part(a.company), part(a.job_title), localDate(PREP?.createdAt ? new Date(PREP.createdAt) : new Date())].filter(Boolean).join('_');
 }
 function prepMarkdown(){
   const a = PREP.analysis || {}, L = [];
@@ -1825,26 +1840,182 @@ function prepMarkdown(){
   return L.join('\n');
 }
 const mdToTxt = md => md.replace(/^#+\s*/gm,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/_([^_]+)_/g,'$1');
-async function savePrepToFolder(){
-  const md = prepMarkdown(), name = prepFileBase();
-  const json = JSON.stringify({ plan:PREP, guides:Object.fromEntries(PREP.topics.map(t => [t.name, guideOf(t)])) }, null, 2);
-  const dir = await idb.get('folderHandle');
-  if(dir && dir.requestPermission){
+/* ---------- topic library in your folder: PDF + text + audio files, reused across interviews ---------- */
+// <your folder>/AIHelper-Library/<topic>/guide.json · guide.md · guide.txt · guide.pdf · guide.m4a (audio, made by make-audio.sh)
+// <your folder>/prep/<company_role_date>/Preparation.pdf · .md · .txt · plan.json · playlist.m3u
+const LIB_DIR = 'AIHelper-Library';
+let FOLDERLIB = {};                                   // topic key -> {dir, pdf, audio}
+const topicSlug = n => topicKey(n).replace(/ /g,'-').slice(0,60) || 'topic';
+async function folderHandle(write, interactive){
+  const dir = await idb.get('folderHandle'); if(!dir || !dir.queryPermission) return null;
+  try{
+    const mode = write ? 'readwrite' : 'read';
+    let p = await dir.queryPermission({mode});
+    if(p !== 'granted' && interactive) p = await dir.requestPermission({mode});
+    return p === 'granted' ? dir : null;
+  }catch(e){ return null; }
+}
+async function loadFolderLibrary(interactive){
+  const dir = await folderHandle(false, interactive); if(!dir) return -1;
+  let lib; try{ lib = await dir.getDirectoryHandle(LIB_DIR); }catch(e){ FOLDERLIB = {}; return 0; }
+  let added = 0; FOLDERLIB = {};
+  for await (const [name, h] of lib.entries()){
+    if(h.kind !== 'directory') continue;
+    const files = {}; for await (const [fn] of h.entries()) files[fn] = true;
+    if(!files['guide.json']) continue;
     try{
-      let perm = await dir.queryPermission({mode:'readwrite'});
-      if(perm !== 'granted') perm = await dir.requestPermission({mode:'readwrite'});
-      if(perm === 'granted'){
-        const sub = await (await dir.getDirectoryHandle('prep', {create:true})).getDirectoryHandle(name, {create:true});
-        for(const [fn, txt] of [['Preparation.md', md], ['Preparation.txt', mdToTxt(md)], ['plan.json', json]]){
-          const w = await (await sub.getFileHandle(fn, {create:true})).createWritable(); await w.write(txt); await w.close();
-        }
-        prepMsg(`✓ Saved to ${dir.name}/prep/${name}/ (Preparation.md, .txt, plan.json)`, 'ok'); return;
-      }
-    }catch(e){ /* fall back to downloads */ }
+      const rec = JSON.parse(await (await (await h.getFileHandle('guide.json')).getFile()).text());
+      const key = topicKey(rec.topic || name);
+      if(!PLIB[key] || (rec.createdAt||'') > (PLIB[key].createdAt||'')){ PLIB[key] = rec; added++; }
+      FOLDERLIB[key] = { dir:name, pdf:!!files['guide.pdf'], audio:!!files['guide.m4a'] };
+    }catch(e){}
   }
-  download(name + '.md', md, 'text/markdown');
-  setTimeout(() => download(name + '.txt', mdToTxt(md), 'text/plain'), 600);
-  prepMsg(`✓ Downloaded ${name}.md and .txt to your Downloads folder.`, 'ok');
+  if(added) saveLib();
+  return added;
+}
+async function writeFile(dirH, name, data){ const w = await (await dirH.getFileHandle(name, {create:true})).createWritable(); await w.write(data); await w.close(); }
+
+/* PDF (jsPDF, loaded only when needed) */
+async function getJsPDF(){
+  if(!window.jspdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  if(!window.jspdf) throw new Error('Could not load the PDF maker. Check your internet connection.');
+  return window.jspdf.jsPDF;
+}
+const pdfSafe = s => String(s||'').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,'-').replace(/…/g,'...').replace(/[→]/g,'->').replace(/[✓]/g,'').replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g,'');
+function pdfWriter(doc){
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 50; let y = M;
+  const line = (txt, o={}) => {
+    const size = o.size||11, indent = o.indent||0;
+    doc.setFont('helvetica', o.bold ? 'bold' : 'normal'); doc.setFontSize(size); doc.setTextColor(...(o.color||[25,32,43]));
+    const lh = size * 1.4;
+    doc.splitTextToSize(pdfSafe(txt), W - 2*M - indent).forEach(l => { if(y + lh > H - M){ doc.addPage(); y = M; } doc.text(l, M + indent, y); y += lh; });
+    y += (o.gap == null ? 4 : o.gap);
+  };
+  return { line, space:(n=8)=>{ y += n; }, page:()=>{ doc.addPage(); y = M; } };
+}
+function writeGuide(w, t, g, idx){
+  w.line((idx != null ? (idx+1) + '. ' : '') + t.name, {size:16, bold:true, gap:2});
+  w.line(`${t.minutes} minutes · ${t.priority||''}${t.why ? ' · ' + t.why : ''}`, {size:9, color:[100,110,122], gap:10});
+  if(g.overview){ w.line('Overview', {size:10, bold:true, color:[11,110,138], gap:2}); w.line(g.overview, {gap:8}); }
+  if(g.key_points?.length){ w.line('Key points', {size:10, bold:true, color:[11,110,138], gap:2}); g.key_points.forEach(k => w.line('-  ' + k, {indent:6, gap:2})); w.space(6); }
+  if(g.questions?.length){
+    w.line('Interview questions', {size:10, bold:true, color:[11,110,138], gap:4});
+    g.questions.forEach((q,n) => {
+      w.line(`Q${n+1}. ${q.q||''}`, {bold:true, gap:2});
+      w.line(q.a||'', {indent:12, gap:2});
+      if(q.detail) w.line(q.detail, {indent:12, size:10, color:[80,90,100], gap:2});
+      if(q.keywords?.length) w.line('Keywords: ' + q.keywords.join(', '), {indent:12, size:9, color:[11,110,138], gap:8});
+      else w.space(6);
+    });
+  }
+  if(g.resume_examples?.length){ w.line('From your resume', {size:10, bold:true, color:[11,110,138], gap:2}); g.resume_examples.forEach(k => w.line('-  ' + k, {indent:6, gap:2})); w.space(6); }
+  if(g.ask_them?.length){ w.line('Questions to ask them', {size:10, bold:true, color:[11,110,138], gap:2}); g.ask_them.forEach(k => w.line('-  ' + k, {indent:6, gap:2})); w.space(6); }
+  if(g.quick_revision){ w.line('Quick revision', {size:10, bold:true, color:[11,110,138], gap:2}); String(g.quick_revision).split(/\n/).forEach(l => w.line(l, {gap:1})); }
+}
+async function topicPdf(t, g){
+  const doc = new (await getJsPDF())({unit:'pt', format:'letter'}); writeGuide(pdfWriter(doc), t, g); return doc.output('blob');
+}
+async function planPdf(){
+  const doc = new (await getJsPDF())({unit:'pt', format:'letter'}), w = pdfWriter(doc), a = PREP.analysis || {};
+  w.line('Interview preparation', {size:11, color:[11,110,138], gap:2});
+  w.line(`${a.job_title||''}${a.company ? ' · ' + a.company : ''}`, {size:20, bold:true, gap:6});
+  w.line(`${PREP.total} minutes of study · created ${new Date(PREP.createdAt).toLocaleDateString()}`, {size:10, color:[100,110,122], gap:10});
+  if(a.summary) w.line(a.summary, {gap:6});
+  if(a.strong_matches?.length) w.line('Strong match: ' + a.strong_matches.join(', '), {gap:2});
+  if(a.gaps?.length) w.line('Gaps to cover: ' + a.gaps.join(', '), {gap:10});
+  w.line('Plan', {size:12, bold:true, gap:4});
+  PREP.topics.forEach((t,i) => w.line(`${i+1}.  ${t.name}  ·  ${t.priority}  ·  ${t.minutes} min`, {indent:6, gap:2}));
+  PREP.topics.forEach((t,i) => { const g = guideOf(t); if(!g) return; w.page(); writeGuide(w, t, g, i); });
+  return doc.output('blob');
+}
+function blobDownload(name, blob){
+  const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 8000);
+}
+const speechText = (t, g) => speechSegments(t, g).join('\n\n');
+
+const MAKE_AUDIO_SH = `#!/bin/bash
+# make-audio.sh — creates guide.m4a for every topic in this library that has no audio yet
+# (or whose text changed). Uses the Mac's built-in voice: free, offline.
+# Run:  bash "<this folder>/make-audio.sh"        Voice:  VOICE=Daniel bash make-audio.sh
+cd "$(dirname "$0")" || exit 1
+VOICE="\${VOICE:-Samantha}"; RATE="\${RATE:-175}"
+made=0; kept=0
+for txt in */guide.txt; do
+  [ -f "$txt" ] || continue
+  d="$(dirname "$txt")"
+  if [ -f "$d/guide.m4a" ] && [ "$d/guide.m4a" -nt "$txt" ]; then kept=$((kept+1)); continue; fi
+  echo "Recording: $d"
+  say -v "$VOICE" -r "$RATE" -f "$txt" -o "$d/guide.aiff" 2>/dev/null || say -r "$RATE" -f "$txt" -o "$d/guide.aiff"
+  afconvert -f m4af -d aac "$d/guide.aiff" "$d/guide.m4a" && rm -f "$d/guide.aiff" && made=$((made+1))
+done
+echo "Done: $made new audio file(s), $kept already up to date."
+`;
+
+async function savePrepToFolder(){
+  if(!PREP) return;
+  const name = prepFileBase(), md = prepMarkdown();
+  prepMsg('⏳ Making PDFs and saving…', 'work');
+  let pdfAll;
+  try{ pdfAll = await planPdf(); }catch(e){ prepMsg('✗ ' + e.message, 'err'); return; }
+  const dir = await folderHandle(true, true);
+  if(!dir){
+    blobDownload(name + '.pdf', pdfAll);
+    setTimeout(() => download(name + '.md', md, 'text/markdown'), 600);
+    prepMsg(`✓ Downloaded ${name}.pdf and .md. To store files and audio in your folder, tap Folder, choose it, and allow editing.`, 'ok');
+    return;
+  }
+  try{
+    const lib = await dir.getDirectoryHandle(LIB_DIR, {create:true});
+    await writeFile(lib, 'make-audio.sh', MAKE_AUDIO_SH);
+    let created = 0, reused = 0; const playlist = ['#EXTM3U'];
+    for(const t of PREP.topics){
+      const g = guideOf(t); if(!g) continue;
+      const rec = PLIB[topicKey(t.name)], slug = FOLDERLIB[topicKey(t.name)]?.dir || topicSlug(t.name);
+      const td = await lib.getDirectoryHandle(slug, {create:true});
+      let same = false;
+      try{ const old = JSON.parse(await (await (await td.getFileHandle('guide.json')).getFile()).text()); same = old.createdAt === rec.createdAt; }catch(e){}
+      if(same){ reused++; }
+      else {
+        await writeFile(td, 'guide.json', JSON.stringify(rec, null, 2));
+        await writeFile(td, 'guide.txt', speechText(t, g));
+        await writeFile(td, 'guide.md', mdToTxt(prepTopicMarkdown(t, g)));
+        await writeFile(td, 'guide.pdf', await topicPdf(t, g));
+        created++;
+      }
+      playlist.push(`#EXTINF:-1,${t.name}`, `../../${LIB_DIR}/${slug}/guide.m4a`);
+    }
+    const sess = await (await dir.getDirectoryHandle('prep', {create:true})).getDirectoryHandle(name, {create:true});
+    await writeFile(sess, 'Preparation.pdf', pdfAll);
+    await writeFile(sess, 'Preparation.md', md);
+    await writeFile(sess, 'Preparation.txt', mdToTxt(md));
+    await writeFile(sess, 'plan.json', JSON.stringify({ plan:PREP, guides:Object.fromEntries(PREP.topics.map(t => [t.name, guideOf(t)])) }, null, 2));
+    await writeFile(sess, 'playlist.m3u', playlist.join('\n') + '\n');
+    await loadFolderLibrary(false);
+    const noAudio = PREP.topics.filter(t => guideOf(t) && !FOLDERLIB[topicKey(t.name)]?.audio).length;
+    PREP.audioCmd = `bash "<${dir.name}>/${LIB_DIR}/make-audio.sh"`; savePrep(); renderPlan();
+    prepMsg(`✓ Saved: ${created} new topic file set(s), ${reused} already in your library · prep/${name}/Preparation.pdf` + (noAudio ? ` · ${noAudio} topic(s) still need audio: run make-audio.sh (see below)` : ' · all audio ready'), 'ok');
+  }catch(e){ prepMsg('✗ Could not save to the folder: ' + (e.message||e.name), 'err'); }
+}
+function prepTopicMarkdown(t, g){
+  const L = [`# ${t.name}`, '', `${t.minutes} minutes · ${t.priority||''}`, ''];
+  if(g.overview) L.push(g.overview, '');
+  if(g.key_points?.length){ L.push('## Key points', ''); g.key_points.forEach(k => L.push('- ' + k)); L.push(''); }
+  (g.questions||[]).forEach((q,n) => { L.push(`**Q${n+1}. ${q.q}**`, '', q.a||''); if(q.detail) L.push('', q.detail); L.push(''); });
+  if(g.resume_examples?.length){ L.push('## From your resume', ''); g.resume_examples.forEach(k => L.push('- ' + k)); L.push(''); }
+  if(g.ask_them?.length){ L.push('## Questions to ask them', ''); g.ask_them.forEach(k => L.push('- ' + k)); L.push(''); }
+  if(g.quick_revision) L.push('## Quick revision', '', g.quick_revision);
+  return L.join('\n');
+}
+async function attachRecordedAudio(i){
+  const t = PREP.topics[i], f = FOLDERLIB[topicKey(t.name)]; const slot = $('recAudio'); if(!slot) return;
+  if(!f?.audio){ slot.innerHTML = '<span class="note">No audio file yet. Save to folder, then run make-audio.sh on your Mac.</span>'; return; }
+  try{
+    const dir = await folderHandle(false, false); if(!dir) throw 0;
+    const fh = await (await (await dir.getDirectoryHandle(LIB_DIR)).getDirectoryHandle(f.dir)).getFileHandle('guide.m4a');
+    const url = URL.createObjectURL(await fh.getFile());
+    slot.innerHTML = `<span class="note">Audio file (guide.m4a):</span> <audio controls preload="metadata" src="${url}"></audio>`;
+  }catch(e){ slot.innerHTML = '<span class="note">Audio file found, but the folder needs permission. Tap Folder.</span>'; }
 }
 
 /* events */
@@ -1868,6 +2039,8 @@ $('prepView').addEventListener('click', e => {
   else if(b.dataset.nav != null) openStudy(+b.dataset.nav);
   else if(b.id === 'prepGenAll') genAll();
   else if(b.id === 'prepSave') savePrepToFolder();
+  else if(b.id === 'prepPdf'){ prepMsg('⏳ Making the PDF…', 'work'); planPdf().then(bl => { blobDownload(prepFileBase() + '.pdf', bl); prepMsg('✓ Downloaded ' + prepFileBase() + '.pdf', 'ok'); }).catch(err => prepMsg('✗ ' + err.message, 'err')); }
+  else if(b.id === 'spPdf'){ const t = PREP.topics[studyIdx], g = guideOf(t); const w = window.open('', '_blank'); topicPdf(t, g).then(bl => { const u = URL.createObjectURL(bl); if(w) w.location = u; else blobDownload(topicSlug(t.name) + '.pdf', bl); }).catch(err => { if(w) w.close(); prepMsg('✗ ' + err.message, 'err'); }); }
   else if(b.id === 'prepListenAll'){ const first = PREP.topics.findIndex(t => guideOf(t)); if(first >= 0){ openStudy(first); SPK.all = true; speakTopic(first, true); } }
   else if(b.id === 'spPlay'){ if(SPK.playing && SPK.topic === studyIdx) stopSpeaking(); else { SPK.all = false; speakTopic(studyIdx, false); } }
   else if(b.id === 'spRestart'){ SPK.all = false; speakTopic(studyIdx, true); }
