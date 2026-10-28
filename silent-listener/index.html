@@ -240,7 +240,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
-    <span class="chip ver" id="hVer" title="App version">v2026-10-27s</span>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27t</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -293,7 +293,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27s · Interview Preparation (robust guides).</div>
+    <div class="note">Version 2026-10-27t · Sonnet fix.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -692,7 +692,12 @@ function addCost(model, u){
   if(typeof renderHealth==='function') renderHealth();
   return usd;
 }
-const money = v => !v ? '$0' : v < 0.01 ? '$'+v.toFixed(4) : v < 1 ? '$'+v.toFixed(3) : '$'+v.toFixed(2);
+const money = v => !v ? '$0' : v < 0.0001 ? '<$0.0001' : v < 0.01 ? '$'+v.toFixed(4) : v < 1 ? '$'+v.toFixed(3) : '$'+v.toFixed(2);
+
+// Each model turns thinking off differently (checked live 2026-10-27): Haiku 5.5 takes "disabled",
+// Sonnet 5.5 takes "between_tools". Thinking left on used the whole reply budget and cut answers off.
+const THINK_OFF = { 'claude-haiku-5-5':{type:'disabled'}, 'claude-sonnet-5-5':{type:'between_tools'} };
+const thinkingOff = m => THINK_OFF[m] || {type:'disabled'};
 
 // Streams the reply so answers appear word by word; the long system prompt (resume + JD) is cached
 // by the API, which makes every later question faster.
@@ -719,10 +724,11 @@ async function callClaudeWithFallback(system, user, opts){
   }
 }
 async function callClaudeOnce(system, user, opts={}){
-  const body = { model:opts.model||S.model, max_tokens:opts.maxTokens||1500, stream:true, thinking:{type:'disabled'},
+  const mdl = opts.model||S.model;
+  const body = { model:mdl, max_tokens:opts.maxTokens||1500, stream:true, thinking:thinkingOff(mdl),
     system:[{type:'text', text:system, cache_control:{type:'ephemeral'}}],
     messages:[{role:'user',content:user}] };
-  if(opts.noThinkingField) delete body.thinking;
+  if(!body.thinking) delete body.thinking;
   let res;
   try{
     res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -737,7 +743,14 @@ async function callClaudeOnce(system, user, opts={}){
     if(res.status===401) throw new Error('API key rejected: '+msg);
     if(res.status===429) throw new Error('Rate limited. Answers resume in a moment.');
     if(res.status===400 && /credit/i.test(msg)) throw new Error('No API credits left. Add credits in the Claude Console billing page.');
-    if(res.status===400 && /thinking/i.test(msg) && !opts.noThinkingField){ return callClaudeOnce(system, user, {...opts, noThinkingField:true}); }
+    if(res.status===400 && /thinking/i.test(msg) && !opts.thinkRetried){
+      // learn this model's setting from the error and try once more
+      THINK_OFF[mdl] = /between_tools/.test(msg) && !/between_tools.{0,20}not supported/.test(msg) ? {type:'between_tools'} : /disabled/.test(msg) && !/disabled.{0,20}not supported/.test(msg) ? {type:'disabled'} : null;
+      const o2 = {...opts, thinkRetried:true};
+      const r = await callClaudeOnce(system, user, o2);
+      Object.assign(opts, {costUsd:o2.costUsd, cutOff:o2.cutOff});
+      return r;
+    }
     if(res.status===404 || /model/i.test(msg) && /not.?found|invalid/i.test(msg)){ const err=new Error('Model not available: '+msg); err.modelMissing=true; throw err; }
     throw new Error('Claude error: '+msg);
   }
