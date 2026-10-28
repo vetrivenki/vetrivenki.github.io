@@ -244,7 +244,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
     <button class="chip" id="hCost" type="button">Cost $0</button>
-    <span class="chip ver" id="hVer" title="App version">v2026-10-27v</span>
+    <span class="chip ver" id="hVer" title="App version">v2026-10-27w</span>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -297,7 +297,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27v · error log.</div>
+    <div class="note">Version 2026-10-27w · prepare from a role or topics.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -367,12 +367,12 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
 
 <section id="prepView" class="prep" hidden aria-label="Interview preparation">
   <div class="prepwrap">
-    <div class="progress pmsg" id="prepMsg" role="status">Pick a job description and how long you want to study.</div>
+    <div class="progress pmsg" id="prepMsg" role="status">Type a role (e.g. AWS Architect) or paste a job description, then pick how long you want to study.</div>
 
     <div class="pcard" id="prepSetup">
       <h2>Interview preparation</h2>
-      <label for="prepJd" class="plabel">Job description</label>
-      <textarea id="prepJd" rows="7" placeholder="Paste the job description, or load a file below…"></textarea>
+      <label for="prepJd" class="plabel">Job description, or just the role / topics</label>
+      <textarea id="prepJd" rows="7" placeholder="Paste a job description, load a file below, or simply type a role such as: AWS Solutions Architect, or topics such as: EKS, Terraform, CI/CD"></textarea>
       <div class="row"><input id="prepJdFile" type="file" accept=".pdf,.txt,.md"><span id="prepJdMsg" class="note"></span></div>
       <div class="row note" id="prepResume"></div>
       <span class="plabel">Study time (minimum 30 minutes)</span>
@@ -1597,7 +1597,8 @@ function fixMinutes(ts, total){
 
 async function analyzeJD(){
   const jd = $('prepJd').value.trim();
-  if(jd.split(/\s+/).length < 30){ prepMsg('Paste or load the full job description first (a few sentences at least).', 'err'); return; }
+  if(jd.length < 2){ prepMsg('Type a role (for example "AWS Architect"), a few topics, or paste a job description.', 'err'); return; }
+  const shortInput = jd.split(/\s+/).length < 30;   // a role title or topic list instead of a full JD
   if(!S.key){ prepMsg('No API key loaded. Tap Folder to load your key file.', 'err'); return; }
   const model = $('prepModel').value; store.set('prepModel', model);
   stopSpeaking();
@@ -1605,9 +1606,10 @@ async function analyzeJD(){
   prepMsg('⏳ Checking your topic library…', 'work');
   try{ await loadFolderLibrary(true); }catch(e){ logErr('library', e.name + ': ' + e.message); }
   prepMsg('⏳ Reading the JD and building a ' + prepTotal + '-minute plan…', 'work');
-  const sys = `You plan interview preparation from a job description (JD).
+  const sys = `You plan interview preparation from a job description (JD).${shortInput ? `
+The input is NOT a full JD: it is a role title or a short list of topics (it may contain typos, e.g. "arechitect" = architect). Treat it as a senior-level job description for that role: use the skills, responsibilities and interview topics that role normally requires, and the resume to judge seniority, strong matches and gaps. Put the corrected role name in "job_title" and leave "company" empty.` : ''}
 Rules:
-- Topics come ONLY from what the JD asks for. Never add a technology just because it is in the resume.
+- Topics come ONLY from what the JD (or the role) asks for. Never add a technology just because it is in the resume.
 - Priority: "Critical" = explicitly required and central; "High" = frequently mentioned or essential to the responsibilities; "Medium" = supporting skill; "Low" = optional or preferred.
 - Compare with the resume: "strong_matches" = JD needs the resume clearly supports; "gaps" = JD needs the resume does not clearly support. Give gap topics a little extra time.
 - Split exactly ${prepTotal} minutes across the topics by priority, whole minutes, summing to exactly ${prepTotal}. Use ${prepTotal<=30?'3 to 5':prepTotal<=60?'5 to 7':'6 to 10'} topics.
@@ -2057,7 +2059,7 @@ $('prepView').addEventListener('click', e => {
   else if(b.id === 'spRestart'){ SPK.all = false; speakTopic(studyIdx, true); }
   else if(b.id === 'prepNew'){
     if(Date.now() - newPrepArmed > 3000){ newPrepArmed = Date.now(); b.textContent = 'Tap again to start over'; return; }
-    stopSpeaking(); PREP = null; savePrep(); $('prepJd').value = ''; renderPrepSetup(); prepMsg('Pick a job description and how long you want to study.', '');
+    stopSpeaking(); PREP = null; savePrep(); $('prepJd').value = ''; renderPrepSetup(); prepMsg('Type a role or paste a job description, then pick how long you want to study.', '');
     $('prepView').scrollTop = 0;
   }
 });
