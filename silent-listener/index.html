@@ -137,6 +137,7 @@ button.chip{cursor:pointer}
 .progress.err{border-style:solid;border-color:var(--live);color:var(--live)}
 .progress.ok{border-style:solid;border-color:#1f8a4c;color:#1f8a4c}
 .turn.fixed .final::after{content:" ✎";color:var(--accent);font-size:.7em}
+.qa .cost{margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
 .qa.live .a{color:var(--muted)}
 .caret{animation:blink 1s steps(1) infinite;color:var(--accent)}@keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.caret{animation:none}}
@@ -190,6 +191,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
     <button class="chip" id="hClaude" type="button">Claude ?</button>
     <span class="chip" id="hAns">Answers 0</span>
     <span class="chip" id="hLive">Live</span>
+    <button class="chip" id="hCost" type="button">Cost $0</button>
     <span class="herr" id="hErr"></span>
   </div>
   <div class="spacer"></div>
@@ -241,7 +243,7 @@ details.settings[open] .sOpen{display:inline}details.settings[open] .sClosed{dis
         <textarea id="dEmail" rows="3" placeholder="Paste the interview invitation email…"></textarea></label>
       <div class="wide resumeRow"><button id="dFill" class="btn" type="button">Fill details from email / JD</button><span id="dMsg" class="note"></span></div>
     </div>
-    <div class="note">Version 2026-10-27m · answers fixed, live box clears per question.</div>
+    <div class="note">Version 2026-10-27n · API cost shown.</div>
     <div class="note">Speech-to-text uses the browser's built-in recognizer (Chrome/Edge on Windows, Mac, Android; Safari on iPhone). Answers come from Claude using your API key. Get consent before transcribing other people.</div>
   </details>
 </div>
@@ -529,7 +531,7 @@ async function flushSpeech(){
     const items = await analyze(text);
     applyCorrection(text, els);
     const secs = ((performance.now()-t0)/1000).toFixed(1)+' s';
-    if(items.length){ els.forEach(el=>el.classList.add('q')); progress('ok', '✓ Answered '+items.length+' question'+(items.length>1?'s':'')+' in '+secs); }
+    if(items.length){ els.forEach(el=>el.classList.add('q')); progress('ok', '✓ Answered '+items.length+' question'+(items.length>1?'s':'')+' in '+secs+' · cost '+money(answerCost)); }
     else progress('none', 'No question found in “'+snippet+'” ('+secs+'). Ask a full question, or name a topic.');
     items.forEach(addCard);
     hideBanner();
@@ -581,6 +583,32 @@ Also return "corrected": NEW SPEECH rewritten as clean text with misheard techni
 
 Reply with JSON only: {"corrected":"","items":[{"question":"","answer":"","keywords":[""],"details":[{"term":"","detail":""}],"resume":[],"followUp":false,"followUpOf":0}]}. If there is no question, still reply with "corrected" and "items":[].`;
 }
+/* ---------- API cost: exact tokens from each reply × Anthropic list prices (USD per million tokens) ---------- */
+// Source: platform.claude.com/docs/en/about-claude/pricing (checked 2026-10-27). Haiku 5.5 has a higher tier for prompts over 100k tokens.
+const PRICES = {
+  'claude-haiku-5-5':  { in:0.10, out:0.50, cw:0.125, cr:0.01, big:{ in:0.50, out:2.50, cw:0.625, cr:0.05 } },
+  'claude-sonnet-5-5': { in:2.00, out:10.00, cw:2.50, cr:0.10 }
+};
+const todayKey = () => 'cost_'+new Date().toISOString().slice(0,10);
+const monthKey = () => 'cost_'+new Date().toISOString().slice(0,7);
+const COST = { session:0, sessionCalls:0, last:0, lastTokens:'', today:+store.get(todayKey(),0), month:+store.get(monthKey(),0) };
+function priceCall(model, u){
+  const p0 = PRICES[model] || PRICES['claude-sonnet-5-5'];
+  const inTok = u.input_tokens||0, cw = u.cache_creation_input_tokens||0, cr = u.cache_read_input_tokens||0, out = u.output_tokens||0;
+  const p = (p0.big && inTok+cw+cr > 100000) ? p0.big : p0;
+  return (inTok*p.in + cw*p.cw + cr*p.cr + out*p.out) / 1e6;
+}
+function addCost(model, u){
+  const usd = priceCall(model, u);
+  COST.last = usd; COST.session += usd; COST.sessionCalls++;
+  COST.today = +store.get(todayKey(),0) + usd; store.set(todayKey(), COST.today.toFixed(6));
+  COST.month = +store.get(monthKey(),0) + usd; store.set(monthKey(), COST.month.toFixed(6));
+  COST.lastTokens = `${(u.input_tokens||0)+(u.cache_creation_input_tokens||0)+(u.cache_read_input_tokens||0)} in (${u.cache_read_input_tokens||0} cached) · ${u.output_tokens||0} out · ${model.replace('claude-','')}`;
+  if(typeof renderHealth==='function') renderHealth();
+  return usd;
+}
+const money = v => v < 0.01 ? '$'+v.toFixed(4) : v < 1 ? '$'+v.toFixed(3) : '$'+v.toFixed(2);
+
 // Streams the reply so answers appear word by word; the long system prompt (resume + JD) is cached
 // by the API, which makes every later question faster.
 async function callClaude(system, user, opts={}){
@@ -629,7 +657,7 @@ async function callClaudeOnce(system, user, opts={}){
     throw new Error('Claude error: '+msg);
   }
   const reader = res.body.getReader(), dec = new TextDecoder();
-  let buf='', text='';
+  let buf='', text='', usage={};
   for(;;){
     const {value, done} = await reader.read();
     if(done) break;
@@ -640,10 +668,13 @@ async function callClaudeOnce(system, user, opts={}){
       if(!line.startsWith('data:')) continue;
       let ev; try{ ev = JSON.parse(line.slice(5)); }catch(e){ continue; }
       if(ev.type==='content_block_delta' && ev.delta?.text){ text += ev.delta.text; opts.onText?.(text); }
+      else if(ev.type==='message_start' && ev.message?.usage) usage = {...ev.message.usage};
+      else if(ev.type==='message_delta' && ev.usage) usage = {...usage, ...Object.fromEntries(Object.entries(ev.usage).filter(([,v])=>v!=null))};
       else if(ev.type==='error') throw new Error('Claude error: '+(ev.error?.message||'stream failed'));
       else if(ev.type==='message_delta' && ev.delta?.stop_reason==='max_tokens') opts.cutOff=true;
     }
   }
+  opts.costUsd = addCost(body.model, usage);
   if(opts.cutOff && opts.kind==='main' && !text.trim().endsWith('}')) throw new Error('Answer was cut off before it finished. Try again.');
   return text.trim();
 }
@@ -674,9 +705,12 @@ function buildUser(text){
   return `EARLIER CONVERSATION:\n${recentContext()}\n\nPREVIOUS Q&A (most recent last):\n${previousQA()}\n\nNEW SPEECH:\n${text}`;
 }
 let lastCorrected='';
+let answerCost=0;
 async function analyze(text){
   try{
-    const out = await callClaude(systemPrompt(), buildUser(text), {onText:showLive, kind:'main'});
+    const o = {onText:showLive, kind:'main'};
+    const out = await callClaude(systemPrompt(), buildUser(text), o);
+    answerCost = o.costUsd||0;
     lastCorrected = '';
     try{ const j = JSON.parse(out.match(/\{[\s\S]*\}/)[0]); lastCorrected = typeof j.corrected==='string' ? j.corrected.trim() : ''; }catch(e){}
     return parseItems(out);
@@ -698,9 +732,10 @@ async function askTyped(q){
   if(!S.key){ showBanner('Add your Claude API key in Settings to get answers.'); return; }
   setThinking(true);
   try{
-    let items; try{ items = parseItems(await callClaude(systemPrompt(), buildUser(q), {onText:showLive, kind:'main'})); } finally{ clearLive(); }
+    const o = {onText:showLive, kind:'main'};
+    let items; try{ items = parseItems(await callClaude(systemPrompt(), buildUser(q), o)); answerCost = o.costUsd||0; } finally{ clearLive(); }
     if(items.length) items.forEach(addCard); else addCard({question:q, answer:'Not answered: outside your Technologies list (Settings).', keywords:[]});
-    progress(items.length?'ok':'none', items.length?'✓ Answered':'Outside your Technologies list');
+    progress(items.length?'ok':'none', (items.length?'✓ Answered':'Outside your Technologies list')+' · cost '+money(answerCost));
     hideBanner();
   }catch(err){ showBanner(err.message); progress('err','✗ '+err.message); }
   setThinking(false);
@@ -713,6 +748,7 @@ function highlight(answer, kws){
   return html.replace(re,'<mark>$1</mark>');
 }
 function addCard(it){
+  const cardCost = answerCost;
   if(typeof H!=='undefined') H.answers++;
   if(typeof liveSaid!=='undefined'){ liveSaid=''; liveLastText=''; }
   answersEl.querySelector('.empty')?.remove();
@@ -721,12 +757,13 @@ function addCard(it){
   const kws = Array.isArray(it.keywords)?it.keywords:[];
   const cv = Array.isArray(it.resume)?it.resume.filter(Boolean).slice(0,3):[];
   const det = Array.isArray(it.details)?it.details.filter(d=>d&&d.term&&d.detail).slice(0,6):[];
-  answered.push({n:qCount, question:it.question, answer:it.answer, keywords:kws, details:det, resume:cv, followUpOf:parent});
+  answered.push({n:qCount, question:it.question, answer:it.answer, keywords:kws, details:det, resume:cv, followUpOf:parent, cost:cardCost});
   const card=document.createElement('div'); card.className='qa';
   card.innerHTML = `${parent?`<div class="fu">↳ follow-up to Q${parent}</div>`:''}<div class="q">Q${qCount}. ${esc(it.question)}</div>
     <div class="a">${highlight(it.answer, kws)}</div>
     ${det.length?detailsHTML(det):(kws.length?`<div class="chips">${kws.map(k=>`<span>${esc(String(k))}</span>`).join('')}</div>`:'')}
-    ${cv.length?`<div class="cv"><b>From your resume</b><ul>${cv.map(c=>`<li>${highlight(String(c), kws)}</li>`).join('')}</ul></div>`:''}`;
+    ${cv.length?`<div class="cv"><b>From your resume</b><ul>${cv.map(c=>`<li>${highlight(String(c), kws)}</li>`).join('')}</ul></div>`:''}
+    ${cardCost?`<div class="cost">API cost ${money(cardCost)}</div>`:''}`;
   answersEl.appendChild(card); scrollEnd(answersEl);
 }
 function detailsHTML(det){
@@ -969,6 +1006,7 @@ $('dFill').onclick = async ()=>{
 function beginInterview(){
   $('clear').click(); examples=false;
   session = { start:new Date(), details:details() };
+  COST.session = 0; COST.sessionCalls = 0; renderHealth();
   start();
   $('toggle').textContent='Stop interview';
   clockTimer = setInterval(()=>{ if($('resumeBtn').hidden) setStatus('Interview · '+dur(Date.now()-session.start)); }, 1000);
@@ -981,11 +1019,13 @@ async function endInterview(){
   for(let i=0;i<40 && (busy||buffer);i++){ if(buffer && !busy) flushSpeech(); await new Promise(r=>setTimeout(r,250)); }
   session.transcript = [...transcriptEl.querySelectorAll('.turn')].map(t=>({time:t.dataset.time||'', text:t.querySelector('.final')?.textContent||''})).filter(t=>t.text);
   session.qa = answered.map(x=>({...x}));
+  session.costBeforeSummary = COST.session;
   session.details = details();
   setStatus('Interview ended · '+dur(session.end-session.start));
   showSummaryPanel('Writing the summary…');
   try{ session.summary = await summarize(session); }
   catch(err){ session.summary = null; session.summaryError = err.message; }
+  session.cost = COST.session; session.calls = COST.sessionCalls;
   renderSummary(session);
   saveFiles(session);
   try{ const hist=JSON.parse(store.get('history','[]')); hist.unshift(session); store.set('history', JSON.stringify(hist.slice(0,10))); }catch(e){}
@@ -1010,7 +1050,7 @@ const SUM_SECTIONS = [['topics','Topics covered'],['went_well','Went well'],['im
 function showSummaryPanel(msg){ $('sumBody').innerHTML='<p class="note">'+esc(msg)+'</p>'; $('sumPanel').classList.add('open'); }
 function summaryHTML(sx){
   const d=sx.details, sm=sx.summary;
-  let h = `<p class="meta">${[d.company,d.role,d.round].filter(Boolean).map(esc).join(' · ')||'Interview'}<br>${esc(sx.start.toLocaleString())} · ${dur(sx.end-sx.start)} · ${sx.qa.length} questions${d.interviewer?' · '+esc(d.interviewer):''}</p>`;
+  let h = `<p class="meta">${[d.company,d.role,d.round].filter(Boolean).map(esc).join(' · ')||'Interview'}<br>${esc(sx.start.toLocaleString())} · ${dur(sx.end-sx.start)} · ${sx.qa.length} questions · API cost ${money(sx.cost||0)}${d.interviewer?' · '+esc(d.interviewer):''}</p>`;
   if(sm){
     h += `<p>${esc(sm.overview||'')}</p>`;
     for(const [k,label] of SUM_SECTIONS) if(sm[k]?.length) h += `<h4>${label}</h4><ul>${sm[k].map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`;
@@ -1039,7 +1079,7 @@ mark{background:#ffe58a;padding:0 .15em;border-radius:3px;font-weight:600}.chips
 .kd{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:6px 0 0;font-size:14px}.kd dt{font-weight:600;color:#0b6e8a}.kd dd{margin:0}
 time{font-family:ui-monospace,monospace;font-size:12px;color:#5f6d7a}table td{padding:2px 12px 2px 0;vertical-align:top}</style></head><body>
 <h1>${esc(d.company||'Interview')}${d.role?' — '+esc(d.role):''}</h1>
-<table>${[['Round',d.round],['Interviewer',d.interviewer],['Scheduled',d.when],['Recorded',sx.start.toLocaleString()+' – '+sx.end.toLocaleTimeString()],['Duration',dur(sx.end-sx.start)],['Questions',String(sx.qa.length)]].filter(r=>r[1]).map(r=>`<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}</td></tr>`).join('')}</table>
+<table>${[['Round',d.round],['Interviewer',d.interviewer],['Scheduled',d.when],['Recorded',sx.start.toLocaleString()+' – '+sx.end.toLocaleTimeString()],['Duration',dur(sx.end-sx.start)],['Questions',String(sx.qa.length)],['API cost',sx.cost!=null?money(sx.cost)+' ('+sx.calls+' calls)':'']].filter(r=>r[1]).map(r=>`<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}</td></tr>`).join('')}</table>
 <h2>Summary</h2>${sx.summary?`<p>${esc(sx.summary.overview||'')}</p>`+SUM_SECTIONS.filter(([k])=>sx.summary[k]?.length).map(([k,l])=>`<h4>${l}</h4><ul>${sx.summary[k].map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`).join(''):`<p>${esc(sx.summaryError||'No summary.')}</p>`}
 <h2>Questions &amp; answers</h2>${qa||'<p>No questions detected.</p>'}
 <h2>Transcript</h2>${tr||'<p>Empty.</p>'}
@@ -1049,7 +1089,7 @@ function reportTXT(sx){
   const d=sx.details, L=[];
   L.push(`INTERVIEW: ${d.company||'-'}${d.role?' — '+d.role:''}`);
   if(d.round) L.push('Round: '+d.round); if(d.interviewer) L.push('Interviewer: '+d.interviewer); if(d.when) L.push('Scheduled: '+d.when);
-  L.push(`Recorded: ${sx.start.toLocaleString()} – ${sx.end.toLocaleTimeString()} (${dur(sx.end-sx.start)})`, `Questions: ${sx.qa.length}`, '', '== SUMMARY ==');
+  L.push(`Recorded: ${sx.start.toLocaleString()} – ${sx.end.toLocaleTimeString()} (${dur(sx.end-sx.start)})`, `Questions: ${sx.qa.length}`, `API cost: ${sx.cost!=null?money(sx.cost)+' ('+sx.calls+' calls)':'-'}`, '', '== SUMMARY ==');
   if(sx.summary){ L.push(sx.summary.overview||''); for(const [k,l] of SUM_SECTIONS) if(sx.summary[k]?.length){ L.push('', l+':'); sx.summary[k].forEach(x=>L.push('  - '+x)); } }
   else L.push(sx.summaryError||'No summary.');
   L.push('', '== QUESTIONS & ANSWERS ==');
@@ -1335,6 +1375,8 @@ function renderHealth(){
   // answers
   chip('hAns', H.answers?'ok':'off', 'Answers '+H.answers+(H.answerMs?' · '+(H.answerMs/1000).toFixed(1)+' s':''));
   chip('hLive', !S.liveAnswer?'off':(H.liveMs?'ok':'off'), S.liveAnswer ? ('Live '+(H.liveMs?(H.liveMs/1000).toFixed(1)+' s':'ready')) : 'Live off');
+  chip('hCost', COST.session>0?'ok':'off', 'Cost '+money(COST.session)+' · today '+money(COST.today));
+  $('hCost').title = 'This session: '+money(COST.session)+' over '+COST.sessionCalls+' calls\nToday: '+money(COST.today)+'\nThis month: '+money(COST.month)+(COST.lastTokens?'\nLast call: '+money(COST.last)+' ('+COST.lastTokens+')':'')+'\nPrices: Anthropic list price per million tokens';
   $('hErr').textContent = H.claude==='bad' ? H.claudeErr : '';
 }
 async function testClaude(){
@@ -1346,6 +1388,7 @@ async function testClaude(){
 $('hMic').onclick = ()=> T.open ? closeTest() : openTest();
 $('hKey').onclick = ()=>{ keyMsg(''); $('keySetup').hidden=false; };
 $('hClaude').onclick = testClaude;
+$('hCost').onclick = ()=>{ const p=$('progress'); p.className='progress ok'; p.textContent = 'API cost · this session '+money(COST.session)+' ('+COST.sessionCalls+' calls) · today '+money(COST.today)+' · this month '+money(COST.month)+(COST.lastTokens?' · last call '+money(COST.last)+' — '+COST.lastTokens:''); };
 setInterval(renderHealth, 1000);
 renderHealth();
 setTimeout(()=>{ if(S.key) testClaude(); }, 1500);   // check the connection once when the page opens
